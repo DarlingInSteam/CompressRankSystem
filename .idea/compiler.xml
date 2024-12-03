@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Gradle Imported" enabled="true">
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-configuration-processor/3.4.1-SNAPSHOT/fa22bc2d7a80a073d2625b4b2b6c3761177a0e88/spring-boot-configuration-processor-3.4.1-SNAPSHOT.jar" />
+        </processorPath>
+        <module name="CompressionService.main" />
+      </profile>
+    </annotationProcessing>
+  </component>
+</project>

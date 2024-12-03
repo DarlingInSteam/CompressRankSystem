@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/CompressRankSystem.iml" filepath="$PROJECT_DIR$/CompressRankSystem.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CompressionService.main.iml" filepath="$PROJECT_DIR$/.idea/modules/CompressionService.main.iml" />
     </modules>
   </component>
 </project>
