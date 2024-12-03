@@ -1,5 +1,6 @@
 package com.shadowshiftstudio.compressionservice.config;
 
+import com.shadowshiftstudio.compressionservice.filter.RequestLoggingFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
@@ -13,22 +14,6 @@ import javax.imageio.ImageIO;
  */
 @Configuration
 public class ApplicationConfig {
-
-    /**
-     * Создает и настраивает фильтр для логирования запросов.
-     *
-     * @return настроенный экземпляр CommonsRequestLoggingFilter
-     */
-    @Bean
-    public CommonsRequestLoggingFilter requestLoggingFilter() {
-        CommonsRequestLoggingFilter filter = new CommonsRequestLoggingFilter();
-        filter.setIncludeQueryString(true);
-        filter.setIncludePayload(true);
-        filter.setMaxPayloadLength(10000);
-        filter.setIncludeHeaders(false);
-        return filter;
-    }
-
     /**
      * Создает и настраивает конвертер сообщений для BufferedImage.
      *
@@ -37,6 +22,11 @@ public class ApplicationConfig {
     @Bean
     public BufferedImageHttpMessageConverter bufferedImageHttpMessageConverter() {
         return new BufferedImageHttpMessageConverter();
+    }
+
+    @Bean(name = "requestLoggingFilter") // Явно задаем имя бина
+    public RequestLoggingFilter requestLoggingFilter() {
+        return new RequestLoggingFilter();
     }
 
     /**
