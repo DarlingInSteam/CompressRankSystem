@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,8 +10,21 @@
 </head>
 <body>
     <div class="container py-4">
-        <header class="pb-3 mb-4 border-bottom">
+        <header class="pb-3 mb-4 border-bottom d-flex justify-content-between align-items-center">
             <h1 class="display-5 fw-bold">Сервис сжатия изображений</h1>
+            
+            <!-- Theme Toggle -->
+            <div class="d-flex align-items-center">
+                <span class="me-2"><i class="bi bi-brightness-high-fill"></i></span>
+                <label class="theme-toggle">
+                    <input type="checkbox" id="themeToggle">
+                    <span class="theme-toggle-slider">
+                        <i class="bi bi-brightness-high-fill theme-toggle-icon sun"></i>
+                        <i class="bi bi-moon-fill theme-toggle-icon moon"></i>
+                    </span>
+                </label>
+                <span class="ms-2"><i class="bi bi-moon-fill"></i></span>
+            </div>
         </header>
 
         <div class="p-4 mb-4 bg-light rounded-3">
@@ -52,7 +65,8 @@
                                 <div class="col-md-2">
                                     <select class="form-select" name="sortBy" id="sortBy">
                                         <option value="">Сортировка по дате</option>
-                                        <option value="popularity" th:selected="${sortBy == 'popularity'}">По популярности</option>
+                                        <option value="views" th:selected="${sortBy == 'views'}">По просмотрам</option>
+                                        <option value="downloads" th:selected="${sortBy == 'downloads'}">По скачиваниям</option>
                                         <option value="size_asc" th:selected="${sortBy == 'size_asc'}">По размеру (возр)</option>
                                         <option value="size_desc" th:selected="${sortBy == 'size_desc'}">По размеру (убыв)</option>
                                     </select>
@@ -164,6 +178,30 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Получаем сохраненную тему из localStorage
+            const savedTheme = localStorage.getItem('theme');
+            const themeToggle = document.getElementById('themeToggle');
+            
+            // Устанавливаем текущую тему из localStorage, или по умолчанию светлую
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+                themeToggle.checked = true;
+            } else {
+                document.documentElement.setAttribute('data-bs-theme', 'light');
+                themeToggle.checked = false;
+            }
+            
+            // Обработчик для переключателя темы
+            themeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    document.documentElement.setAttribute('data-bs-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.documentElement.setAttribute('data-bs-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+            
             // Обработчик для кнопки сброса фильтров
             document.getElementById('resetFilters').addEventListener('click', function() {
                 window.location.href = '/';

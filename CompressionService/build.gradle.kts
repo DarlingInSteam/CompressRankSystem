@@ -29,6 +29,9 @@ dependencies {
 	implementation("org.springframework.retry:spring-retry") // Добавляем Spring Retry
 	implementation("org.springframework:spring-aspects") // Необходимо для работы аннотаций @Retryable
 
+	// Документация API (Swagger/OpenAPI)
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
+
 	// Зависимости для работы с базой данных
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("com.h2database:h2") // Используем H2 вместо PostgreSQL

@@ -43,6 +43,22 @@ public class ImageStatisticsService {
         return statisticsRepository.findMostPopular();
     }
     
+    /**
+     * Получает список изображений, отсортированных по количеству просмотров
+     * @return список изображений, отсортированных по просмотрам в убывающем порядке
+     */
+    public List<ImageStatisticsEntity> getMostViewedImages() {
+        return statisticsRepository.findMostViewed();
+    }
+    
+    /**
+     * Получает список изображений, отсортированных по количеству скачиваний
+     * @return список изображений, отсортированных по скачиваниям в убывающем порядке
+     */
+    public List<ImageStatisticsEntity> getMostDownloadedImages() {
+        return statisticsRepository.findMostDownloaded();
+    }
+    
     public ImageStatisticsEntity getStatisticsForImage(String imageId) {
         return statisticsRepository.findById(imageId)
                 .orElse(new ImageStatisticsEntity(imageId));
