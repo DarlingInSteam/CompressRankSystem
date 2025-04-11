@@ -5,6 +5,11 @@ import com.shadowshiftstudio.compressionservice.model.Image;
 import com.shadowshiftstudio.compressionservice.service.CompressionService;
 import com.shadowshiftstudio.compressionservice.service.ImageStatisticsService;
 import com.shadowshiftstudio.compressionservice.service.ImageStorageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,6 +25,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
+@Tag(name = "Веб-интерфейс", description = "Контроллер для работы с HTML-страницами веб-интерфейса")
 public class WebController {
 
     private final ImageStorageService imageStorageService;
@@ -33,12 +39,27 @@ public class WebController {
         this.statisticsService = statisticsService;
     }
 
+    /**
+     * Главная страница с галереей изображений
+     */
+    @Operation(
+        summary = "Главная страница",
+        description = "Отображает главную страницу с галереей всех исходных изображений, с возможностью фильтрации и сортировки"
+    )
     @GetMapping("/")
-    public String home(Model model, 
-                      @RequestParam(required = false) String search,
-                      @RequestParam(required = false) String sortBy,
-                      @RequestParam(required = false) String dateFilter,
-                      @RequestParam(required = false) String sizeFilter) {
+    public String home(
+            Model model,
+            @Parameter(description = "Поисковый запрос для фильтрации изображений по имени") 
+            @RequestParam(required = false) String search,
+            
+            @Parameter(description = "Способ сортировки изображений (views, downloads, popularity, size_asc, size_desc)") 
+            @RequestParam(required = false) String sortBy,
+            
+            @Parameter(description = "Фильтр по дате загрузки (today, week, month, year)") 
+            @RequestParam(required = false) String dateFilter,
+            
+            @Parameter(description = "Фильтр по размеру (small, medium, large, xlarge)") 
+            @RequestParam(required = false) String sizeFilter) {
         
         Map<String, Image> imagesMap = imageStorageService.getAllImageMetadata();
         Map<String, Image> filteredImagesMap = new HashMap<>(imagesMap);
@@ -208,9 +229,21 @@ public class WebController {
         return "index";
     }
 
+    /**
+     * Загрузка нового изображения через форму
+     */
+    @Operation(
+        summary = "Загрузка изображения через форму",
+        description = "Обрабатывает загрузку нового изображения через веб-форму"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "302", description = "Редирект на главную страницу после загрузки")
+    })
     @PostMapping("/upload")
-    public String uploadImage(@RequestParam("file") MultipartFile file, 
-                             RedirectAttributes redirectAttributes) {
+    public String uploadImage(
+            @Parameter(description = "Файл изображения для загрузки", required = true)
+            @RequestParam("file") MultipartFile file, 
+            RedirectAttributes redirectAttributes) {
         try {
             if (file.isEmpty()) {
                 redirectAttributes.addFlashAttribute("message", "Пожалуйста, выберите файл для загрузки");
@@ -235,8 +268,18 @@ public class WebController {
         return "redirect:/";
     }
     
+    /**
+     * Страница просмотра изображения и его сжатых версий
+     */
+    @Operation(
+        summary = "Страница просмотра изображения",
+        description = "Отображает страницу с детальной информацией о изображении и его сжатых версиях"
+    )
     @GetMapping("/images/{id}/view")
-    public String viewImage(@PathVariable String id, Model model) {
+    public String viewImage(
+            @Parameter(description = "Идентификатор изображения", required = true)
+            @PathVariable String id, 
+            Model model) {
         Image image = imageStorageService.getImageMetadata(id);
         if (image == null) {
             return "redirect:/";
@@ -273,10 +316,22 @@ public class WebController {
         return "view";
     }
     
+    /**
+     * Сжатие изображения через форму
+     */
+    @Operation(
+        summary = "Сжатие изображения через форму",
+        description = "Обрабатывает запрос на сжатие изображения с указанным уровнем компрессии"
+    )
     @PostMapping("/images/{id}/compress")
-    public String compressImage(@PathVariable String id, 
-                              @RequestParam(defaultValue = "5") int compressionLevel,
-                              RedirectAttributes redirectAttributes) {
+    public String compressImage(
+            @Parameter(description = "Идентификатор изображения", required = true)
+            @PathVariable String id, 
+            
+            @Parameter(description = "Уровень сжатия от 0 до 10", example = "5")
+            @RequestParam(defaultValue = "5") int compressionLevel,
+            
+            RedirectAttributes redirectAttributes) {
         try {
             if (compressionLevel < 0 || compressionLevel > 10) {
                 redirectAttributes.addFlashAttribute("message", "Уровень сжатия должен быть от 0 до 10");
@@ -298,8 +353,15 @@ public class WebController {
     /**
      * Удаление изображения
      */
+    @Operation(
+        summary = "Удаление изображения через форму",
+        description = "Обрабатывает запрос на удаление изображения"
+    )
     @PostMapping("/images/{id}/delete")
-    public String deleteImage(@PathVariable String id, RedirectAttributes redirectAttributes) {
+    public String deleteImage(
+            @Parameter(description = "Идентификатор изображения для удаления", required = true)
+            @PathVariable String id, 
+            RedirectAttributes redirectAttributes) {
         try {
             Image image = imageStorageService.getImageMetadata(id);
             if (image == null) {
