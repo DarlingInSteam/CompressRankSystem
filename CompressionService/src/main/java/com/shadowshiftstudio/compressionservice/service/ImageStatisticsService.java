@@ -47,4 +47,15 @@ public class ImageStatisticsService {
         return statisticsRepository.findById(imageId)
                 .orElse(new ImageStatisticsEntity(imageId));
     }
+    
+    /**
+     * Получает статистику для указанного изображения.
+     * Синоним для метода getStatisticsForImage для обеспечения обратной совместимости.
+     * 
+     * @param imageId идентификатор изображения
+     * @return объект статистики или новый объект с нулевыми счетчиками, если статистика не найдена
+     */
+    public ImageStatisticsEntity getImageStatistics(String imageId) {
+        return getStatisticsForImage(imageId);
+    }
 }

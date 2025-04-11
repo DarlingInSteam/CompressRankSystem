@@ -112,7 +112,15 @@
                                 <h5 class="card-title" th:text="${entry.value.originalFilename}">Имя файла</h5>
                                 <p class="card-text">
                                     <small th:text="'Размер: ' + ${#numbers.formatDecimal(entry.value.size / 1024, 0, 2)} + ' KB'"></small><br>
-                                    <small th:text="'Загружен: ' + ${#temporals.format(entry.value.uploadedAt, 'dd.MM.yyyy HH:mm')}"></small>
+                                    <small th:text="'Загружен: ' + ${#temporals.format(entry.value.uploadedAt, 'dd.MM.yyyy HH:mm')}"></small><br>
+                                    <small>
+                                        <span class="badge bg-info">
+                                            <i class="bi bi-eye"></i> <span th:text="${entry.value.accessCount}"></span>
+                                            <span th:if="${statistics != null && statistics[entry.key] != null}">
+                                                <i class="bi bi-download ms-1"></i> <span th:text="${statistics[entry.key].downloadCount}"></span>
+                                            </span>
+                                        </span>
+                                    </small>
                                 </p>
                                 <div class="d-flex justify-content-between">
                                     <a th:href="@{'/images/' + ${entry.key} + '/view'}" class="btn btn-primary">Просмотреть</a>

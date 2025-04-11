@@ -123,15 +123,7 @@ public class WebController {
                 }
             }
             
-            Comparator<String> dateComparator = Comparator.<String>comparingLong(id -> {
-                Image img = filteredImagesMap.get(id);
-                return img != null && img.getUploadedAt() != null ? 
-                       -img.getUploadedAt().toEpochSecond(java.time.ZoneOffset.UTC) : 0;
-            });
-            
-            filteredImagesMap.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey(dateComparator))
-                .forEach(entry -> sortedImagesMap.put(entry.getKey(), entry.getValue()));
+            sortedImagesMap.putAll(filteredImagesMap);
         }
         else if ("size_asc".equals(sortBy)) {
             sortedImagesMap = new TreeMap<>(
@@ -162,7 +154,16 @@ public class WebController {
             sortedImagesMap.putAll(filteredImagesMap);
         }
         
+        Map<String, ImageStatisticsEntity> imageStatistics = new HashMap<>();
+        for (String imageId : sortedImagesMap.keySet()) {
+            ImageStatisticsEntity stats = statisticsService.getImageStatistics(imageId);
+            if (stats != null) {
+                imageStatistics.put(imageId, stats);
+            }
+        }
+        
         model.addAttribute("images", sortedImagesMap);
+        model.addAttribute("statistics", imageStatistics);
         model.addAttribute("search", search);
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("dateFilter", dateFilter);
@@ -220,6 +221,18 @@ public class WebController {
         }
         
         model.addAttribute("compressedVersions", compressedVersions);
+        
+        ImageStatisticsEntity statistics = statisticsService.getImageStatistics(id);
+        model.addAttribute("statistics", statistics);
+        
+        Map<String, ImageStatisticsEntity> compressedStatistics = new HashMap<>();
+        for (String compressedId : compressedVersions.keySet()) {
+            ImageStatisticsEntity stats = statisticsService.getImageStatistics(compressedId);
+            if (stats != null) {
+                compressedStatistics.put(compressedId, stats);
+            }
+        }
+        model.addAttribute("compressedStatistics", compressedStatistics);
         
         return "view";
     }
