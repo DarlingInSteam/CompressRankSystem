@@ -1,0 +1,59 @@
+/* Основные стили для сервиса сжатия изображений */
+
+.image-container {
+    height: 200px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f8f9fa;
+}
+
+.image-container img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.card-img-top {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Эффекты для карточек - только когда нет модального окна */
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* Отключаем hover эффект при открытом модальном окне */
+body:not(.modal-open) .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* Дополнительные стили для модальных окон */
+.modal {
+    z-index: 1050 !important;
+}
+
+.modal-backdrop {
+    z-index: 1040 !important;
+}
+
+/* Стили для фиксации модального окна */
+.modal.show .modal-dialog {
+    transform: none !important;
+}
+
+/* Стили для слайдера сжатия */
+.form-range::-webkit-slider-thumb {
+    background-color: #0d6efd;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .col-md-8, .col-md-4 {
+        margin-bottom: 20px;
+    }
+}

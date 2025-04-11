@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Просмотр - ' + ${image.originalFilename}">Просмотр изображения</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container py-4">
+        <header class="pb-3 mb-4 border-bottom d-flex justify-content-between align-items-center">
+            <h1 class="display-5 fw-bold">Просмотр изображения</h1>
+            <a href="/" class="btn btn-outline-secondary">Назад к списку</a>
+        </header>
+
+        <div th:if="${message}" class="alert" th:classappend="${message.contains('ошибка') ? 'alert-danger' : 'alert-success'}" role="alert">
+            <p th:text="${message}">Сообщение</p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 th:text="${image.originalFilename}">Имя файла</h3>
+                    </div>
+                    <div class="card-body text-center">
+                        <img th:src="@{'/api/images/' + ${image.id}}" class="img-fluid" th:alt="${image.originalFilename}">
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="mb-0">
+                                    <strong>Размер:</strong> <span th:text="${#numbers.formatDecimal(image.size / 1024, 0, 2)} + ' KB'"></span><br>
+                                    <strong>Тип:</strong> <span th:text="${image.contentType}"></span><br>
+                                    <strong>Загружен:</strong> <span th:text="${#temporals.format(image.uploadedAt, 'dd.MM.yyyy HH:mm')}"></span>
+                                </p>
+                            </div>
+                            <div>
+                                <a th:href="@{'/api/images/' + ${image.id} + '?download=true'}" class="btn btn-success" download th:attr="download=${image.originalFilename}">Скачать оригинал</a>
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteImageModal">Удалить</button>
+                                
+                                <!-- Модальное окно подтверждения удаления оригинала -->
+                                <div class="modal fade" id="deleteImageModal" tabindex="-1" aria-labelledby="deleteImageModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="deleteImageModalLabel">Подтверждение удаления</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Вы действительно хотите удалить изображение "<span th:text="${image.originalFilename}"></span>"?</p>
+                                                <p class="text-danger">Это действие невозможно отменить. Все сжатые версии изображения также будут удалены.</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                                <form th:action="@{'/images/' + ${image.id} + '/delete'}" method="POST" class="d-inline">
+                                                    <button type="submit" class="btn btn-danger">Удалить</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Сжать изображение</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" th:action="@{'/images/' + ${image.id} + '/compress'}">
+                            <div class="mb-3">
+                                <label for="compressionLevel" class="form-label">Уровень сжатия (0-10):</label>
+                                <input type="range" class="form-range" min="0" max="10" step="1" id="compressionLevel" name="compressionLevel" value="5">
+                                <div class="d-flex justify-content-between">
+                                    <span class="badge bg-success">0 (минимальное)</span>
+                                    <span class="badge bg-primary">5 (среднее)</span>
+                                    <span class="badge bg-danger">10 (максимальное)</span>
+                                </div>
+                            </div>
+                            <div class="form-text mb-3">
+                                <p>
+                                    <strong>0</strong> - минимальное сжатие (высокое качество)<br>
+                                    <strong>10</strong> - максимальное сжатие (низкое качество)
+                                </p>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Сжать</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Сжатые версии</h4>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#maps.isEmpty(compressedVersions)}" class="alert alert-info">
+                            Нет сжатых версий этого изображения.
+                        </div>
+
+                        <div class="list-group">
+                            <div class="list-group-item list-group-item-action" th:each="entry : ${compressedVersions}">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1" th:text="'Сжатие: ' + ${entry.value.compressionLevel} + '/10'"></h5>
+                                    <small th:text="${#temporals.format(entry.value.uploadedAt, 'dd.MM.yyyy HH:mm')}"></small>
+                                </div>
+                                <p class="mb-1">Размер: <span th:text="${#numbers.formatDecimal(entry.value.size / 1024, 0, 2)} + ' KB'"></span>
+                                   (<span th:text="${#numbers.formatDecimal(100 - ((entry.value.size * 100) / image.size), 0, 1)} + '%'"></span> от оригинала)
+                                </p>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <div>
+                                        <a th:href="@{'/api/images/' + ${entry.key}}" class="btn btn-sm btn-primary">Просмотреть</a>
+                                        <a th:href="@{'/api/images/' + ${entry.key} + '?download=true'}" class="btn btn-sm btn-success" download th:attr="download=${image.originalFilename}">Скачать</a>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-danger" 
+                                            data-bs-toggle="modal" 
+                                            th:data-bs-target="'#deleteCompressedModal' + ${entry.key}">
+                                        Удалить
+                                    </button>
+                                    
+                                    <!-- Модальное окно подтверждения удаления сжатой версии -->
+                                    <div class="modal fade" th:id="'deleteCompressedModal' + ${entry.key}" tabindex="-1" 
+                                         th:aria-labelledby="'deleteCompressedModalLabel' + ${entry.key}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" th:id="'deleteCompressedModalLabel' + ${entry.key}">Подтверждение удаления</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Вы действительно хотите удалить сжатую версию изображения (уровень сжатия: <span th:text="${entry.value.compressionLevel}"></span>)?</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                                    <form th:action="@{'/images/' + ${entry.key} + '/delete'}" method="POST" class="d-inline">
+                                                        <button type="submit" class="btn btn-danger">Удалить</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Показывает текущее значение слайдера
+        const compressionLevelInput = document.getElementById('compressionLevel');
+        if (compressionLevelInput) {
+            compressionLevelInput.addEventListener('input', function() {
+                const currentValueBadge = document.getElementById('currentCompression');
+                if (!currentValueBadge) {
+                    const badge = document.createElement('span');
+                    badge.id = 'currentCompression';
+                    badge.classList.add('badge', 'bg-primary', 'ms-2');
+                    badge.textContent = this.value;
+                    this.parentNode.appendChild(badge);
+                } else {
+                    currentValueBadge.textContent = this.value;
+                }
+            });
+        }
+        
+        // Обработчики для предотвращения мерцания модальных окон
+        document.addEventListener('DOMContentLoaded', function() {
+            // Правильно устанавливаем класс modal-open для body
+            const allModals = document.querySelectorAll('.modal');
+            allModals.forEach(function(modal) {
+                modal.addEventListener('show.bs.modal', function() {
+                    document.body.classList.add('modal-open');
+                });
+                
+                modal.addEventListener('hide.bs.modal', function() {
+                    setTimeout(function() {
+                        if (!document.querySelector('.modal.show')) {
+                            document.body.classList.remove('modal-open');
+                        }
+                    }, 200);
+                });
+            });
+            
+            // Отключаем все эффекты hover при открытом модальном окне
+            document.querySelectorAll('.btn-danger[data-bs-toggle="modal"]').forEach(function(btn) {
+                btn.addEventListener('mouseenter', function() {
+                    // Останавливаем любые текущие анимации и трансформации карточек
+                    const card = this.closest('.card');
+                    if (card) {
+                        card.style.transform = 'none';
+                        card.style.boxShadow = 'none';
+                    }
+                });
+            });
+            
+            // Обработчик для кнопок удаления
+            document.querySelectorAll('.modal form .btn-danger').forEach(function(submitBtn) {
+                submitBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Блокируем кнопку, чтобы предотвратить повторные клики
+                    this.disabled = true;
+                    this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Удаление...';
+                    
+                    // Добавляем небольшую задержку перед отправкой формы
+                    setTimeout(() => {
+                        this.closest('form').submit();
+                    }, 300);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
