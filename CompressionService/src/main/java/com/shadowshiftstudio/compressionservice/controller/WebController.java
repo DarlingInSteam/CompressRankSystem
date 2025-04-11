@@ -107,7 +107,43 @@ public class WebController {
         
         Map<String, Image> sortedImagesMap;
         
-        if ("popularity".equals(sortBy)) {
+        if ("views".equals(sortBy)) {
+            List<ImageStatisticsEntity> mostViewedImages = statisticsService.getMostViewedImages();
+            
+            List<String> orderedIds = mostViewedImages.stream()
+                .map(ImageStatisticsEntity::getImageId)
+                .collect(Collectors.toList());
+            
+            sortedImagesMap = new LinkedHashMap<>();
+            
+            for (String id : orderedIds) {
+                if (filteredImagesMap.containsKey(id)) {
+                    sortedImagesMap.put(id, filteredImagesMap.get(id));
+                    filteredImagesMap.remove(id);
+                }
+            }
+            
+            sortedImagesMap.putAll(filteredImagesMap);
+        }
+        else if ("downloads".equals(sortBy)) {
+            List<ImageStatisticsEntity> mostDownloadedImages = statisticsService.getMostDownloadedImages();
+            
+            List<String> orderedIds = mostDownloadedImages.stream()
+                .map(ImageStatisticsEntity::getImageId)
+                .collect(Collectors.toList());
+            
+            sortedImagesMap = new LinkedHashMap<>();
+            
+            for (String id : orderedIds) {
+                if (filteredImagesMap.containsKey(id)) {
+                    sortedImagesMap.put(id, filteredImagesMap.get(id));
+                    filteredImagesMap.remove(id);
+                }
+            }
+            
+            sortedImagesMap.putAll(filteredImagesMap);
+        }
+        else if ("popularity".equals(sortBy)) {
             List<ImageStatisticsEntity> popularImages = statisticsService.getMostPopularImages();
             
             List<String> orderedIds = popularImages.stream()

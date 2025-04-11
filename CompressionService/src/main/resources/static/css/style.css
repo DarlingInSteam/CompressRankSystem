@@ -1,12 +1,75 @@
 /* Основные стили для сервиса сжатия изображений */
 
+:root {
+    --bg-color: #ffffff;
+    --text-color: #212529;
+    --card-bg: #ffffff;
+    --header-border: #dee2e6;
+    --form-bg: #f8f9fa;
+    --modal-bg: #ffffff;
+    --image-container-bg: #f8f9fa;
+    --card-shadow: rgba(0,0,0,0.1);
+    --border-color: #dee2e6;
+    --input-bg: #ffffff;
+    --input-border: #ced4da;
+}
+
+[data-bs-theme="dark"] {
+    --bg-color: #212529;
+    --text-color: #f8f9fa;
+    --card-bg: #343a40;
+    --header-border: #495057;
+    --form-bg: #343a40;
+    --modal-bg: #343a40;
+    --image-container-bg: #212529;
+    --card-shadow: rgba(255,255,255,0.1);
+    --border-color: #495057;
+    --input-bg: #2b3035;
+    --input-border: #495057;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.border-bottom {
+    border-color: var(--header-border) !important;
+}
+
+.card {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s ease;
+}
+
+.bg-light {
+    background-color: var(--form-bg) !important;
+}
+
+.modal-content {
+    background-color: var(--modal-bg);
+}
+
+.form-control, .form-select {
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--text-color);
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}
+
 .image-container {
     height: 200px;
     overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f8f9fa;
+    background-color: var(--image-container-bg);
 }
 
 .image-container img {
@@ -22,14 +85,10 @@
 }
 
 /* Эффекты для карточек - только когда нет модального окна */
-.card {
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
 /* Отключаем hover эффект при открытом модальном окне */
 body:not(.modal-open) .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 20px var(--card-shadow);
 }
 
 /* Дополнительные стили для модальных окон */
@@ -49,6 +108,78 @@ body:not(.modal-open) .card:hover {
 /* Стили для слайдера сжатия */
 .form-range::-webkit-slider-thumb {
     background-color: #0d6efd;
+}
+
+/* Стили для переключателя темы */
+.theme-toggle {
+    cursor: pointer;
+    width: 48px;
+    height: 24px;
+    position: relative;
+    display: inline-block;
+}
+
+.theme-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.theme-toggle-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    border-radius: 24px;
+    transition: .4s;
+}
+
+.theme-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: .4s;
+}
+
+input:checked + .theme-toggle-slider {
+    background-color: #2196F3;
+}
+
+input:checked + .theme-toggle-slider:before {
+    transform: translateX(24px);
+}
+
+.theme-toggle-icon {
+    position: absolute;
+    top: 3px;
+    font-size: 14px;
+    transition: .4s;
+    color: white;
+}
+
+.theme-toggle-icon.sun {
+    left: 6px;
+    opacity: 0;
+}
+
+.theme-toggle-icon.moon {
+    right: 6px;
+    opacity: 1;
+}
+
+input:checked + .theme-toggle-slider .theme-toggle-icon.sun {
+    opacity: 1;
+}
+
+input:checked + .theme-toggle-slider .theme-toggle-icon.moon {
+    opacity: 0;
 }
 
 /* Адаптивность для мобильных устройств */

@@ -11,4 +11,10 @@ import java.util.List;
 public interface ImageStatisticsRepository extends JpaRepository<ImageStatisticsEntity, String> {
     @Query("SELECT s FROM ImageStatisticsEntity s ORDER BY (s.viewCount + s.downloadCount) DESC")
     List<ImageStatisticsEntity> findMostPopular();
+    
+    @Query("SELECT s FROM ImageStatisticsEntity s ORDER BY s.viewCount DESC")
+    List<ImageStatisticsEntity> findMostViewed();
+    
+    @Query("SELECT s FROM ImageStatisticsEntity s ORDER BY s.downloadCount DESC")
+    List<ImageStatisticsEntity> findMostDownloaded();
 }
