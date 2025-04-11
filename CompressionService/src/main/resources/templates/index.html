@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сервис сжатия изображений</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container py-4">
+        <header class="pb-3 mb-4 border-bottom">
+            <h1 class="display-5 fw-bold">Сервис сжатия изображений</h1>
+        </header>
+
+        <div class="p-4 mb-4 bg-light rounded-3">
+            <div th:if="${message}" class="alert" th:classappend="${message.contains('ошибка') ? 'alert-danger' : 'alert-success'}" role="alert">
+                <p th:text="${message}">Сообщение</p>
+            </div>
+            
+            <form method="POST" th:action="@{/upload}" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="file" class="form-label">Выберите изображение для загрузки:</label>
+                    <input type="file" class="form-control" name="file" id="file" accept="image/*" required>
+                    <div class="form-text">Поддерживаются форматы: JPEG, PNG, GIF, BMP</div>
+                </div>
+                <button type="submit" class="btn btn-primary">Загрузить</button>
+            </form>
+        </div>
+
+        <!-- Новый блок с поисковой строкой и фильтрами -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Поиск и фильтры</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" th:action="@{/}" id="searchForm">
+                            <div class="row g-3 align-items-center">
+                                <!-- Поисковая строка -->
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                        <input type="text" class="form-control" placeholder="Поиск по имени файла" 
+                                              name="search" th:value="${search}">
+                                    </div>
+                                </div>
+                                
+                                <!-- Фильтр сортировки -->
+                                <div class="col-md-2">
+                                    <select class="form-select" name="sortBy" id="sortBy">
+                                        <option value="">Сортировка по дате</option>
+                                        <option value="popularity" th:selected="${sortBy == 'popularity'}">По популярности</option>
+                                        <option value="size_asc" th:selected="${sortBy == 'size_asc'}">По размеру (возр)</option>
+                                        <option value="size_desc" th:selected="${sortBy == 'size_desc'}">По размеру (убыв)</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Фильтр по дате -->
+                                <div class="col-md-2">
+                                    <select class="form-select" name="dateFilter" id="dateFilter">
+                                        <option value="">Любая дата</option>
+                                        <option value="today" th:selected="${dateFilter == 'today'}">За сегодня</option>
+                                        <option value="week" th:selected="${dateFilter == 'week'}">За неделю</option>
+                                        <option value="month" th:selected="${dateFilter == 'month'}">За месяц</option>
+                                        <option value="year" th:selected="${dateFilter == 'year'}">За год</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Фильтр по размеру -->
+                                <div class="col-md-2">
+                                    <select class="form-select" name="sizeFilter" id="sizeFilter">
+                                        <option value="">Любой размер</option>
+                                        <option value="small" th:selected="${sizeFilter == 'small'}">Маленький (< 100KB)</option>
+                                        <option value="medium" th:selected="${sizeFilter == 'medium'}">Средний (100KB - 1MB)</option>
+                                        <option value="large" th:selected="${sizeFilter == 'large'}">Большой (1MB - 5MB)</option>
+                                        <option value="xlarge" th:selected="${sizeFilter == 'xlarge'}">Очень большой (> 5MB)</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Кнопки применения и сброса фильтров -->
+                                <div class="col-md-2">
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                        <button type="submit" class="btn btn-primary">Применить</button>
+                                        <button type="button" id="resetFilters" class="btn btn-outline-secondary">Сбросить</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col">
+                <h2 class="mb-4">Каталог изображений</h2>
+                
+                <div th:if="${#maps.isEmpty(images)}" class="alert alert-info">
+                    Нет загруженных изображений. Загрузите ваше первое изображение.
+                </div>
+                
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    <div class="col" th:each="entry : ${images}" th:if="${entry.value.originalImageId == null}">
+                        <div class="card h-100">
+                            <div class="image-container">
+                                <img th:src="@{'/api/images/' + ${entry.key}}" class="card-img-top" th:alt="${entry.value.originalFilename}">
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title" th:text="${entry.value.originalFilename}">Имя файла</h5>
+                                <p class="card-text">
+                                    <small th:text="'Размер: ' + ${#numbers.formatDecimal(entry.value.size / 1024, 0, 2)} + ' KB'"></small><br>
+                                    <small th:text="'Загружен: ' + ${#temporals.format(entry.value.uploadedAt, 'dd.MM.yyyy HH:mm')}"></small>
+                                </p>
+                                <div class="d-flex justify-content-between">
+                                    <a th:href="@{'/images/' + ${entry.key} + '/view'}" class="btn btn-primary">Просмотреть</a>
+                                    <button type="button" class="btn btn-danger" 
+                                            data-bs-toggle="modal" 
+                                            th:data-bs-target="'#deleteModal' + ${entry.key}">
+                                        Удалить
+                                    </button>
+                                </div>
+                                
+                                <!-- Модальное окно подтверждения удаления -->
+                                <div class="modal fade" th:id="'deleteModal' + ${entry.key}" tabindex="-1" 
+                                     th:aria-labelledby="'deleteModalLabel' + ${entry.key}" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" th:id="'deleteModalLabel' + ${entry.key}">Подтверждение удаления</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Вы действительно хотите удалить изображение "<span th:text="${entry.value.originalFilename}"></span>"?</p>
+                                                <p class="text-danger">Это действие невозможно отменить. Все сжатые версии изображения также будут удалены.</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                                <form th:action="@{'/images/' + ${entry.key} + '/delete'}" method="POST" class="d-inline">
+                                                    <button type="submit" class="btn btn-danger">Удалить</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Обработчик для кнопки сброса фильтров
+            document.getElementById('resetFilters').addEventListener('click', function() {
+                window.location.href = '/';
+            });
+            
+            // Автоматически отправлять форму при изменении выпадающих списков
+            const selects = document.querySelectorAll('#sortBy, #dateFilter, #sizeFilter');
+            selects.forEach(function(select) {
+                select.addEventListener('change', function() {
+                    document.getElementById('searchForm').submit();
+                });
+            });
+            
+            // Правильно устанавливаем класс modal-open для body
+            const allModals = document.querySelectorAll('.modal');
+            allModals.forEach(function(modal) {
+                modal.addEventListener('show.bs.modal', function() {
+                    document.body.classList.add('modal-open');
+                });
+                
+                modal.addEventListener('hide.bs.modal', function() {
+                    setTimeout(function() {
+                        if (!document.querySelector('.modal.show')) {
+                            document.body.classList.remove('modal-open');
+                        }
+                    }, 200);
+                });
+            });
+            
+            // Отключаем все эффекты hover при открытом модальном окне
+            document.querySelectorAll('.btn-danger[data-bs-toggle="modal"]').forEach(function(btn) {
+                btn.addEventListener('mouseenter', function() {
+                    // Останавливаем любые текущие анимации и трансформации карточек
+                    const card = this.closest('.card');
+                    if (card) {
+                        card.style.transform = 'none';
+                        card.style.boxShadow = 'none';
+                    }
+                });
+            });
+            
+            // Обработчик для кнопок удаления
+            document.querySelectorAll('.modal form .btn-danger').forEach(function(submitBtn) {
+                submitBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Блокируем кнопку, чтобы предотвратить повторные клики
+                    this.disabled = true;
+                    this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Удаление...';
+                    
+                    // Добавляем небольшую задержку перед отправкой формы
+                    setTimeout(() => {
+                        this.closest('form').submit();
+                    }, 300);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
