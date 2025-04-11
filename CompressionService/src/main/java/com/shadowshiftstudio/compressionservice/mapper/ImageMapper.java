@@ -1,4 +1,4 @@
-package com.shadowshiftstudio.compressionservice.service;
+package com.shadowshiftstudio.compressionservice.mapper;
 
 import com.shadowshiftstudio.compressionservice.entity.ImageEntity;
 import com.shadowshiftstudio.compressionservice.model.Image;

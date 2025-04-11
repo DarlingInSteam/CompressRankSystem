@@ -1,6 +1,7 @@
-package com.shadowshiftstudio.compressionservice.service;
+package com.shadowshiftstudio.compressionservice.service.compression;
 
 import com.shadowshiftstudio.compressionservice.model.Image;
+import com.shadowshiftstudio.compressionservice.service.ImageStorageService;
 import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -2,8 +2,8 @@ package com.shadowshiftstudio.compressionservice.controller;
 
 import com.shadowshiftstudio.compressionservice.entity.ImageStatisticsEntity;
 import com.shadowshiftstudio.compressionservice.model.Image;
-import com.shadowshiftstudio.compressionservice.service.CompressionService;
-import com.shadowshiftstudio.compressionservice.service.ImageStatisticsService;
+import com.shadowshiftstudio.compressionservice.service.compression.CompressionService;
+import com.shadowshiftstudio.compressionservice.service.image.ImageStatisticsService;
 import com.shadowshiftstudio.compressionservice.service.ImageStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

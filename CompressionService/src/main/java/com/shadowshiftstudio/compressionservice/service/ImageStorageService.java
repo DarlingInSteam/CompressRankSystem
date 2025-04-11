@@ -5,7 +5,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Map;
-import jakarta.annotation.PostConstruct;
 
 public interface ImageStorageService {
 
