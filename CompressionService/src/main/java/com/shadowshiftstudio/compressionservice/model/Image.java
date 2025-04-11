@@ -28,7 +28,6 @@ public class Image {
         this.objectName = id + "_" + originalFilename.replaceAll("\\s+", "_");
     }
 
-    // Геттеры и сеттеры
     public String getId() {
         return id;
     }

@@ -28,14 +28,14 @@ dependencies {
 	implementation("commons-io:commons-io:2.15.1") // Утилиты для работы с файлами
 	implementation("org.springframework.retry:spring-retry") // Добавляем Spring Retry
 	implementation("org.springframework:spring-aspects") // Необходимо для работы аннотаций @Retryable
-	
+
 	// Зависимости для работы с базой данных
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("com.h2database:h2") // Используем H2 вместо PostgreSQL
-	
+
 	// Добавляем встроенный MinIO сервер для эмуляции
 	implementation("de.bwaldvogel:mongo-java-server:1.44.0") // Помогает запустить встроенный сервер
-	
+
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

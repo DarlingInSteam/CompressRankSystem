@@ -33,7 +33,12 @@
                                 <p class="mb-0">
                                     <strong>Размер:</strong> <span th:text="${#numbers.formatDecimal(image.size / 1024, 0, 2)} + ' KB'"></span><br>
                                     <strong>Тип:</strong> <span th:text="${image.contentType}"></span><br>
-                                    <strong>Загружен:</strong> <span th:text="${#temporals.format(image.uploadedAt, 'dd.MM.yyyy HH:mm')}"></span>
+                                    <strong>Загружен:</strong> <span th:text="${#temporals.format(image.uploadedAt, 'dd.MM.yyyy HH:mm')}"></span><br>
+                                    <strong>Просмотры:</strong> <span th:text="${image.accessCount}"></span><br>
+                                    <span th:if="${statistics}" class="badge bg-info">
+                                        <i class="bi bi-eye"></i> <span th:text="${statistics.viewCount}"></span>
+                                        <i class="bi bi-download ms-2"></i> <span th:text="${statistics.downloadCount}"></span>
+                                    </span>
                                 </p>
                             </div>
                             <div>
@@ -111,6 +116,17 @@
                                 </div>
                                 <p class="mb-1">Размер: <span th:text="${#numbers.formatDecimal(entry.value.size / 1024, 0, 2)} + ' KB'"></span>
                                    (<span th:text="${#numbers.formatDecimal(100 - ((entry.value.size * 100) / image.size), 0, 1)} + '%'"></span> от оригинала)
+                                </p>
+                                <p class="mb-1">
+                                    <small class="text-muted">
+                                        <span th:if="${entry.value.accessCount > 0}">
+                                            <i class="bi bi-eye"></i> <span th:text="${entry.value.accessCount}"></span>
+                                        </span>
+                                        <span th:if="${compressedStatistics != null && compressedStatistics[entry.key] != null}">
+                                            <i class="bi bi-eye"></i> <span th:text="${compressedStatistics[entry.key].viewCount}"></span>
+                                            <i class="bi bi-download ms-1"></i> <span th:text="${compressedStatistics[entry.key].downloadCount}"></span>
+                                        </span>
+                                    </small>
                                 </p>
                                 <div class="d-flex justify-content-between mt-2">
                                     <div>
