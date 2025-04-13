@@ -6,7 +6,7 @@ package com.shadowshiftstudio.compressionservice.util.webp;
  */
 public class WebpOptions {
     
-    private int quality = 75;
+    private int quality = 100;
     private int alphaQuality = 100;
     private boolean lossless = false;
     private boolean lowMemory = false;

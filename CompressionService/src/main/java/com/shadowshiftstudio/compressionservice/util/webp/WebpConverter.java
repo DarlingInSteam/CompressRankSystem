@@ -48,32 +48,12 @@ public class WebpConverter {
         if (imageByte == null || imageByte.length == 0) {
             throw new CWebpException("Input image byte array is empty or null");
         }
-        
-        // Check for cwebp availability
-        checkCWebpAvailable();
 
-        Path tempDir = null;
         try {
-            // Create temporary directory with unique name
-            tempDir = Files.createTempDirectory("webp_" + generateUniqueId());
-            
-            // Determine input file extension based on magic bytes
-            String extension = detectImageFormat(imageByte);
-            String time = generateUniqueId();
-            
-            String input = tempDir.toString() + "/img_" + time + "." + extension;
-            String output = tempDir.toString() + "/img_" + time + ".webp";
-
-            // Write input file
-            try (FileOutputStream fos = new FileOutputStream(input)) {
-                fos.write(imageByte);
-            }
-
-            return getWebpBytes(input, quality, tempDir, output);
+            CWebp cwebp = new CWebp().quality(quality);
+            return cwebp.convertFromBytes(imageByte);
         } catch (IOException e) {
             throw new CWebpException("Error processing image: " + e.getMessage(), e);
-        } finally {
-            cleanupTempDir(tempDir);
         }
     }
     
@@ -90,31 +70,55 @@ public class WebpConverter {
             throw new CWebpException("Input image byte array is empty or null");
         }
         
-        // Check for cwebp availability
-        checkCWebpAvailable();
-
-        Path tempDir = null;
         try {
-            // Create temporary directory with unique name
-            tempDir = Files.createTempDirectory("webp_" + generateUniqueId());
+            CWebp cwebp = new CWebp();
             
-            // Determine input file extension based on magic bytes
-            String extension = detectImageFormat(imageByte);
-            String time = generateUniqueId();
-            
-            String input = tempDir.toString() + "/img_" + time + "." + extension;
-            String output = tempDir.toString() + "/img_" + time + ".webp";
-
-            // Write input file
-            try (FileOutputStream fos = new FileOutputStream(input)) {
-                fos.write(imageByte);
+            // Apply all options
+            if (options.isLossless()) {
+                cwebp.lossless();
+            } else {
+                cwebp.quality(options.getQuality());
             }
-
-            return getWebpBytesWithOptions(input, options, tempDir, output);
+            
+            // Alpha quality
+            if (options.getAlphaQuality() > 0) {
+                cwebp.alphaQ(options.getAlphaQuality());
+            }
+            
+            // Resize if specified
+            if (options.getWidth() > 0 && options.getHeight() > 0) {
+                cwebp.resize(options.getWidth(), options.getHeight());
+            }
+            
+            // Apply crop if specified
+            if (options.getCropWidth() > 0 && options.getCropHeight() > 0) {
+                cwebp.crop(options.getCropX(), options.getCropY(), options.getCropWidth(), options.getCropHeight());
+            }
+            
+            // Apply noise filtering
+            if (options.getNoiseFilter() > 0) {
+                cwebp.strongNoise(options.getNoiseFilter());
+            }
+            
+            // Apply sharpness
+            if (options.getSharpness() > 0) {
+                cwebp.sharpness(options.getSharpness());
+            }
+            
+            // Use low memory if requested
+            if (options.isLowMemory()) {
+                cwebp.lowMemory();
+            }
+            
+            // Set exact option if needed
+            if (options.isExact()) {
+                cwebp.exact();
+            }
+            
+            // Perform direct in-memory conversion
+            return cwebp.convertFromBytes(imageByte);
         } catch (IOException e) {
             throw new CWebpException("Error processing image: " + e.getMessage(), e);
-        } finally {
-            cleanupTempDir(tempDir);
         }
     }
 
@@ -135,9 +139,6 @@ public class WebpConverter {
             throw new CWebpException("Image file does not exist: " + imageFilePath);
         }
 
-        // Check for cwebp availability
-        checkCWebpAvailable();
-        
         // Validate image format
         String extension = FilenameUtils.getExtension(imageFilePath).toLowerCase();
         if (!SUPPORTED_FORMATS.contains(extension)) {
@@ -174,9 +175,6 @@ public class WebpConverter {
             throw new CWebpException("Image file does not exist: " + imageFilePath);
         }
 
-        // Check for cwebp availability
-        checkCWebpAvailable();
-        
         // Validate image format
         String extension = FilenameUtils.getExtension(imageFilePath).toLowerCase();
         if (!SUPPORTED_FORMATS.contains(extension)) {
@@ -252,26 +250,18 @@ public class WebpConverter {
             throw new CWebpException("Output webp file path is empty or null");
         }
         
-        // Check for cwebp availability
-        checkCWebpAvailable();
-
-        Path tempDir = null;
         try {
-            tempDir = Files.createTempDirectory("webp_" + generateUniqueId());
+            // Convert byte array directly to WebP bytes
+            byte[] webpData = imageToWebpByte(imageByte, quality);
             
-            // Determine input file extension based on magic bytes
-            String extension = detectImageFormat(imageByte);
-            String input = tempDir.toString() + "/img_" + generateUniqueId() + "." + extension;
-
-            try (FileOutputStream fos = new FileOutputStream(input)) {
-                fos.write(imageByte);
+            // Write WebP bytes to file
+            try (FileOutputStream fos = new FileOutputStream(webpPathFile)) {
+                fos.write(webpData);
             }
-
-            return getWebpFile(input, quality, tempDir, webpPathFile);
+            
+            return new File(webpPathFile);
         } catch (IOException e) {
             throw new CWebpException("Error processing image: " + e.getMessage(), e);
-        } finally {
-            cleanupTempDir(tempDir);
         }
     }
     
@@ -291,27 +281,19 @@ public class WebpConverter {
         if (webpPathFile == null || webpPathFile.trim().isEmpty()) {
             throw new CWebpException("Output webp file path is empty or null");
         }
-        
-        // Check for cwebp availability
-        checkCWebpAvailable();
 
-        Path tempDir = null;
         try {
-            tempDir = Files.createTempDirectory("webp_" + generateUniqueId());
+            // Convert byte array directly to WebP bytes with options
+            byte[] webpData = imageToWebpByte(imageByte, options);
             
-            // Determine input file extension based on magic bytes
-            String extension = detectImageFormat(imageByte);
-            String input = tempDir.toString() + "/img_" + generateUniqueId() + "." + extension;
-
-            try (FileOutputStream fos = new FileOutputStream(input)) {
-                fos.write(imageByte);
+            // Write WebP bytes to file
+            try (FileOutputStream fos = new FileOutputStream(webpPathFile)) {
+                fos.write(webpData);
             }
-
-            return getWebpFileWithOptions(input, options, tempDir, webpPathFile);
+            
+            return new File(webpPathFile);
         } catch (IOException e) {
             throw new CWebpException("Error processing image: " + e.getMessage(), e);
-        } finally {
-            cleanupTempDir(tempDir);
         }
     }
 
@@ -337,9 +319,6 @@ public class WebpConverter {
             throw new CWebpException("Image file does not exist: " + imageFilePath);
         }
 
-        // Check for cwebp availability
-        checkCWebpAvailable();
-        
         try {
             return getWebpFile(imageFilePath, quality, null, webpPathFile);
         } catch (IOException e) {
@@ -369,9 +348,6 @@ public class WebpConverter {
             throw new CWebpException("Image file does not exist: " + imageFilePath);
         }
 
-        // Check for cwebp availability
-        checkCWebpAvailable();
-        
         try {
             return getWebpFileWithOptions(imageFilePath, options, null, webpPathFile);
         } catch (IOException e) {
@@ -452,9 +428,6 @@ public class WebpConverter {
             throw new CWebpException("Output path is not a directory: " + outputDirectory.getAbsolutePath());
         }
         
-        // Check for cwebp availability
-        checkCWebpAvailable();
-        
         File[] outputFiles = new File[inputFiles.length];
         
         for (int i = 0; i < inputFiles.length; i++) {
@@ -488,13 +461,17 @@ public class WebpConverter {
      * @throws CWebpException if cwebp execution fails
      */
     private static byte[] getWebpBytes(String imageFilePath, int quality, Path tempDir, String output) throws IOException, CWebpException {
-        CWebp cwebp = new CWebp().quality(quality).input(imageFilePath).output(output);
-        cwebp.execute();
-
-        File webp = new File(output);
-        byte[] webpByte = Files.readAllBytes(webp.toPath());
-        
-        return webpByte;
+        try {
+            CWebp cwebp = new CWebp().quality(quality);
+            
+            // If we have a file path, read the bytes
+            byte[] inputImageBytes = Files.readAllBytes(new File(imageFilePath).toPath());
+            
+            // Perform direct in-memory conversion
+            return cwebp.convertFromBytes(inputImageBytes);
+        } catch (IOException e) {
+            throw new CWebpException("WebP conversion failed: " + e.getMessage(), e);
+        }
     }
     
     /**
@@ -554,13 +531,15 @@ public class WebpConverter {
             cwebp.exact();
         }
         
-        cwebp.input(imageFilePath).output(output);
-        cwebp.execute();
-
-        File webp = new File(output);
-        byte[] webpByte = Files.readAllBytes(webp.toPath());
-        
-        return webpByte;
+        try {
+            // Read input image bytes
+            byte[] inputImageBytes = Files.readAllBytes(new File(imageFilePath).toPath());
+            
+            // Perform direct in-memory conversion
+            return cwebp.convertFromBytes(inputImageBytes);
+        } catch (IOException e) {
+            throw new CWebpException("WebP conversion with options failed: " + e.getMessage(), e);
+        }
     }
 
     /**
@@ -574,11 +553,20 @@ public class WebpConverter {
      * @throws CWebpException if cwebp execution fails
      */
     private static File getWebpFile(String imageFilePath, int quality, Path tempDir, String output) throws IOException, CWebpException {
-        CWebp cwebp = new CWebp().quality(quality).input(imageFilePath).output(output);
-        cwebp.execute();
-
-        File webp = new File(output);
-        return webp;
+        try {
+            // Convert the image bytes in memory
+            byte[] inputBytes = Files.readAllBytes(new File(imageFilePath).toPath());
+            byte[] webpData = imageToWebpByte(inputBytes, quality);
+            
+            // Write to output file
+            try (FileOutputStream fos = new FileOutputStream(output)) {
+                fos.write(webpData);
+            }
+            
+            return new File(output);
+        } catch (IOException e) {
+            throw new CWebpException("Error processing image file: " + e.getMessage(), e);
+        }
     }
     
     /**
@@ -594,55 +582,22 @@ public class WebpConverter {
     private static File getWebpFileWithOptions(String imageFilePath, WebpOptions options, Path tempDir, String output) 
             throws IOException, CWebpException {
         
-        CWebp cwebp = new CWebp();
-        
-        // Apply all options
-        if (options.isLossless()) {
-            cwebp.lossless();
-        } else {
-            cwebp.quality(options.getQuality());
+        try {
+            // Read input image bytes
+            byte[] inputBytes = Files.readAllBytes(new File(imageFilePath).toPath());
+            
+            // Convert in memory using our options
+            byte[] webpData = imageToWebpByte(inputBytes, options);
+            
+            // Write to output file
+            try (FileOutputStream fos = new FileOutputStream(output)) {
+                fos.write(webpData);
+            }
+            
+            return new File(output);
+        } catch (IOException e) {
+            throw new CWebpException("WebP conversion with options failed: " + e.getMessage(), e);
         }
-        
-        // Alpha quality
-        if (options.getAlphaQuality() > 0) {
-            cwebp.alphaQ(options.getAlphaQuality());
-        }
-        
-        // Resize if specified
-        if (options.getWidth() > 0 && options.getHeight() > 0) {
-            cwebp.resize(options.getWidth(), options.getHeight());
-        }
-        
-        // Apply crop if specified
-        if (options.getCropWidth() > 0 && options.getCropHeight() > 0) {
-            cwebp.crop(options.getCropX(), options.getCropY(), options.getCropWidth(), options.getCropHeight());
-        }
-        
-        // Apply noise filtering
-        if (options.getNoiseFilter() > 0) {
-            cwebp.strongNoise(options.getNoiseFilter());
-        }
-        
-        // Apply sharpness
-        if (options.getSharpness() > 0) {
-            cwebp.sharpness(options.getSharpness());
-        }
-        
-        // Use low memory if requested
-        if (options.isLowMemory()) {
-            cwebp.lowMemory();
-        }
-        
-        // Set exact option if needed
-        if (options.isExact()) {
-            cwebp.exact();
-        }
-        
-        cwebp.input(imageFilePath).output(output);
-        cwebp.execute();
-
-        File webp = new File(output);
-        return webp;
     }
 
     /**
@@ -685,7 +640,7 @@ public class WebpConverter {
         }
         
         // Check for WEBP
-        if (bytes[8] == (byte)'W' && bytes[9] == (byte)'E' && bytes[10] == (byte)'B' && 
+        if (bytes.length >= 12 && bytes[8] == (byte)'W' && bytes[9] == (byte)'E' && bytes[10] == (byte)'B' && 
             bytes[11] == (byte)'P') {
             return "webp";
         }
@@ -707,8 +662,45 @@ public class WebpConverter {
             return "tif";
         }
         
+        // Try to guess based on content
+        String guessedFormat = guessImageFormat(bytes);
+        if (guessedFormat != null) {
+            return guessedFormat;
+        }
+        
         // Default to binary data
         return "dat";
+    }
+    
+    /**
+     * Attempt to guess the image format if magic bytes don't match known patterns
+     */
+    private static String guessImageFormat(byte[] bytes) {
+        // Look for JFIF marker in JPEG
+        for (int i = 0; i < bytes.length - 10; i++) {
+            if (bytes[i] == (byte)'J' && bytes[i+1] == (byte)'F' && bytes[i+2] == (byte)'I' && 
+                bytes[i+3] == (byte)'F') {
+                return "jpg";
+            }
+        }
+        
+        // Look for EXIF marker
+        for (int i = 0; i < bytes.length - 10; i++) {
+            if (bytes[i] == (byte)'E' && bytes[i+1] == (byte)'x' && bytes[i+2] == (byte)'i' && 
+                bytes[i+3] == (byte)'f') {
+                return "jpg";
+            }
+        }
+        
+        // Check if it might be a PNG (sometimes magic bytes are corrupted)
+        for (int i = 0; i < bytes.length - 10; i++) {
+            if (bytes[i] == (byte)'I' && bytes[i+1] == (byte)'H' && bytes[i+2] == (byte)'D' && 
+                bytes[i+3] == (byte)'R') {
+                return "png";
+            }
+        }
+        
+        return null;
     }
     
     /**
@@ -722,16 +714,6 @@ public class WebpConverter {
             } catch (IOException e) {
                 logger.log(Level.WARNING, "Failed to delete temporary directory: " + tempDir, e);
             }
-        }
-    }
-    
-    /**
-     * Check if cwebp is available in the system path
-     * @throws CWebpException if cwebp is not available
-     */
-    private static void checkCWebpAvailable() throws CWebpException {
-        if (!CWebp.isAvailable()) {
-            throw new CWebpException("cwebp command is not available in system path");
         }
     }
 }
