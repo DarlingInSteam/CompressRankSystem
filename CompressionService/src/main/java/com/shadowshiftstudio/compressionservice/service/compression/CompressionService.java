@@ -2,30 +2,26 @@ package com.shadowshiftstudio.compressionservice.service.compression;
 
 import com.shadowshiftstudio.compressionservice.model.Image;
 import com.shadowshiftstudio.compressionservice.service.ImageStorageService;
-import org.imgscalr.Scalr;
+import com.shadowshiftstudio.compressionservice.service.webp.WebpService;
+import com.shadowshiftstudio.compressionservice.util.webp.WebpOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.imageio.IIOImage;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
-import javax.imageio.stream.ImageOutputStream;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Iterator;
 
 @Service
 public class CompressionService {
 
+    private static final Logger logger = LoggerFactory.getLogger(CompressionService.class);
     private final ImageStorageService imageStorageService;
+    private final WebpService webpService;
 
     @Autowired
-    public CompressionService(ImageStorageService imageStorageService) {
+    public CompressionService(ImageStorageService imageStorageService, WebpService webpService) {
         this.imageStorageService = imageStorageService;
+        this.webpService = webpService;
     }
 
     /**
@@ -46,91 +42,56 @@ public class CompressionService {
         byte[] imageData = imageStorageService.getImage(imageId);
         Image imageMetadata = imageStorageService.getImageMetadata(imageId);
         
-        String format = getFormatFromContentType(imageMetadata.getContentType());
-        
-        BufferedImage originalImage;
-        try (InputStream is = new ByteArrayInputStream(imageData)) {
-            originalImage = ImageIO.read(is);
+        if (imageData == null || imageMetadata == null) {
+            throw new IOException("Image not found with id: " + imageId);
         }
         
-        if (originalImage == null) {
-            throw new IOException("Could not read image");
+        try {
+            // Преобразуем уровень сжатия (0-10) в качество WebP (0-100)
+            int webpQuality = mapCompressionLevelToWebpQuality(compressionLevel);
+            
+            // Создаем опции для WebP конвертации с указанным качеством
+            WebpOptions options = new WebpOptions()
+                .withQuality(webpQuality)
+                .withExact(true);
+            
+            // Используем более агрессивное шумоподавление для высоких уровней сжатия
+            if (compressionLevel > 7) {
+                options.withNoiseFilter(30);
+            }
+            
+            // Для самых высоких уровней сжатия можно добавить дополнительное уменьшение размера
+            if (compressionLevel > 9) {
+                // Уровень 10 - самый высокий уровень сжатия
+                options.withNoiseFilter(50);
+            }
+            
+            // Конвертируем изображение
+            byte[] compressedData = webpService.convertToWebp(imageData, options);
+            
+            if (compressedData == null) {
+                throw new IOException("WebP conversion failed");
+            }
+            
+            logger.info("Image compressed with WebP: id={}, level={}, quality={}, original size={}, compressed size={}",
+                    imageId, compressionLevel, webpQuality, imageData.length, compressedData.length);
+            
+            return imageStorageService.storeCompressedImage(imageId, compressedData, compressionLevel);
+        } catch (Exception e) {
+            logger.error("Error compressing image: {}", e.getMessage(), e);
+            throw e;
         }
-        
-        byte[] compressedData;
-        if ("jpg".equalsIgnoreCase(format) || "jpeg".equalsIgnoreCase(format)) {
-            compressedData = compressJpeg(originalImage, compressionLevel);
-        } else if ("png".equalsIgnoreCase(format)) {
-            compressedData = compressPng(originalImage, compressionLevel, format);
-        } else {
-            compressedData = compressGeneric(originalImage, compressionLevel, format);
-        }
-        
-        return imageStorageService.storeCompressedImage(imageId, compressedData, compressionLevel);
-    }
-    
-    private byte[] compressJpeg(BufferedImage image, int compressionLevel) throws IOException {
-        float quality = 1.0f - (compressionLevel / 10.0f);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        
-        Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpeg");
-        ImageWriter writer = writers.next();
-        
-        ImageWriteParam param = writer.getDefaultWriteParam();
-        param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-        param.setCompressionQuality(quality);
-        
-        try (ImageOutputStream ios = ImageIO.createImageOutputStream(outputStream)) {
-            writer.setOutput(ios);
-            writer.write(null, new IIOImage(image, null, null), param);
-        } finally {
-            writer.dispose();
-        }
-        
-        return outputStream.toByteArray();
-    }
-    
-    private byte[] compressPng(BufferedImage image, int compressionLevel, String format) throws IOException {
-        double scaleFactor = 1.0 - (compressionLevel * 0.05);
-        
-        int newWidth = (int) (image.getWidth() * scaleFactor);
-        int newHeight = (int) (image.getHeight() * scaleFactor);
-        
-        BufferedImage resized = Scalr.resize(image, Scalr.Method.QUALITY, newWidth, newHeight);
-        
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ImageIO.write(resized, format, outputStream);
-        
-        return outputStream.toByteArray();
-    }
-    
-    private byte[] compressGeneric(BufferedImage image, int compressionLevel, String format) throws IOException {
-        double scaleFactor = 1.0 - (compressionLevel * 0.07);
-        
-        int newWidth = (int) (image.getWidth() * scaleFactor);
-        int newHeight = (int) (image.getHeight() * scaleFactor);
-        
-        BufferedImage resized = Scalr.resize(image, Scalr.Method.BALANCED, newWidth, newHeight);
-        
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ImageIO.write(resized, format, outputStream);
-        
-        return outputStream.toByteArray();
     }
     
     /**
-     * Извлекает формат изображения из Content-Type
+     * Преобразование уровня сжатия в значение качества WebP
+     * @param compressionLevel уровень сжатия (0-10)
+     * @return качество WebP (0-100)
      */
-    private String getFormatFromContentType(String contentType) {
-        if (contentType == null) {
-            return "png";
-        }
-        
-        String[] parts = contentType.split("/");
-        if (parts.length == 2) {
-            return parts[1];
-        }
-        
-        return "png";
+    private int mapCompressionLevelToWebpQuality(int compressionLevel) {
+        // Инвертируем уровень сжатия в качество WebP:
+        // уровень сжатия 0 -> качество 100
+        // уровень сжатия 10 -> качество 10
+        return Math.max(10, 100 - (compressionLevel * 9));
     }
 }

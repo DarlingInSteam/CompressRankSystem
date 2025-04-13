@@ -1,10 +1,18 @@
 package com.shadowshiftstudio.compressionservice.util.webp;
 
 import java.io.*;
+import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * util for create and execute cwebp command to compresses an image using the WebP format.
@@ -14,7 +22,10 @@ import java.util.logging.Logger;
 public class CWebp {
 
     private static final Logger logger = Logger.getLogger(CWebp.class.getName());
-    
+    private static final String WEBP_BINARY_PATH = "webp_binaries";
+    private static String cwebpPath = null;
+    private static boolean webpBinaryInitialized = false;
+
     /**
      * StringBuffer of command line
      */
@@ -34,8 +45,181 @@ public class CWebp {
      * Compress an image file to a WebP file
      */
     public CWebp() {
+        if (!webpBinaryInitialized) {
+            initializeWebpBinary();
+        }
         command = new StringBuffer();
-        command.append("cwebp ");
+        command.append(cwebpPath != null ? cwebpPath : "cwebp ");
+        if (!command.toString().endsWith(" ")) {
+            command.append(" ");
+        }
+    }
+
+    /**
+     * Initialize WebP binary by checking if it exists in PATH or downloading/extracting it if needed
+     */
+    private static synchronized void initializeWebpBinary() {
+        if (webpBinaryInitialized) {
+            return;
+        }
+
+        try {
+            // First check if cwebp is available in PATH
+            boolean isAvailable = checkCWebpInPath();
+            if (isAvailable) {
+                cwebpPath = "cwebp";
+                webpBinaryInitialized = true;
+                logger.info("cwebp found in system PATH");
+                return;
+            }
+
+            // If not available in PATH, check or create binary directory
+            Path webpDir = Paths.get(System.getProperty("user.dir"), WEBP_BINARY_PATH);
+            if (!Files.exists(webpDir)) {
+                Files.createDirectories(webpDir);
+            }
+
+            // Determine platform and download appropriate WebP binary
+            String os = System.getProperty("os.name").toLowerCase();
+            String arch = System.getProperty("os.arch").toLowerCase();
+
+            Path binPath;
+            if (os.contains("win")) {
+                binPath = downloadWindowsBinary(webpDir);
+            } else if (os.contains("mac") || os.contains("darwin")) {
+                binPath = downloadMacBinary(webpDir, arch);
+            } else {
+                binPath = downloadLinuxBinary(webpDir, arch);
+            }
+
+            if (binPath != null) {
+                cwebpPath = binPath.toAbsolutePath().toString();
+                makeExecutable(binPath);
+                webpBinaryInitialized = true;
+                logger.info("Successfully initialized WebP binary at: " + cwebpPath);
+            } else {
+                logger.severe("Failed to initialize WebP binary");
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error initializing WebP binary", e);
+        }
+    }
+
+    /**
+     * Check if cwebp is available in system PATH
+     */
+    private static boolean checkCWebpInPath() {
+        try {
+            Process process;
+            if (System.getProperty("os.name").toLowerCase().contains("win")) {
+                process = Runtime.getRuntime().exec(new String[]{"where", "cwebp"});
+            } else {
+                process = Runtime.getRuntime().exec(new String[]{"which", "cwebp"});
+            }
+
+            boolean completed = process.waitFor(5, TimeUnit.SECONDS);
+            return completed && process.exitValue() == 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Download Windows binary
+     */
+    private static Path downloadWindowsBinary(Path webpDir) throws IOException {
+        String url = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.3.2-windows-x64.zip";
+        Path zipFile = webpDir.resolve("libwebp-windows.zip");
+
+        downloadFile(url, zipFile);
+        Path binPath = webpDir.resolve("cwebp.exe");
+
+        try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFile.toFile()))) {
+            ZipEntry entry;
+            while ((entry = zipIn.getNextEntry()) != null) {
+                if (entry.getName().endsWith("bin/cwebp.exe")) {
+                    Files.copy(zipIn, binPath, StandardCopyOption.REPLACE_EXISTING);
+                    break;
+                }
+            }
+        }
+
+        return binPath;
+    }
+
+    /**
+     * Download Mac binary
+     */
+    private static Path downloadMacBinary(Path webpDir, String arch) throws IOException, InterruptedException {
+        String url;
+        if (arch.contains("aarch64") || arch.contains("arm")) {
+            url = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.3.2-mac-arm64.tar.gz";
+        } else {
+            url = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.3.2-mac-x86-64.tar.gz";
+        }
+
+        Path tarFile = webpDir.resolve("libwebp-mac.tar.gz");
+        downloadFile(url, tarFile);
+
+        // Extract using system tar command
+        Path binPath = webpDir.resolve("cwebp");
+        Process process = Runtime.getRuntime().exec(new String[]{
+            "tar", "-xzf", tarFile.toString(), "--strip-components=2",
+            "-C", webpDir.toString(), "libwebp-1.3.2-mac-*/bin/cwebp"
+        });
+
+        process.waitFor(30, TimeUnit.SECONDS);
+
+        return binPath;
+    }
+
+    /**
+     * Download Linux binary
+     */
+    private static Path downloadLinuxBinary(Path webpDir, String arch) throws IOException, InterruptedException {
+        String url;
+        if (arch.contains("aarch64") || arch.contains("arm")) {
+            url = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.3.2-linux-arm64.tar.gz";
+        } else {
+            url = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.3.2-linux-x86-64.tar.gz";
+        }
+
+        Path tarFile = webpDir.resolve("libwebp-linux.tar.gz");
+        downloadFile(url, tarFile);
+
+        // Extract using system tar command
+        Path binPath = webpDir.resolve("cwebp");
+        Process process = Runtime.getRuntime().exec(new String[]{
+            "tar", "-xzf", tarFile.toString(), "--strip-components=2",
+            "-C", webpDir.toString(), "libwebp-1.3.2-linux-*/bin/cwebp"
+        });
+
+        process.waitFor(30, TimeUnit.SECONDS);
+
+        return binPath;
+    }
+
+    /**
+     * Make a file executable
+     */
+    private static void makeExecutable(Path path) {
+        try {
+            if (!System.getProperty("os.name").toLowerCase().contains("win")) {
+                Runtime.getRuntime().exec(new String[]{"chmod", "+x", path.toString()}).waitFor();
+            }
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Failed to make file executable: " + path, e);
+        }
+    }
+
+    /**
+     * Download a file from a URL
+     */
+    private static void downloadFile(String url, Path destination) throws IOException {
+        try (ReadableByteChannel readChannel = Channels.newChannel(new URL(url).openStream());
+             FileOutputStream fileOS = new FileOutputStream(destination.toFile())) {
+            fileOS.getChannel().transferFrom(readChannel, 0, Long.MAX_VALUE);
+        }
     }
 
     /**
@@ -59,7 +243,7 @@ public class CWebp {
      * @return A new {@link CWebp} object for managing the subprocess
      */
     public CWebp nearLossless(int level) {
-        if(level > 100 || level < 0){
+        if (level > 100 || level < 0) {
             return this;
         }
         command.append("-near_lossless ");
@@ -76,7 +260,7 @@ public class CWebp {
      * @return A new {@link CWebp} object for managing the subprocess
      */
     public CWebp quality(int quality) {
-        if(quality > 100 || quality < 0){
+        if (quality > 100 || quality < 0) {
             return this;
         }
         command.append("-q ");
@@ -92,7 +276,7 @@ public class CWebp {
      * @return A new {@link CWebp} object for managing the subprocess
      */
     public CWebp alphaQ(int alpha) {
-        if(alpha > 100 || alpha < 0){
+        if (alpha > 100 || alpha < 0) {
             return this;
         }
         command.append("-alpha_q ");
@@ -123,8 +307,8 @@ public class CWebp {
      * @param height size height
      * @return A new {@link CWebp} object for managing the subprocess
      */
-    public CWebp crop(int x_position, int y_position ,int width , int height) {
-        if(width == 0 || height == 0){
+    public CWebp crop(int x_position, int y_position, int width, int height) {
+        if (width == 0 || height == 0) {
             return this;
         }
         command.append("-crop ");
@@ -144,13 +328,13 @@ public class CWebp {
      * @param height size height
      * @return A new {@link CWebp} object for managing the subprocess
      */
-    public CWebp resize(int width , int height) {
+    public CWebp resize(int width, int height) {
         command.append("-resize ");
         command.append(width + " ");
         command.append(height + " ");
         return this;
     }
-    
+
     /**
      * Set metadata in the output WebP file
      * @return A new {@link CWebp} object for managing the subprocess
@@ -160,7 +344,7 @@ public class CWebp {
         command.append(metadata + " ");
         return this;
     }
-    
+
     /**
      * Preserve RGB values in transparent area
      * @return A new {@link CWebp} object for managing the subprocess
@@ -169,42 +353,42 @@ public class CWebp {
         command.append("-exact ");
         return this;
     }
-    
+
     /**
      * Specify a maximum file size to aim for, expressed in bytes
      * @param size maximum file size in bytes
      * @return A new {@link CWebp} object for managing the subprocess
      */
     public CWebp size(int size) {
-        if(size <= 0){
+        if (size <= 0) {
             return this;
         }
         command.append("-size ");
         command.append(size + " ");
         return this;
     }
-    
+
     /**
      * Preprocessing filter that sharpens the converted picture
      * @param strength between 0 and 7, default is 0 (no filter)
      * @return A new {@link CWebp} object for managing the subprocess
      */
     public CWebp sharpness(int strength) {
-        if(strength < 0 || strength > 7) {
+        if (strength < 0 || strength > 7) {
             return this;
         }
         command.append("-sharpness ");
         command.append(strength + " ");
         return this;
     }
-    
+
     /**
      * Preprocessing filter for strong noise
      * @param strength between 0 and 100, default is 0 (no filter)
      * @return A new {@link CWebp} object for managing the subprocess
      */
     public CWebp strongNoise(int strength) {
-        if(strength < 0 || strength > 100) {
+        if (strength < 0 || strength > 100) {
             return this;
         }
         command.append("-sns ");
@@ -237,90 +421,134 @@ public class CWebp {
         command.append(outputPath + " ");
         return this;
     }
-    
+
+    /**
+     * Convert raw image bytes to WebP format using temporary files
+     * @param imageData input image data as byte array
+     * @return WebP image data as byte array
+     * @throws IOException if the conversion fails
+     */
+    public byte[] convertFromBytes(byte[] imageData) throws IOException {
+        if (!webpBinaryInitialized || cwebpPath == null) {
+            throw new IOException("WebP binary is not available. Please install cwebp or restart the service.");
+        }
+        
+        // Create temporary directory for input and output files
+        Path tempDir = Files.createTempDirectory("webp_conversion_");
+        Path tempInputFile = tempDir.resolve("input_image.bin");
+        Path tempOutputFile = tempDir.resolve("output_image.webp");
+        
+        try {
+            // Write input data to temporary file
+            Files.write(tempInputFile, imageData);
+            
+            // Prepare command with temporary files
+            String finalCommand = this.getCommand();
+            
+            // Ensure command doesn't already have input or output parameters
+            if (!finalCommand.contains(" -o ")) {
+                finalCommand += " -o " + tempOutputFile.toString();
+            }
+            
+            // Add input file as the last parameter if not already present
+            if (!finalCommand.contains(tempInputFile.toString())) {
+                finalCommand += " " + tempInputFile.toString();
+            }
+            
+            logger.info("Executing WebP command: " + finalCommand);
+            
+            // Build and start process
+            ProcessBuilder pb;
+            if (System.getProperty("os.name").toLowerCase().contains("win")) {
+                pb = new ProcessBuilder("cmd.exe", "/c", finalCommand);
+            } else {
+                pb = new ProcessBuilder("sh", "-c", finalCommand);
+            }
+            
+            // Redirect error stream to capture any error messages
+            ByteArrayOutputStream errorOutput = new ByteArrayOutputStream();
+            Process process = pb.start();
+            
+            // Start thread to read error stream
+            Thread errorThread = startOutputThread(process.getErrorStream(), errorOutput);
+            
+            // Wait for process to complete with timeout
+            boolean completed = process.waitFor(30, TimeUnit.SECONDS);
+            if (!completed) {
+                process.destroyForcibly();
+                throw new IOException("WebP conversion process timed out");
+            }
+            
+            // Wait for error thread to complete
+            errorThread.join(5000);
+            
+            int exitCode = process.exitValue();
+            if (exitCode != 0) {
+                this.processError = new String(errorOutput.toByteArray());
+                logger.warning("cwebp process error: " + this.processError);
+                throw new IOException("WebP conversion failed with exit code: " + exitCode);
+            }
+            
+            // Read output file if it exists
+            if (Files.exists(tempOutputFile)) {
+                byte[] webpData = Files.readAllBytes(tempOutputFile);
+                this.processOutput = "Success, generated " + webpData.length + " bytes";
+                return webpData;
+            } else {
+                throw new IOException("WebP output file was not created");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("WebP conversion was interrupted", e);
+        } finally {
+            // Clean up temporary files
+            try {
+                if (Files.exists(tempInputFile)) Files.delete(tempInputFile);
+                if (Files.exists(tempOutputFile)) Files.delete(tempOutputFile);
+                Files.delete(tempDir);
+            } catch (IOException e) {
+                logger.log(Level.WARNING, "Failed to clean up temporary files", e);
+            }
+        }
+    }
+
+    /**
+     * Helper method to start a thread that reads from an input stream and writes to an output stream
+     */
+    private Thread startOutputThread(final InputStream input, final ByteArrayOutputStream output) {
+        Thread thread = new Thread(() -> {
+            try {
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = input.read(buffer)) != -1) {
+                    output.write(buffer, 0, bytesRead);
+                }
+            } catch (IOException e) {
+                logger.log(Level.WARNING, "Error reading process output", e);
+            }
+        });
+        thread.start();
+        return thread;
+    }
+
     /**
      * Shows the command that would be executed
      */
     public String getCommand() {
         return command.toString();
     }
-    
+
     /**
      * Returns the output from the process
      */
     public String getProcessOutput() {
         return processOutput;
     }
-    
+
     /**
      * Returns any error message from the process
      */
     public String getProcessError() {
         return processError;
-    }
-
-    /**
-     * Check if the cwebp command is available in the system
-     * @return true if available, false otherwise
-     */
-    public static boolean isAvailable() {
-        Process process = null;
-        try {
-            ProcessBuilder pb = new ProcessBuilder("cwebp", "-version");
-            process = pb.start();
-            return process.waitFor(3, TimeUnit.SECONDS) && process.exitValue() == 0;
-        } catch (IOException | InterruptedException e) {
-            logger.log(Level.WARNING, "cwebp command not available", e);
-            return false;
-        } finally {
-            if(process != null) {
-                process.destroy();
-            }
-        }
-    }
-
-    /**
-     * Executes the specified string command in a separate process.
-     * @throws CWebpException if the command fails to execute
-     */
-    public void execute() throws CWebpException {
-        Process process = null;
-        try {
-            String cmd = command.toString();
-            logger.log(Level.INFO, "Executing command: {0}", cmd);
-            
-            process = Runtime.getRuntime().exec(cmd);
-            
-            // Capture the output and error streams
-            try (BufferedReader outputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                 BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
-                
-                StringBuilder outputBuilder = new StringBuilder();
-                StringBuilder errorBuilder = new StringBuilder();
-                String line;
-                
-                while ((line = outputReader.readLine()) != null) {
-                    outputBuilder.append(line).append(System.lineSeparator());
-                }
-                
-                while ((line = errorReader.readLine()) != null) {
-                    errorBuilder.append(line).append(System.lineSeparator());
-                }
-                
-                processOutput = outputBuilder.toString();
-                processError = errorBuilder.toString();
-            }
-            
-            int exitCode = process.waitFor();
-            if (exitCode != 0) {
-                throw new CWebpException("cwebp command failed with exit code " + exitCode + ". Error: " + processError);
-            }
-        } catch (IOException | InterruptedException e) {
-            throw new CWebpException(e);
-        } finally {
-            if(process != null) {
-                process.destroy();
-            }
-        }
     }
 }
