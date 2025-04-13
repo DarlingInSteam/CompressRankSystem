@@ -1,4 +1,4 @@
-package com.shadowshiftstudio.compressionservice.service;
+package com.shadowshiftstudio.compressionservice.service.image;
 
 import com.shadowshiftstudio.compressionservice.entity.ImageStatisticsEntity;
 import com.shadowshiftstudio.compressionservice.repository.ImageStatisticsRepository;
@@ -6,9 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ImageStatisticsService {

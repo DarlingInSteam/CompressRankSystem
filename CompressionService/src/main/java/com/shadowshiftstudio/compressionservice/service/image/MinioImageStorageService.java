@@ -1,8 +1,10 @@
-package com.shadowshiftstudio.compressionservice.service;
+package com.shadowshiftstudio.compressionservice.service.image;
 
 import com.shadowshiftstudio.compressionservice.entity.ImageEntity;
+import com.shadowshiftstudio.compressionservice.mapper.ImageMapper;
 import com.shadowshiftstudio.compressionservice.model.Image;
 import com.shadowshiftstudio.compressionservice.repository.ImageRepository;
+import com.shadowshiftstudio.compressionservice.service.ImageStorageService;
 import io.minio.*;
 import io.minio.messages.Item;
 import org.slf4j.Logger;
@@ -18,7 +20,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
