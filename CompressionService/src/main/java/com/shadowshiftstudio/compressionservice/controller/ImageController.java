@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -199,6 +200,67 @@ public class ImageController {
             if (result) {
                 return ResponseEntity.noContent().build();
             } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Получение размера оригинального изображения
+     */
+    @Operation(
+        summary = "Получить размер оригинала",
+        description = "Возвращает размер оригинального изображения (из бэкапа) для сравнения со сжатой версией"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Размер оригинального изображения успешно возвращен",
+            content = @Content(mediaType = "application/json")
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Изображение или оригинальная версия не найдены",
+            content = @Content
+        ),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Внутренняя ошибка сервера",
+            content = @Content
+        )
+    })
+    @GetMapping("/{id}/original-size")
+    public ResponseEntity<Map<String, Long>> getOriginalImageSize(
+            @Parameter(description = "Идентификатор изображения", required = true)
+            @PathVariable String id) {
+        try {
+            Image image = imageStorageService.getImageMetadata(id);
+            if (image == null) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            // Если это оригинальное изображение (без сжатия), возвращаем его размер
+            if (image.getCompressionLevel() == 0) {
+                Map<String, Long> response = new HashMap<>();
+                response.put("originalSize", image.getSize());
+                return ResponseEntity.ok(response);
+            }
+            
+            try {
+                // Получаем бэкап оригинального изображения
+                byte[] originalData = imageStorageService.getOriginalImageBackup(id);
+                if (originalData == null) {
+                    return ResponseEntity.notFound().build();
+                }
+                
+                // Возвращаем размер оригинального изображения
+                Map<String, Long> response = new HashMap<>();
+                response.put("originalSize", (long) originalData.length);
+                return ResponseEntity.ok(response);
+            } catch (Exception e) {
                 return ResponseEntity.notFound().build();
             }
         } catch (Exception e) {

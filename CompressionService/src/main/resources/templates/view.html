@@ -51,6 +51,9 @@
                                     <strong>Тип:</strong> <span th:text="${image.contentType}"></span><br>
                                     <strong>Загружен:</strong> <span th:text="${#temporals.format(image.uploadedAt, 'dd.MM.yyyy HH:mm')}"></span><br>
                                     <strong>Просмотры:</strong> <span th:text="${image.accessCount}"></span><br>
+                                    <strong>Сжатие:</strong> <span th:text="${image.compressionLevel} + '%'"></span>
+                                    <span th:if="${image.compressionLevel > 0}" class="badge bg-success ms-2">Сжато</span>
+                                    <span th:if="${image.compressionLevel == 0}" class="badge bg-info ms-2">Оригинал</span><br>
                                     <span th:if="${statistics}" class="badge bg-info">
                                         <i class="bi bi-eye"></i> <span th:text="${statistics.viewCount}"></span>
                                         <i class="bi bi-download ms-2"></i> <span th:text="${statistics.downloadCount}"></span>
@@ -58,10 +61,10 @@
                                 </p>
                             </div>
                             <div>
-                                <a th:href="@{'/api/images/' + ${image.id} + '?download=true'}" class="btn btn-success" download th:attr="download=${image.originalFilename}">Скачать оригинал</a>
+                                <a th:href="@{'/api/images/' + ${image.id} + '?download=true'}" class="btn btn-success" download th:attr="download=${image.originalFilename}">Скачать</a>
                                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteImageModal">Удалить</button>
                                 
-                                <!-- Модальное окно подтверждения удаления оригинала -->
+                                <!-- Модальное окно подтверждения удаления -->
                                 <div class="modal fade" id="deleteImageModal" tabindex="-1" aria-labelledby="deleteImageModalLabel" aria-hidden="true">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
@@ -71,7 +74,7 @@
                                             </div>
                                             <div class="modal-body">
                                                 <p>Вы действительно хотите удалить изображение "<span th:text="${image.originalFilename}"></span>"?</p>
-                                                <p class="text-danger">Это действие невозможно отменить. Все сжатые версии изображения также будут удалены.</p>
+                                                <p class="text-danger">Это действие невозможно отменить.</p>
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
@@ -89,27 +92,55 @@
 
                 <div class="card">
                     <div class="card-header">
-                        <h4>Сжать изображение</h4>
+                        <h4>Управление сжатием изображения</h4>
                     </div>
                     <div class="card-body">
-                        <form method="POST" th:action="@{'/images/' + ${image.id} + '/compress'}">
+                        <div th:if="${image.compressionLevel > 0}" class="alert alert-info mb-3">
+                            <p class="mb-0">Изображение сжато с уровнем <strong th:text="${image.compressionLevel} + '%'"></strong></p>
+                            <p class="mb-0">Вы можете восстановить оригинал или изменить уровень сжатия.</p>
+                        </div>
+                        
+                        <form method="POST" th:action="@{'/images/' + ${image.id} + '/compress'}" class="mb-3">
                             <div class="mb-3">
-                                <label for="compressionLevel" class="form-label">Уровень сжатия (0-10):</label>
-                                <input type="range" class="form-range" min="0" max="10" step="1" id="compressionLevel" name="compressionLevel" value="5">
+                                <label for="compressionLevel" class="form-label">Уровень сжатия (0-100):</label>
+                                <input type="range" class="form-range" min="0" max="100" step="1" id="compressionLevel" 
+                                       name="compressionLevel" th:value="${image.compressionLevel}">
                                 <div class="d-flex justify-content-between">
-                                    <span class="badge bg-success">0 (минимальное)</span>
-                                    <span class="badge bg-primary">5 (среднее)</span>
-                                    <span class="badge bg-danger">10 (максимальное)</span>
+                                    <span class="badge bg-success">0 (без сжатия)</span>
+                                    <span class="badge bg-primary">50 (среднее)</span>
+                                    <span class="badge bg-danger">100 (максимальное)</span>
+                                </div>
+                                <div id="currentCompression" class="text-center mt-2">
+                                    <span class="badge" 
+                                          th:classappend="${image.compressionLevel > 70 ? 'bg-danger' : (image.compressionLevel > 30 ? 'bg-primary' : 'bg-success')}" 
+                                          th:text="${image.compressionLevel} + '%'"></span>
                                 </div>
                             </div>
                             <div class="form-text mb-3">
                                 <p>
-                                    <strong>0</strong> - минимальное сжатие (высокое качество)<br>
-                                    <strong>10</strong> - максимальное сжатие (низкое качество)
+                                    <strong>0</strong> - без сжатия (оригинальное качество)<br>
+                                    <strong>50</strong> - среднее сжатие (баланс качества и размера)<br>
+                                    <strong>100</strong> - максимальное сжатие (низкое качество)
                                 </p>
                             </div>
-                            <button type="submit" class="btn btn-primary">Сжать</button>
+                            <div class="d-flex">
+                                <button type="submit" class="btn btn-primary me-2">Применить сжатие</button>
+                                
+                                <form th:if="${image.compressionLevel > 0}" method="POST" th:action="@{'/images/' + ${image.id} + '/restore'}" class="d-inline">
+                                    <button type="submit" class="btn btn-warning">Восстановить оригинал</button>
+                                </form>
+                            </div>
                         </form>
+                        
+                        <div class="mt-3">
+                            <h5>Информация о сжатии:</h5>
+                            <ul>
+                                <li>Сжатие применяется непосредственно к изображению</li>
+                                <li>При восстановлении используется оригинальный файл</li>
+                                <li>Оригинал сохраняется в системе, но всегда отображается текущая версия</li>
+                                <li>Все операции обратимы - вы можете вернуться к оригиналу в любой момент</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -117,66 +148,69 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-header">
-                        <h4>Сжатые версии</h4>
+                        <h4>Информация о сжатии</h4>
                     </div>
                     <div class="card-body">
-                        <div th:if="${#maps.isEmpty(compressedVersions)}" class="alert alert-info">
-                            Нет сжатых версий этого изображения.
+                        <div th:if="${image.compressionLevel == 0}" class="alert alert-info">
+                            <p>Это оригинальное изображение без сжатия. Используйте панель слева для применения сжатия.</p>
                         </div>
-
-                        <div class="list-group">
-                            <div class="list-group-item list-group-item-action" th:each="entry : ${compressedVersions}">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h5 class="mb-1" th:text="'Сжатие: ' + ${entry.value.compressionLevel} + '/10'"></h5>
-                                    <small th:text="${#temporals.format(entry.value.uploadedAt, 'dd.MM.yyyy HH:mm')}"></small>
-                                </div>
-                                <p class="mb-1">Размер: <span th:text="${#numbers.formatDecimal(entry.value.size / 1024, 0, 2)} + ' KB'"></span>
-                                   (<span th:text="${#numbers.formatDecimal(100 - ((entry.value.size * 100) / image.size), 0, 1)} + '%'"></span> от оригинала)
-                                </p>
-                                <p class="mb-1">
-                                    <small class="text-muted">
-                                        <span th:if="${entry.value.accessCount > 0}">
-                                            <i class="bi bi-eye"></i> <span th:text="${entry.value.accessCount}"></span>
-                                        </span>
-                                        <span th:if="${compressedStatistics != null && compressedStatistics[entry.key] != null}">
-                                            <i class="bi bi-eye"></i> <span th:text="${compressedStatistics[entry.key].viewCount}"></span>
-                                            <i class="bi bi-download ms-1"></i> <span th:text="${compressedStatistics[entry.key].downloadCount}"></span>
-                                        </span>
-                                    </small>
-                                </p>
-                                <div class="d-flex justify-content-between mt-2">
+                        <div th:if="${image.compressionLevel > 0}" class="alert alert-success">
+                            <p>Текущий уровень сжатия: <strong th:text="${image.compressionLevel} + '%'"></strong></p>
+                        </div>
+                        
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Статистика сжатия</h5>
+                            </div>
+                            <div class="card-body">
+                                <div th:if="${image.compressionLevel > 0}" class="d-flex justify-content-between mb-3">
                                     <div>
-                                        <a th:href="@{'/api/images/' + ${entry.key}}" class="btn btn-sm btn-primary">Просмотреть</a>
-                                        <a th:href="@{'/api/images/' + ${entry.key} + '?download=true'}" class="btn btn-sm btn-success" download th:attr="download=${image.originalFilename}">Скачать</a>
+                                        <p class="mb-1"><strong>Уменьшение размера:</strong></p>
+                                        <h4 th:if="${originalSize != null}" th:text="${#numbers.formatDecimal(100 - ((image.size * 100) / originalSize), 0, 1)} + '%'"></h4>
+                                        <h4 th:unless="${originalSize != null}">Неизвестно</h4>
                                     </div>
-                                    <button type="button" class="btn btn-sm btn-danger" 
-                                            data-bs-toggle="modal" 
-                                            th:data-bs-target="'#deleteCompressedModal' + ${entry.key}">
-                                        Удалить
-                                    </button>
-                                    
-                                    <!-- Модальное окно подтверждения удаления сжатой версии -->
-                                    <div class="modal fade" th:id="'deleteCompressedModal' + ${entry.key}" tabindex="-1" 
-                                         th:aria-labelledby="'deleteCompressedModalLabel' + ${entry.key}" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" th:id="'deleteCompressedModalLabel' + ${entry.key}">Подтверждение удаления</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <p>Вы действительно хотите удалить сжатую версию изображения (уровень сжатия: <span th:text="${entry.value.compressionLevel}"></span>)?</p>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                                                    <form th:action="@{'/images/' + ${entry.key} + '/delete'}" method="POST" class="d-inline">
-                                                        <button type="submit" class="btn btn-danger">Удалить</button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <div class="text-end">
+                                        <p class="mb-1"><strong>Сохранено:</strong></p>
+                                        <h4 th:if="${originalSize != null}" th:text="${#numbers.formatDecimal((originalSize - image.size) / 1024, 0, 2)} + ' KB'"></h4>
+                                        <h4 th:unless="${originalSize != null}">Неизвестно</h4>
                                     </div>
                                 </div>
+                                
+                                <table class="table table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <td>Текущий размер:</td>
+                                            <td class="text-end"><strong th:text="${#numbers.formatDecimal(image.size / 1024, 0, 2)} + ' KB'"></strong></td>
+                                        </tr>
+                                        <tr th:if="${originalSize != null}">
+                                            <td>Размер оригинала:</td>
+                                            <td class="text-end"><strong th:text="${#numbers.formatDecimal(originalSize / 1024, 0, 2)} + ' KB'"></strong></td>
+                                        </tr>
+                                        <tr th:if="${image.compressionLevel > 0 && originalSize != null}">
+                                            <td>Эффективность:</td>
+                                            <td class="text-end">
+                                                <span class="badge" 
+                                                      th:classappend="${(100 - ((image.size * 100) / originalSize)) > 50 ? 'bg-success' : 'bg-warning'}" 
+                                                      th:text="${#numbers.formatDecimal((100 - ((image.size * 100) / originalSize)) / image.compressionLevel, 0, 2)} + 'x'">
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Рекомендации</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="mb-0">
+                                    <li>Уровень <strong>10-30%</strong>: Минимальное сжатие, почти незаметное для глаза</li>
+                                    <li>Уровень <strong>40-60%</strong>: Хороший баланс размера и качества</li>
+                                    <li>Уровень <strong>70-90%</strong>: Значительное сжатие, заметное снижение качества</li>
+                                    <li>Уровень <strong>100%</strong>: Максимальное сжатие, серьезные потери качества</li>
+                                </ul>
                             </div>
                         </div>
                     </div>

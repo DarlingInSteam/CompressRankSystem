@@ -30,7 +30,7 @@ public class CompressionController {
      * Сжимает изображение с указанным уровнем сжатия
      *
      * @param imageId идентификатор изображения
-     * @param compressionLevel уровень сжатия (0-10)
+     * @param compressionLevel уровень сжатия (0-100)
      * @return метаданные сжатого изображения
      */
     @Operation(
@@ -59,16 +59,59 @@ public class CompressionController {
             @Parameter(description = "Идентификатор изображения", required = true)
             @PathVariable String imageId, 
             
-            @Parameter(description = "Уровень сжатия от 0 (минимальное) до 10 (максимальное)", example = "5")
-            @RequestParam(defaultValue = "5") int compressionLevel) {
+            @Parameter(description = "Уровень сжатия от 0 (без сжатия) до 100 (максимальное сжатие)", example = "50")
+            @RequestParam(defaultValue = "50") int compressionLevel) {
         
         try {
-            if (compressionLevel < 0 || compressionLevel > 10) {
+            if (compressionLevel < 0 || compressionLevel > 100) {
                 return ResponseEntity.badRequest().build();
             }
             
             Image compressedImage = compressionService.compressImage(imageId, compressionLevel);
             return ResponseEntity.ok(compressedImage);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    /**
+     * Восстанавливает изображение до исходного вида
+     *
+     * @param imageId идентификатор изображения
+     * @return метаданные восстановленного изображения
+     */
+    @Operation(
+        summary = "Восстановить изображение",
+        description = "Восстанавливает сжатое изображение до исходного качества"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Изображение успешно восстановлено",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Image.class))
+        ),
+        @ApiResponse(
+            responseCode = "400", 
+            description = "Изображение не найдено или не является сжатым",
+            content = @Content
+        ),
+        @ApiResponse(
+            responseCode = "500", 
+            description = "Внутренняя ошибка сервера",
+            content = @Content
+        )
+    })
+    @PostMapping("/{imageId}/restore")
+    public ResponseEntity<Image> restoreImage(
+            @Parameter(description = "Идентификатор изображения", required = true)
+            @PathVariable String imageId) {
+        
+        try {
+            Image restoredImage = compressionService.restoreImage(imageId);
+            return ResponseEntity.ok(restoredImage);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {

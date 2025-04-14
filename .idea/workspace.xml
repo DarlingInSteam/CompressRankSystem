@@ -6,11 +6,16 @@
   <component name="ChangeListManager">
     <list default="true" id="0ec3192d-774f-49c4-adbc-f36601cea625" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/controller/CompressionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/controller/CompressionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/controller/ImageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/controller/ImageController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/controller/WebController.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/controller/WebController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/ImageStorageService.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/ImageStorageService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/compression/CompressionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/compression/CompressionService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/image/MinioImageStorageService.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/image/MinioImageStorageService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/util/webp/CWebp.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/util/webp/CWebp.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/util/webp/WebpConverter.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/util/webp/WebpConverter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/util/webp/WebpOptions.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/util/webp/WebpOptions.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/resources/templates/view.html" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/resources/templates/view.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin-panel/src/pages/detail/ImageDetailPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin-panel/src/pages/detail/ImageDetailPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin-panel/src/services/image.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/admin-panel/src/services/image.service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/compression-db.mv.db" beforeDir="false" afterPath="$PROJECT_DIR$/data/compression-db.mv.db" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,10 +58,10 @@
     &quot;accountId&quot;: &quot;96d1f9b5-0cc7-4af7-864e-168d71ad7234&quot;
   }
 }</component>
-  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
-  <component name="KubernetesApiProvider"><![CDATA[{
-  "isMigrated": true
-}]]></component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
 }</component>
@@ -76,7 +81,6 @@
     "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "Spring Boot.CompressionServiceApplication.executor": "Run",
     "git-widget-placeholder": "compression-service",
     "ignore.virus.scanning.warn.message": "true",
@@ -113,6 +117,7 @@
       <method v="2" />
     </configuration>
     <configuration name="CompressionServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="-parameters" />
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
       <module name="CompressionService.main" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.shadowshiftstudio.compressionservice.CompressionServiceApplication" />
@@ -127,6 +132,11 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="HTTP Request.generated-requests | #1" />
+      <item itemvalue="Spring Boot.CompressionServiceApplication" />
+      <item itemvalue="Spring Boot.RankServiceApplication" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="HTTP Request.generated-requests | #1" />
@@ -151,7 +161,8 @@
       <updated>1744263704665</updated>
       <workItem from="1744263706417" duration="6745000" />
       <workItem from="1744571693039" duration="165000" />
-      <workItem from="1744571994693" duration="9054000" />
+      <workItem from="1744571994693" duration="13487000" />
+      <workItem from="1744634438644" duration="10612000" />
     </task>
     <servers />
   </component>
@@ -168,5 +179,8 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/CompressRankSystem$CompressionServiceApplication.ic" NAME="CompressionServiceApplication Coverage Results" MODIFIED="1744635124821" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
   </component>
 </project>

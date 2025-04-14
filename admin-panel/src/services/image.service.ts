@@ -23,6 +23,24 @@ const ImageService = {
     return response.data;
   },
 
+  // Получение размера оригинального изображения
+  getOriginalImageSize: async (id: string): Promise<number> => {
+    const response = await apiClient.get<{originalSize: number}>(`/images/${id}/original-size`);
+    return response.data.originalSize;
+  },
+  
+  // Получение статистики изображения (просмотры, скачивания)
+  getImageStatistics: async (id: string): Promise<ImageStatistics> => {
+    const response = await apiClient.get<ImageStatistics>(`/images/${id}/statistics`);
+    return response.data;
+  },
+  
+  // Получение всей статистики изображений
+  getAllImageStatistics: async (): Promise<Record<string, ImageStatistics>> => {
+    const response = await apiClient.get<Record<string, ImageStatistics>>('/images/statistics');
+    return response.data;
+  },
+
   // Загрузка нового изображения
   uploadImage: async (file: File): Promise<ImageDTO> => {
     const formData = new FormData();
@@ -47,6 +65,12 @@ const ImageService = {
     const response = await apiClient.post<ImageDTO>(`/compression/${id}`, null, {
       params: { compressionLevel }
     });
+    return response.data;
+  },
+
+  // Восстановление изображения
+  restoreImage: async (id: string): Promise<ImageDTO> => {
+    const response = await apiClient.post<ImageDTO>(`/compression/${id}/restore`);
     return response.data;
   },
 
