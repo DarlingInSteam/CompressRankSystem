@@ -328,13 +328,13 @@ public class WebController {
             @Parameter(description = "Идентификатор изображения", required = true)
             @PathVariable String id, 
             
-            @Parameter(description = "Уровень сжатия от 0 до 10", example = "5")
-            @RequestParam(defaultValue = "5") int compressionLevel,
+            @Parameter(description = "Уровень сжатия от 0 до 100", example = "50")
+            @RequestParam(defaultValue = "50") int compressionLevel,
             
             RedirectAttributes redirectAttributes) {
         try {
-            if (compressionLevel < 0 || compressionLevel > 10) {
-                redirectAttributes.addFlashAttribute("message", "Уровень сжатия должен быть от 0 до 10");
+            if (compressionLevel < 0 || compressionLevel > 100) {
+                redirectAttributes.addFlashAttribute("message", "Уровень сжатия должен быть от 0 до 100");
                 return "redirect:/images/" + id + "/view";
             }
             
@@ -345,6 +345,32 @@ public class WebController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("message", 
                 "Произошла ошибка при сжатии изображения: " + e.getMessage());
+        }
+        
+        return "redirect:/images/" + id + "/view";
+    }
+    
+    /**
+     * Восстановление изображения через форму
+     */
+    @Operation(
+        summary = "Восстановление изображения через форму",
+        description = "Обрабатывает запрос на восстановление изображения до исходного качества"
+    )
+    @PostMapping("/images/{id}/restore")
+    public String restoreImage(
+            @Parameter(description = "Идентификатор изображения", required = true)
+            @PathVariable String id,
+            
+            RedirectAttributes redirectAttributes) {
+        try {
+            Image restoredImage = compressionService.restoreImage(id);
+            redirectAttributes.addFlashAttribute("message", 
+                "Изображение успешно восстановлено до исходного качества");
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("message", 
+                "Произошла ошибка при восстановлении изображения: " + e.getMessage());
         }
         
         return "redirect:/images/" + id + "/view";

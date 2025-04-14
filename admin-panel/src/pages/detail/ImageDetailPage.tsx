@@ -15,9 +15,6 @@ import {
   Typography,
   Slider,
   Chip,
-  List,
-  ListItem,
-  ListItemText,
   Dialog,
   DialogActions,
   DialogContent,
@@ -25,7 +22,7 @@ import {
   DialogTitle,
   Snackbar,
   Alert,
-  IconButton
+  LinearProgress
 } from '@mui/material';
 import {
   CloudDownload as DownloadIcon,
@@ -33,6 +30,7 @@ import {
   Delete as DeleteIcon,
   ArrowBack as ArrowBackIcon,
   Compress as CompressIcon,
+  Refresh as RestoreIcon,
 } from '@mui/icons-material';
 
 import ImageService from '../../services/image.service';
@@ -46,29 +44,20 @@ const formatFileSize = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
-interface CompressedVersion {
-  id: string;
-  originalFilename: string;
-  size: number;
-  compressionLevel: number;
-  uploadedAt: string;
-  accessCount: number;
-}
-
 const ImageDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
   const [image, setImage] = useState<ImageDTO | null>(null);
-  const [compressedVersions, setCompressedVersions] = useState<Record<string, ImageDTO>>({});
+  const [originalSize, setOriginalSize] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [compressionLevel, setCompressionLevel] = useState<number>(5);
+  const [compressionLevel, setCompressionLevel] = useState<number>(0);
   const [compressing, setCompressing] = useState<boolean>(false);
+  const [restoring, setRestoring] = useState<boolean>(false);
 
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
-  const [imageToDelete, setImageToDelete] = useState<string | null>(null);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -82,6 +71,13 @@ const ImageDetailPage: React.FC = () => {
     }
   }, [id]);
 
+  // Update the slider value when the image compression level changes
+  useEffect(() => {
+    if (image) {
+      setCompressionLevel(image.compressionLevel);
+    }
+  }, [image?.compressionLevel]);
+
   const loadImageData = async (imageId: string) => {
     setLoading(true);
     setError(null);
@@ -90,16 +86,17 @@ const ImageDetailPage: React.FC = () => {
       const imageData = await ImageService.getImageMetadata(imageId);
       setImage(imageData);
 
-      const allImages = await ImageService.getAllImages();
-
-      const compressedImages = Object.values(allImages)
-        .filter(img => img.originalImageId === imageId)
-        .reduce((acc, img) => ({
-          ...acc,
-          [img.id]: img
-        }), {});
-
-      setCompressedVersions(compressedImages);
+      // If the image has been compressed before, try to get original size
+      if (imageData.compressionLevel > 0) {
+        try {
+          // We'll add a new endpoint to get original size
+          const originalSizeData = await ImageService.getOriginalImageSize(imageId);
+          setOriginalSize(originalSizeData);
+        } catch (err) {
+          console.warn('Could not fetch original size:', err);
+          // Not critical, we'll just not show the comparison
+        }
+      }
     } catch (error) {
       console.error('Ошибка при загрузке данных изображения:', error);
       setError('Не удалось загрузить данные изображения. Пожалуйста, попробуйте позже.');
@@ -115,12 +112,15 @@ const ImageDetailPage: React.FC = () => {
     showSnackbar('Начато сжатие изображения...', 'success');
 
     try {
+      // Save the current original size before compression if it's the first time
+      if (image && image.compressionLevel === 0) {
+        setOriginalSize(image.size);
+      }
+      
       const compressedImage = await ImageService.compressImage(id, compressionLevel);
-
-      setCompressedVersions(prev => ({
-        ...prev,
-        [compressedImage.id]: compressedImage
-      }));
+      
+      // Update the image data with the compressed version
+      setImage(compressedImage);
 
       showSnackbar('Изображение успешно сжато!', 'success');
     } catch (error) {
@@ -131,39 +131,52 @@ const ImageDetailPage: React.FC = () => {
     }
   };
 
-  const confirmDelete = (imageId: string) => {
-    setImageToDelete(imageId);
+  const handleRestore = async () => {
+    if (!id) return;
+    
+    setRestoring(true);
+    showSnackbar('Идёт восстановление изображения...', 'success');
+
+    try {
+      const restoredImage = await ImageService.restoreImage(id);
+      
+      // Update the image with restored data
+      setImage(restoredImage);
+
+      showSnackbar('Изображение успешно восстановлено до оригинала!', 'success');
+    } catch (error) {
+      console.error('Ошибка при восстановлении изображения:', error);
+      showSnackbar('Ошибка при восстановлении изображения', 'error');
+    } finally {
+      setRestoring(false);
+    }
+  };
+
+  const confirmDelete = () => {
     setOpenDeleteDialog(true);
   };
 
   const handleDeleteImage = async () => {
-    if (!imageToDelete) return;
+    if (!id) return;
 
     try {
-      await ImageService.deleteImage(imageToDelete);
-
-      if (imageToDelete === id) {
-        showSnackbar('Изображение успешно удалено', 'success');
-        setTimeout(() => navigate('/'), 1500);
-      } else {
-        const updatedVersions = { ...compressedVersions };
-        delete updatedVersions[imageToDelete];
-        setCompressedVersions(updatedVersions);
-        showSnackbar('Сжатая версия успешно удалена', 'success');
-      }
-
+      await ImageService.deleteImage(id);
+      showSnackbar('Изображение успешно удалено', 'success');
+      setTimeout(() => navigate('/'), 1500);
+      
       setOpenDeleteDialog(false);
-      setImageToDelete(null);
     } catch (error) {
       console.error('Ошибка при удалении изображения:', error);
       showSnackbar('Ошибка при удалении изображения', 'error');
     }
   };
 
-  const handleDownload = async (imageId: string) => {
+  const handleDownload = async () => {
+    if (!id) return;
+    
     try {
-      const blob = await ImageService.getImage(imageId, true);
-      const filename = imageId === id ? image?.originalFilename : compressedVersions[imageId]?.originalFilename;
+      const blob = await ImageService.getImage(id, true);
+      const filename = image?.originalFilename;
 
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -187,6 +200,13 @@ const ImageDetailPage: React.FC = () => {
       message,
       severity
     });
+  };
+
+  const getCompressionColor = (level: number) => {
+    if (level === 0) return 'success';
+    if (level < 30) return 'info';
+    if (level < 70) return 'primary';
+    return 'error';
   };
 
   if (loading) {
@@ -267,6 +287,20 @@ const ImageDetailPage: React.FC = () => {
                   <Typography variant="body1">
                     <strong>Просмотры:</strong> {image.accessCount}
                   </Typography>
+                  <Typography variant="body1">
+                    <strong>Сжатие:</strong> {image.compressionLevel}%
+                    {image.compressionLevel > 0 && (
+                      <Chip 
+                        label="Сжато" 
+                        color={getCompressionColor(image.compressionLevel)} 
+                        size="small" 
+                        sx={{ ml: 1 }} 
+                      />
+                    )}
+                    {image.compressionLevel === 0 && (
+                      <Chip label="Оригинал" color="info" size="small" sx={{ ml: 1 }} />
+                    )}
+                  </Typography>
                 </Box>
                 <Box display="flex" gap={1} alignItems="center">
                   <Chip
@@ -281,15 +315,15 @@ const ImageDetailPage: React.FC = () => {
               <Button 
                 variant="contained" 
                 startIcon={<DownloadIcon />}
-                onClick={() => handleDownload(image.id)}
+                onClick={handleDownload}
               >
-                Скачать оригинал
+                Скачать
               </Button>
               <Button 
                 variant="outlined" 
                 color="error" 
                 startIcon={<DeleteIcon />}
-                onClick={() => confirmDelete(image.id)}
+                onClick={confirmDelete}
               >
                 Удалить
               </Button>
@@ -298,32 +332,52 @@ const ImageDetailPage: React.FC = () => {
 
           <Card sx={{ mb: 3 }}>
             <CardHeader 
-              title="Сжать изображение"
+              title="Управление сжатием изображения"
               titleTypographyProps={{ variant: 'h6' }}
             />
             <CardContent>
+              {image.compressionLevel > 0 && (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  Изображение сжато с уровнем <strong>{image.compressionLevel}%</strong>.
+                  Вы можете изменить уровень сжатия или восстановить оригинал.
+                </Alert>
+              )}
+              
               <Box px={2}>
                 <Typography gutterBottom>
-                  Уровень сжатия: {compressionLevel}
+                  Уровень сжатия: {compressionLevel}%
                 </Typography>
                 <Slider
                   value={compressionLevel}
                   onChange={(_, value) => setCompressionLevel(value as number)}
                   step={1}
-                  marks
+                  marks={[
+                    { value: 0, label: '0' },
+                    { value: 25, label: '25' },
+                    { value: 50, label: '50' },
+                    { value: 75, label: '75' },
+                    { value: 100, label: '100' }
+                  ]}
                   min={0}
-                  max={10}
+                  max={100}
                   valueLabelDisplay="auto"
+                  color={getCompressionColor(compressionLevel)}
                 />
                 <Box mt={1} display="flex" justifyContent="space-between">
-                  <Typography variant="body2" color="text.secondary">Минимальное сжатие</Typography>
+                  <Typography variant="body2" color="text.secondary">Без сжатия</Typography>
                   <Typography variant="body2" color="text.secondary">Максимальное сжатие</Typography>
                 </Box>
                 <Typography variant="body2" color="text.secondary" mt={1}>
-                  <strong>0</strong> - минимальное сжатие (высокое качество)<br />
-                  <strong>10</strong> - максимальное сжатие (низкое качество)
+                  <strong>0</strong> - без сжатия (оригинальное качество)<br />
+                  <strong>50</strong> - среднее сжатие (баланс качества и размера)<br />
+                  <strong>100</strong> - максимальное сжатие (низкое качество)
                 </Typography>
               </Box>
+
+              <Typography variant="body2" sx={{ mt: 2 }}>
+                <strong>Важно:</strong> Сжатие применяется напрямую к изображению. 
+                Оригинал сохраняется в системе и может быть восстановлен в любой момент.
+              </Typography>
             </CardContent>
             <CardActions>
               <Button 
@@ -331,80 +385,132 @@ const ImageDetailPage: React.FC = () => {
                 color="primary"
                 startIcon={<CompressIcon />}
                 onClick={handleCompress}
-                disabled={compressing}
+                disabled={compressing || (compressionLevel === image.compressionLevel)}
               >
-                {compressing ? 'Сжатие...' : 'Сжать'}
+                {compressing ? 'Сжатие...' : 'Применить сжатие'}
               </Button>
+              
+              {image.compressionLevel > 0 && (
+                <Button 
+                  variant="outlined" 
+                  color="warning"
+                  startIcon={<RestoreIcon />}
+                  onClick={handleRestore}
+                  disabled={restoring}
+                >
+                  {restoring ? 'Восстановление...' : 'Восстановить оригинал'}
+                </Button>
+              )}
             </CardActions>
+            {(compressing || restoring) && <LinearProgress />}
           </Card>
         </Box>
 
         <Box sx={{ width: { xs: '100%', md: '33.333%' } }}>
           <Card>
             <CardHeader 
-              title="Сжатые версии" 
+              title="Информация о сжатии" 
               titleTypographyProps={{ variant: 'h6' }}
             />
             <CardContent>
-              {Object.keys(compressedVersions).length === 0 ? (
+              {image.compressionLevel === 0 ? (
                 <Alert severity="info">
-                  Нет сжатых версий этого изображения
+                  Это оригинальное изображение без сжатия. Используйте панель слева для применения сжатия.
                 </Alert>
               ) : (
-                <List disablePadding>
-                  {Object.values(compressedVersions)
-                    .sort((a, b) => a.compressionLevel - b.compressionLevel)
-                    .map((version) => (
-                      <React.Fragment key={version.id}>
-                        <ListItem alignItems="flex-start" disableGutters>
-                          <Box width="100%">
-                            <Box display="flex" justifyContent="space-between" alignItems="center">
-                              <Typography variant="subtitle1">
-                                Сжатие: {version.compressionLevel}/10
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                {new Date(version.uploadedAt).toLocaleDateString()}
-                              </Typography>
-                            </Box>
-                            <Typography variant="body2">
-                              Размер: {formatFileSize(version.size)}
-                              {' '}({(100 - (version.size * 100 / image.size)).toFixed(1)}% от оригинала)
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              Просмотров: {version.accessCount}
-                            </Typography>
-                            <Box display="flex" gap={1} mt={1}>
-                              <Button
-                                size="small"
-                                variant="outlined"
-                                component="a"
-                                href={ImageService.getImageUrl(version.id)}
-                                target="_blank"
-                              >
-                                Просмотреть
-                              </Button>
-                              <Button
-                                size="small"
-                                variant="contained"
-                                onClick={() => handleDownload(version.id)}
-                              >
-                                Скачать
-                              </Button>
-                              <IconButton
-                                size="small"
-                                color="error"
-                                onClick={() => confirmDelete(version.id)}
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
-                            </Box>
+                <>
+                  <Alert severity="success" sx={{ mb: 3 }}>
+                    <Typography variant="body1">
+                      Текущий уровень сжатия: <strong>{image.compressionLevel}%</strong>
+                    </Typography>
+                  </Alert>
+                  
+                  <Typography variant="h6" gutterBottom>Статистика сжатия</Typography>
+                  
+                  {originalSize && (
+                    <>
+                      <Box display="flex" justifyContent="space-between" mb={2}>
+                        <Box>
+                          <Typography variant="body2" color="text.secondary">Уменьшение размера:</Typography>
+                          <Typography variant="h6">
+                            {(100 - ((image.size * 100) / originalSize)).toFixed(1)}%
+                          </Typography>
+                        </Box>
+                        <Box textAlign="right">
+                          <Typography variant="body2" color="text.secondary">Сохранено:</Typography>
+                          <Typography variant="h6">
+                            {formatFileSize(originalSize - image.size)}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      
+                      <Divider sx={{ my: 2 }} />
+                      
+                      <Box mb={2}>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Сравнение размеров:
+                        </Typography>
+                        <Box display="flex" alignItems="center" mb={1}>
+                          <Typography variant="body2" minWidth={100}>Оригинал:</Typography>
+                          <Box flex={1} ml={2}>
+                            <LinearProgress 
+                              variant="determinate" 
+                              value={100} 
+                              color="primary"
+                              sx={{ height: 10, borderRadius: 1 }}
+                            />
                           </Box>
-                        </ListItem>
-                        <Divider sx={{ my: 1 }} />
-                      </React.Fragment>
-                    ))}
-                </List>
+                          <Typography variant="body2" ml={2} minWidth={70} textAlign="right">
+                            {formatFileSize(originalSize)}
+                          </Typography>
+                        </Box>
+                        <Box display="flex" alignItems="center">
+                          <Typography variant="body2" minWidth={100}>Сжато:</Typography>
+                          <Box flex={1} ml={2}>
+                            <LinearProgress 
+                              variant="determinate" 
+                              value={(image.size * 100) / originalSize} 
+                              color="success"
+                              sx={{ height: 10, borderRadius: 1 }}
+                            />
+                          </Box>
+                          <Typography variant="body2" ml={2} minWidth={70} textAlign="right">
+                            {formatFileSize(image.size)}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      
+                      <Divider sx={{ my: 2 }} />
+                      
+                      <Box>
+                        <Typography variant="body2" fontWeight="bold">Эффективность:</Typography>
+                        <Typography>
+                          {((100 - ((image.size * 100) / originalSize)) / image.compressionLevel).toFixed(2)}x
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          (уменьшение размера в % / уровень сжатия)
+                        </Typography>
+                      </Box>
+                    </>
+                  )}
+                </>
               )}
+              
+              <Divider sx={{ my: 2 }} />
+              
+              <Typography variant="h6" gutterBottom>Рекомендации</Typography>
+              <Typography variant="body2" paragraph>
+                <strong>10-30%</strong>: Минимальное сжатие, почти незаметное для глаза
+              </Typography>
+              <Typography variant="body2" paragraph>
+                <strong>40-60%</strong>: Хороший баланс размера и качества
+              </Typography>
+              <Typography variant="body2" paragraph>
+                <strong>70-90%</strong>: Значительное сжатие, заметное снижение качества
+              </Typography>
+              <Typography variant="body2">
+                <strong>100%</strong>: Максимальное сжатие, серьезные потери качества
+              </Typography>
             </CardContent>
           </Card>
         </Box>
@@ -419,19 +525,9 @@ const ImageDetailPage: React.FC = () => {
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {imageToDelete === id ? (
-              <>
-                Вы действительно хотите удалить изображение "{image.originalFilename}"? 
-                <br /><br />
-                <strong>Внимание!</strong> Это действие невозможно отменить. Все сжатые версии изображения также будут удалены.
-              </>
-            ) : (
-              <>
-                Вы действительно хотите удалить сжатую версию изображения?
-                <br />
-                Это действие невозможно отменить.
-              </>
-            )}
+            Вы действительно хотите удалить изображение "{image.originalFilename}"? 
+            <br /><br />
+            <strong>Внимание!</strong> Это действие невозможно отменить.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

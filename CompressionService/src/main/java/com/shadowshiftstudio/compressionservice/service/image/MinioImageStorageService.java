@@ -34,6 +34,7 @@ public class MinioImageStorageService implements ImageStorageService {
 
     private static final Logger logger = LoggerFactory.getLogger(MinioImageStorageService.class);
     private static final String WEBP_CONTENT_TYPE = "image/webp";
+    private static final String BACKUP_PREFIX = "backup_";
 
     private final MinioClient minioClient;
     private final ImageRepository imageRepository;
@@ -42,6 +43,9 @@ public class MinioImageStorageService implements ImageStorageService {
 
     @Value("${minio.bucket}")
     private String bucketName;
+
+    @Value("${minio.backup.bucket:image-backups}")
+    private String backupBucketName;
 
     @Autowired
     public MinioImageStorageService(MinioClient minioClient, ImageRepository imageRepository,
@@ -55,6 +59,7 @@ public class MinioImageStorageService implements ImageStorageService {
     @PostConstruct
     public void init() {
         try {
+            // Инициализация основного бакета
             boolean bucketExists = minioClient.bucketExists(
                     BucketExistsArgs.builder().bucket(bucketName).build()
             );
@@ -64,7 +69,18 @@ public class MinioImageStorageService implements ImageStorageService {
                         MakeBucketArgs.builder().bucket(bucketName).build()
                 );
                 logger.info("Created new bucket: {}", bucketName);
-                return;
+            }
+
+            // Инициализация бакета для бэкапов
+            boolean backupBucketExists = minioClient.bucketExists(
+                    BucketExistsArgs.builder().bucket(backupBucketName).build()
+            );
+
+            if (!backupBucketExists) {
+                minioClient.makeBucket(
+                        MakeBucketArgs.builder().bucket(backupBucketName).build()
+                );
+                logger.info("Created new backup bucket: {}", backupBucketName);
             }
 
             long count = imageRepository.count();
@@ -174,6 +190,17 @@ public class MinioImageStorageService implements ImageStorageService {
                                 .stream(inputStream, webpData.length, -1)
                                 .build()
                 );
+                
+                // Сохраняем резервную копию исходного изображения для возможности восстановления
+                String backupObjectName = BACKUP_PREFIX + image.getObjectName();
+                minioClient.putObject(
+                        PutObjectArgs.builder()
+                                .bucket(backupBucketName)
+                                .object(backupObjectName)
+                                .contentType(WEBP_CONTENT_TYPE)
+                                .stream(new ByteArrayInputStream(webpData), webpData.length, -1)
+                                .build()
+                );
             }
 
             ImageEntity entity = imageMapper.toEntity(image);
@@ -192,55 +219,126 @@ public class MinioImageStorageService implements ImageStorageService {
     @Override
     @Transactional
     public Image storeCompressedImage(String imageId, byte[] compressedData, int compressionLevel) throws IOException {
-        Image originalImage = getImageMetadata(imageId);
-        if (originalImage == null) {
-            logger.warn("Original image not found: id={}", imageId);
-            throw new IOException("Original image not found with id: " + imageId);
+        // Эта функция оставлена для обратной совместимости, но теперь использует updateImageCompression
+        return updateImageCompression(imageId, compressedData, compressionLevel);
+    }
+
+    @Override
+    @Transactional
+    public Image updateImageCompression(String imageId, byte[] imageData, int compressionLevel) throws IOException {
+        Image image = getImageMetadata(imageId);
+        if (image == null) {
+            logger.warn("Image not found: id={}", imageId);
+            throw new IOException("Image not found with id: " + imageId);
         }
 
         try {
-            WebpOptions options = new WebpOptions()
-                    .withQuality(mapCompressionLevelToQuality(compressionLevel))
-                    .withExact(true);
-
-            byte[] webpData = webpService.convertToWebp(compressedData, options);
-            if (webpData == null) {
-                throw new IOException("Failed to convert compressed image to WebP");
+            // Если это первое сжатие изображения, сохраняем оригинал
+            if (image.getCompressionLevel() == 0 && compressionLevel > 0) {
+                byte[] originalData = getImage(imageId);
+                
+                // Сохраняем резервную копию оригинала, если её еще нет
+                String backupObjectName = BACKUP_PREFIX + image.getObjectName();
+                boolean backupExists = false;
+                
+                try {
+                    minioClient.statObject(
+                            StatObjectArgs.builder()
+                                    .bucket(backupBucketName)
+                                    .object(backupObjectName)
+                                    .build()
+                    );
+                    backupExists = true;
+                } catch (Exception e) {
+                    // Объект не существует, продолжаем
+                }
+                
+                if (!backupExists) {
+                    try (ByteArrayInputStream inputStream = new ByteArrayInputStream(originalData)) {
+                        minioClient.putObject(
+                                PutObjectArgs.builder()
+                                        .bucket(backupBucketName)
+                                        .object(backupObjectName)
+                                        .contentType(WEBP_CONTENT_TYPE)
+                                        .stream(inputStream, originalData.length, -1)
+                                        .build()
+                        );
+                        logger.info("Created backup of original image: id={}", imageId);
+                    }
+                }
             }
 
-            Image compressedImage = new Image(
-                    originalImage.getOriginalFilename(),
-                    WEBP_CONTENT_TYPE,
-                    webpData.length
-            );
-            compressedImage.setCompressionLevel(compressionLevel);
-            compressedImage.setOriginalImageId(imageId);
-
-            String objectName = compressedImage.getId() + "_compressed_" + compressionLevel + "_" + imageId + "_" +
-                    originalImage.getOriginalFilename().replaceAll("\\s+", "_");
-            compressedImage.setObjectName(objectName);
-
-            try (ByteArrayInputStream inputStream = new ByteArrayInputStream(webpData)) {
+            // Сохраняем новые данные в то же хранилище
+            try (ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData)) {
                 minioClient.putObject(
                         PutObjectArgs.builder()
                                 .bucket(bucketName)
-                                .object(compressedImage.getObjectName())
+                                .object(image.getObjectName())
                                 .contentType(WEBP_CONTENT_TYPE)
-                                .stream(inputStream, webpData.length, -1)
+                                .stream(inputStream, imageData.length, -1)
                                 .build()
                 );
             }
 
-            ImageEntity entity = imageMapper.toEntity(compressedImage);
+            // Обновляем метаданные
+            ImageEntity entity = imageRepository.findById(imageId).orElse(null);
+            if (entity == null) {
+                throw new IOException("Image entity not found in database: " + imageId);
+            }
+            
+            entity.setSize(imageData.length);
+            entity.setCompressionLevel(compressionLevel);
+            entity.setLastAccessed(LocalDateTime.now());
+            
             imageRepository.save(entity);
 
-            logger.info("Successfully stored compressed WebP image: id={}, originalId={}, compressionLevel={}, size={}",
-                    compressedImage.getId(), imageId, compressionLevel, webpData.length);
-            return compressedImage;
+            logger.info("Successfully updated image compression: id={}, compressionLevel={}, size={}",
+                    imageId, compressionLevel, imageData.length);
+            
+            return imageMapper.toModel(entity);
 
         } catch (Exception e) {
-            logger.error("Failed to store compressed WebP image for original id={}", imageId, e);
-            throw new IOException("Failed to store compressed WebP image: " + e.getMessage(), e);
+            logger.error("Failed to update image compression: id={}", imageId, e);
+            throw new IOException("Failed to update image compression: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public byte[] getOriginalImageBackup(String id) throws IOException {
+        Image image = getImageMetadata(id);
+        if (image == null) {
+            logger.warn("Image not found: id={}", id);
+            return null;
+        }
+
+        // Если уровень сжатия 0, значит это уже оригинал
+        if (image.getCompressionLevel() == 0) {
+            return getImage(id);
+        }
+
+        String backupObjectName = BACKUP_PREFIX + image.getObjectName();
+
+        try {
+            GetObjectResponse response = minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(backupBucketName)
+                            .object(backupObjectName)
+                            .build()
+            );
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = response.read(buffer, 0, buffer.length)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            logger.info("Retrieved original image backup: id={}", id);
+            return outputStream.toByteArray();
+
+        } catch (Exception e) {
+            logger.error("Failed to get original image backup: id={}", id, e);
+            return null;
         }
     }
 
@@ -310,6 +408,7 @@ public class MinioImageStorageService implements ImageStorageService {
         Image image = imageMapper.toModel(entity);
 
         try {
+            // Удаляем изображение из основного хранилища
             minioClient.removeObject(
                     RemoveObjectArgs.builder()
                             .bucket(bucketName)
@@ -317,22 +416,24 @@ public class MinioImageStorageService implements ImageStorageService {
                             .build()
             );
 
+            // Удаляем бэкап, если он существует
+            try {
+                String backupObjectName = BACKUP_PREFIX + image.getObjectName();
+                minioClient.removeObject(
+                        RemoveObjectArgs.builder()
+                                .bucket(backupBucketName)
+                                .object(backupObjectName)
+                                .build()
+                );
+                logger.info("Deleted backup for image: id={}", id);
+            } catch (Exception e) {
+                // Игнорируем ошибки при удалении бэкапа
+                logger.warn("Failed to delete backup for image id={}, it might not exist", id);
+            }
+
             imageRepository.deleteById(id);
 
             logger.info("Successfully deleted image: id={}, name={}", id, image.getOriginalFilename());
-
-            if (image.getOriginalImageId() == null) {
-                List<ImageEntity> compressedVersions = imageRepository.findByOriginalImageId(id);
-
-                for (ImageEntity compressedVersion : compressedVersions) {
-                    try {
-                        deleteImage(compressedVersion.getId());
-                    } catch (Exception e) {
-                        logger.error("Failed to delete compressed version: id={}", compressedVersion.getId(), e);
-                    }
-                }
-            }
-
             return true;
         } catch (Exception e) {
             logger.error("Failed to delete image: id={}", id, e);
@@ -352,6 +453,9 @@ public class MinioImageStorageService implements ImageStorageService {
     }
 
     private int mapCompressionLevelToQuality(int compressionLevel) {
-        return Math.max(0, Math.min(100, 100 - compressionLevel * 9));
+        // Инвертируем значение сжатия для WebP качества
+        // Уровень сжатия 0 - качество WebP 100
+        // Уровень сжатия 100 - качество WebP 0
+        return Math.max(0, Math.min(100, 100 - compressionLevel));
     }
 }

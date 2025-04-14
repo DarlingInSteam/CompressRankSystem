@@ -29,6 +29,17 @@ public interface ImageStorageService {
     Image storeCompressedImage(String imageId, byte[] compressedData, int compressionLevel) throws IOException;
 
     /**
+     * Обновляет существующее изображение с новым уровнем сжатия
+     * 
+     * @param imageId идентификатор изображения для обновления
+     * @param imageData двоичные данные обновлённого изображения
+     * @param compressionLevel новый уровень сжатия
+     * @return объект с обновлёнными метаданными изображения
+     * @throws IOException в случае ошибки работы с файлами
+     */
+    Image updateImageCompression(String imageId, byte[] imageData, int compressionLevel) throws IOException;
+
+    /**
      * Получает данные изображения по ID
      * 
      * @param id идентификатор изображения
@@ -36,6 +47,16 @@ public interface ImageStorageService {
      * @throws IOException в случае ошибки работы с файлами
      */
     byte[] getImage(String id) throws IOException;
+    
+    /**
+     * Получает оригинальные данные изображения из бэкапа
+     * Если изображение никогда не было сжато, возвращаются текущие данные
+     * 
+     * @param id идентификатор изображения
+     * @return двоичные данные оригинального изображения или null, если бэкап не найден
+     * @throws IOException в случае ошибки работы с файлами
+     */
+    byte[] getOriginalImageBackup(String id) throws IOException;
     
     /**
      * Получает метаданные изображения по ID
