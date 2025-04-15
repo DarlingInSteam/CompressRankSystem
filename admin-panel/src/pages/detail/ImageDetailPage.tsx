@@ -22,7 +22,13 @@ import {
   DialogTitle,
   Snackbar,
   Alert,
-  LinearProgress
+  LinearProgress,
+  Avatar,
+  useTheme,
+  alpha,
+  IconButton,
+  Tooltip,
+  Grid
 } from '@mui/material';
 import {
   CloudDownload as DownloadIcon,
@@ -31,10 +37,13 @@ import {
   ArrowBack as ArrowBackIcon,
   Compress as CompressIcon,
   Refresh as RestoreIcon,
+  Info as InfoIcon,
+  Check as CheckIcon,
+  Share as ShareIcon
 } from '@mui/icons-material';
 
 import ImageService from '../../services/image.service';
-import { ImageDTO } from '../../types/api.types';
+import { ImageDTO, ImageStatistics } from '../../types/api.types';
 
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 Байт';
@@ -47,11 +56,13 @@ const formatFileSize = (bytes: number): string => {
 const ImageDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const theme = useTheme();
 
   const [image, setImage] = useState<ImageDTO | null>(null);
   const [originalSize, setOriginalSize] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [imageStatistics, setImageStatistics] = useState<ImageStatistics | null>(null);
 
   const [compressionLevel, setCompressionLevel] = useState<number>(0);
   const [compressing, setCompressing] = useState<boolean>(false);
@@ -71,7 +82,6 @@ const ImageDetailPage: React.FC = () => {
     }
   }, [id]);
 
-  // Update the slider value when the image compression level changes
   useEffect(() => {
     if (image) {
       setCompressionLevel(image.compressionLevel);
@@ -86,15 +96,21 @@ const ImageDetailPage: React.FC = () => {
       const imageData = await ImageService.getImageMetadata(imageId);
       setImage(imageData);
 
-      // If the image has been compressed before, try to get original size
+      // Получаем статистику для изображения
+      try {
+        const statistics = await ImageService.getImageStatistics(imageId);
+        setImageStatistics(statistics);
+      } catch (err) {
+        console.warn('Could not fetch image statistics:', err);
+        // Продолжаем загрузку даже если статистика недоступна
+      }
+
       if (imageData.compressionLevel > 0) {
         try {
-          // We'll add a new endpoint to get original size
           const originalSizeData = await ImageService.getOriginalImageSize(imageId);
           setOriginalSize(originalSizeData);
         } catch (err) {
           console.warn('Could not fetch original size:', err);
-          // Not critical, we'll just not show the comparison
         }
       }
     } catch (error) {
@@ -112,14 +128,11 @@ const ImageDetailPage: React.FC = () => {
     showSnackbar('Начато сжатие изображения...', 'success');
 
     try {
-      // Save the current original size before compression if it's the first time
       if (image && image.compressionLevel === 0) {
         setOriginalSize(image.size);
       }
       
       const compressedImage = await ImageService.compressImage(id, compressionLevel);
-      
-      // Update the image data with the compressed version
       setImage(compressedImage);
 
       showSnackbar('Изображение успешно сжато!', 'success');
@@ -139,8 +152,6 @@ const ImageDetailPage: React.FC = () => {
 
     try {
       const restoredImage = await ImageService.restoreImage(id);
-      
-      // Update the image with restored data
       setImage(restoredImage);
 
       showSnackbar('Изображение успешно восстановлено до оригинала!', 'success');
@@ -209,335 +220,1057 @@ const ImageDetailPage: React.FC = () => {
     return 'error';
   };
 
-  if (loading) {
-    return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
-          <CircularProgress />
+  return (
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4, px: { xs: 2, sm: 3, md: 4 } }}>
+      {/* Header with back button */}
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          mb: 4, 
+          p: 3,
+          borderRadius: '16px',
+          backdropFilter: 'blur(10px)',
+          backgroundColor: theme => theme.palette.mode === 'light' 
+            ? 'rgba(255, 255, 255, 0.9)' 
+            : 'rgba(66, 66, 66, 0.8)',
+          boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+          border: '1px solid',
+          borderColor: theme => theme.palette.mode === 'light'
+            ? 'rgba(255, 255, 255, 0.4)'
+            : 'rgba(255, 255, 255, 0.1)',
+          transition: 'all 0.3s ease-in-out'
+        }}
+      >
+        <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
+          <Box>
+            <Typography variant="h4" fontWeight="bold" gutterBottom>
+              {image?.originalFilename}
+            </Typography>
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              color: 'text.secondary',
+              gap: 2
+            }}>
+              <Typography variant="body1">
+                Загружено: {image && new Date(image.uploadedAt).toLocaleString()}
+              </Typography>
+              {image && image.compressionLevel > 0 && (
+                <Chip 
+                  icon={<CompressIcon fontSize="small" />} 
+                  label={`Сжато ${image.compressionLevel}%`}
+                  color="success"
+                  size="small"
+                  sx={{ 
+                    borderRadius: '50px',
+                    fontWeight: 500,
+                    background: 'linear-gradient(90deg, #4caf50, #8bc34a)',
+                    color: 'white',
+                    '& .MuiChip-icon': {
+                      color: 'white'
+                    }
+                  }}
+                />
+              )}
+            </Box>
+          </Box>
+          <Button 
+            variant="outlined" 
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate('/')}
+            sx={{ 
+              borderRadius: '12px', 
+              textTransform: 'none',
+              fontWeight: 'medium',
+              borderWidth: '1.5px',
+              px: 3,
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+              }
+            }}
+          >
+            Вернуться к списку
+          </Button>
         </Box>
-      </Container>
-    );
-  }
+      </Paper>
 
-  if (error || !image) {
-    return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Paper sx={{ p: 3 }}>
+      {loading ? (
+        <Box sx={{ 
+          width: '100%', 
+          display: 'flex', 
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '60vh',
+          gap: 2
+        }}>
+          <CircularProgress size={60} thickness={4} />
+          <Typography variant="h6" color="text.secondary">Загрузка данных...</Typography>
+        </Box>
+      ) : error ? (
+        <Paper 
+          sx={{ 
+            p: 4, 
+            borderRadius: '16px',
+            textAlign: 'center',
+            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+            backdropFilter: 'blur(8px)',
+            backgroundColor: theme => theme.palette.mode === 'light' 
+              ? 'rgba(255, 255, 255, 0.9)' 
+              : 'rgba(66, 66, 66, 0.8)',
+          }}
+        >
           <Typography variant="h5" color="error" gutterBottom>
             Ошибка загрузки
           </Typography>
-          <Typography variant="body1">
+          <Typography variant="body1" sx={{ mb: 3 }}>
             {error || 'Изображение не найдено'}
           </Typography>
           <Button 
             variant="contained" 
             startIcon={<ArrowBackIcon />}
             onClick={() => navigate('/')}
-            sx={{ mt: 2 }}
+            sx={{ 
+              borderRadius: '12px',
+              textTransform: 'none',
+              fontWeight: 'medium',
+              px: 4,
+              py: 1.5
+            }}
           >
             Вернуться на главную
           </Button>
         </Paper>
-      </Container>
-    );
-  }
-
-  return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4">
-          Просмотр изображения
-        </Typography>
-        <Button 
-          variant="outlined" 
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/')}
-        >
-          Вернуться к списку
-        </Button>
-      </Box>
-
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
-        <Box sx={{ width: { xs: '100%', md: '66.666%' } }}>
-          <Card sx={{ mb: 3 }}>
-            <CardHeader 
-              title={image.originalFilename}
-              subheader={`Загружено: ${new Date(image.uploadedAt).toLocaleString()}`}
-            />
-            <CardMedia
-              component="img"
-              sx={{ 
-                height: 'auto', 
-                maxHeight: '500px',
-                objectFit: 'contain',
-                bgcolor: 'background.default'
-              }}
-              image={ImageService.getImageUrl(image.id)}
-              alt={image.originalFilename}
-            />
-            <CardContent>
-              <Box display="flex" justifyContent="space-between" flexWrap="wrap">
-                <Box>
-                  <Typography variant="body1">
-                    <strong>Размер:</strong> {formatFileSize(image.size)}
-                  </Typography>
-                  <Typography variant="body1">
-                    <strong>Тип:</strong> {image.contentType}
-                  </Typography>
-                  <Typography variant="body1">
-                    <strong>Просмотры:</strong> {image.accessCount}
-                  </Typography>
-                  <Typography variant="body1">
-                    <strong>Сжатие:</strong> {image.compressionLevel}%
-                    {image.compressionLevel > 0 && (
-                      <Chip 
-                        label="Сжато" 
-                        color={getCompressionColor(image.compressionLevel)} 
-                        size="small" 
-                        sx={{ ml: 1 }} 
-                      />
-                    )}
-                    {image.compressionLevel === 0 && (
-                      <Chip label="Оригинал" color="info" size="small" sx={{ ml: 1 }} />
-                    )}
-                  </Typography>
-                </Box>
-                <Box display="flex" gap={1} alignItems="center">
-                  <Chip
-                    icon={<VisibilityIcon />}
-                    label={`${image.accessCount} просмотров`}
-                    variant="outlined"
-                  />
-                </Box>
-              </Box>
-            </CardContent>
-            <CardActions>
-              <Button 
-                variant="contained" 
-                startIcon={<DownloadIcon />}
-                onClick={handleDownload}
+      ) : (
+        <>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
+            {/* Main content column */}
+            <Box sx={{ width: { xs: '100%', md: '66.666%' } }}>
+              {/* Image preview card */}
+              <Paper 
+                elevation={0} 
+                sx={{ 
+                  mb: 3, 
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                  boxShadow: '0 8px 32px 0 rgba(0,0,0,0.08)',
+                  border: '1px solid',
+                  borderColor: theme => theme.palette.mode === 'light'
+                    ? 'rgba(255, 255, 255, 0.5)'
+                    : 'rgba(255, 255, 255, 0.1)',
+                  transition: 'transform 0.3s, box-shadow 0.3s',
+                  '&:hover': {
+                    transform: 'translateY(-5px)',
+                    boxShadow: '0 14px 40px 0 rgba(0,0,0,0.12)'
+                  }
+                }}
               >
-                Скачать
+                <Box sx={{ 
+                  p: 3, 
+                  pb: 2, 
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <Typography 
+                    variant="h6" 
+                    fontWeight="medium"
+                    sx={{
+                      background: theme.palette.mode === 'dark' 
+                        ? 'linear-gradient(90deg, #e3f2fd, #bbdefb)' 
+                        : 'linear-gradient(90deg, #1976d2, #42a5f5)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      display: 'inline-block'
+                    }}
+                  >
+                    Предпросмотр
+                  </Typography>
+                  {image && (
+                    <Chip 
+                      label={image.contentType}
+                      variant="outlined"
+                      size="small"
+                      sx={{ borderRadius: '8px' }}
+                    />
+                  )}
+                </Box>
+                <Box 
+                  sx={{ 
+                    bgcolor: theme => theme.palette.mode === 'light'
+                      ? 'rgba(240, 240, 240, 0.5)'
+                      : 'rgba(30, 30, 30, 0.6)',
+                    p: { xs: 2, md: 3 },
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: '300px',
+                    borderTop: '1px solid',
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                    backdropFilter: 'blur(5px)'
+                  }}
+                >
+                  {image && (
+                    <Box
+                      component="img"
+                      sx={{ 
+                        maxHeight: '500px',
+                        maxWidth: '100%',
+                        objectFit: 'contain',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                        borderRadius: '8px',
+                        transition: 'transform 0.5s ease',
+                        '&:hover': {
+                          transform: 'scale(1.02)'
+                        }
+                      }}
+                      src={ImageService.getImageUrl(image.id)}
+                      alt={image.originalFilename}
+                    />
+                  )}
+                </Box>
+                <Box sx={{ p: 3 }}>
+                  <Grid container spacing={2} sx={{ mb: 3 }}>
+                    <Grid xs={12} sm={6} md={3}>
+                      <Box sx={{ 
+                        p: 2, 
+                        borderRadius: '12px', 
+                        bgcolor: theme => 
+                          alpha(theme.palette.primary.main, theme.palette.mode === 'light' ? 0.05 : 0.15),
+                        height: '100%'
+                      }}>
+                        <Typography variant="body2" color="text.secondary">Размер файла</Typography>
+                        <Typography variant="body1" fontWeight="medium" sx={{ mt: 0.5 }}>
+                          {image && formatFileSize(image.size)}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid xs={12} sm={6} md={2}>
+                      <Box sx={{ 
+                        p: 2, 
+                        borderRadius: '12px', 
+                        bgcolor: theme => 
+                          alpha(theme.palette.info.main, theme.palette.mode === 'light' ? 0.05 : 0.15),
+                        height: '100%'
+                      }}>
+                        <Typography variant="body2" color="text.secondary">Тип файла</Typography>
+                        <Typography variant="body1" fontWeight="medium" sx={{ mt: 0.5 }}>
+                          {image && image.contentType.split('/')[1].toUpperCase()}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid xs={12} sm={6} md={2}>
+                      <Box sx={{ 
+                        p: 2, 
+                        borderRadius: '12px', 
+                        bgcolor: theme => 
+                          alpha(theme.palette.secondary.main, theme.palette.mode === 'light' ? 0.05 : 0.15),
+                        height: '100%'
+                      }}>
+                        <Typography variant="body2" color="text.secondary">Просмотры</Typography>
+                        <Typography variant="body1" fontWeight="medium" sx={{ mt: 0.5, display: 'flex', alignItems: 'center' }}>
+                          <VisibilityIcon fontSize="small" sx={{ mr: 0.5, opacity: 0.7 }} />
+                          {image && image.accessCount}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid xs={12} sm={6} md={2}>
+                      <Box sx={{ 
+                        p: 2, 
+                        borderRadius: '12px', 
+                        bgcolor: theme => 
+                          alpha(theme.palette.primary.main, theme.palette.mode === 'light' ? 0.05 : 0.15),
+                        height: '100%'
+                      }}>
+                        <Typography variant="body2" color="text.secondary">Скачивания</Typography>
+                        <Typography variant="body1" fontWeight="medium" sx={{ mt: 0.5, display: 'flex', alignItems: 'center' }}>
+                          <DownloadIcon fontSize="small" sx={{ mr: 0.5, opacity: 0.7 }} />
+                          {imageStatistics ? imageStatistics.downloadCount : 0}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid xs={12} sm={6} md={3}>
+                      <Box sx={{ 
+                        p: 2, 
+                        borderRadius: '12px', 
+                        bgcolor: theme => 
+                          alpha(theme.palette.success.main, theme.palette.mode === 'light' ? 0.05 : 0.15),
+                        height: '100%'
+                      }}>
+                        <Typography variant="body2" color="text.secondary">Статус сжатия</Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                          {image && (
+                            <Chip 
+                              label={image.compressionLevel > 0 ? `Сжато ${image.compressionLevel}%` : "Оригинал"} 
+                              color={getCompressionColor(image.compressionLevel)}
+                              size="small"
+                              sx={{ fontWeight: 'medium', fontSize: '0.75rem' }}
+                            />
+                          )}
+                        </Box>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                  
+                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                    <Button 
+                      variant="contained" 
+                      startIcon={<DownloadIcon />}
+                      onClick={handleDownload}
+                      sx={{ 
+                        borderRadius: '12px',
+                        textTransform: 'none',
+                        fontWeight: 'medium',
+                        boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+                        background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
+                        transition: 'all 0.3s',
+                        px: 3,
+                        py: 1.2,
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 6px 15px rgba(0,0,0,0.15)',
+                          background: 'linear-gradient(45deg, #1565c0, #1976d2)'
+                        }
+                      }}
+                    >
+                      Скачать
+                    </Button>
+                    
+                    <Button 
+                      variant="outlined" 
+                      color="error" 
+                      startIcon={<DeleteIcon />}
+                      onClick={confirmDelete}
+                      sx={{ 
+                        borderRadius: '12px',
+                        textTransform: 'none',
+                        fontWeight: 'medium',
+                        borderWidth: '1.5px',
+                        px: 3,
+                        py: 1.2,
+                        transition: 'all 0.3s',
+                        '&:hover': {
+                          backgroundColor: 'rgba(211, 47, 47, 0.04)',
+                          borderColor: 'error.main',
+                          borderWidth: '1.5px',
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 4px 8px rgba(211, 47, 47, 0.15)'
+                        }
+                      }}
+                    >
+                      Удалить
+                    </Button>
+                    
+                    <Tooltip title="Поделиться изображением">
+                      <IconButton 
+                        sx={{ 
+                          ml: 'auto', 
+                          bgcolor: theme => alpha(theme.palette.primary.main, 0.1),
+                          '&:hover': { 
+                            bgcolor: theme => alpha(theme.palette.primary.main, 0.2) 
+                          }
+                        }}
+                      >
+                        <ShareIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </Box>
+              </Paper>
+
+              {/* Compression controls card */}
+              <Paper 
+                elevation={0} 
+                sx={{ 
+                  mb: 3, 
+                  borderRadius: '16px',
+                  boxShadow: '0 8px 32px 0 rgba(0,0,0,0.08)',
+                  overflow: 'hidden',
+                  border: '1px solid',
+                  borderColor: theme => theme.palette.mode === 'light'
+                    ? 'rgba(255, 255, 255, 0.5)'
+                    : 'rgba(255, 255, 255, 0.1)',
+                  transition: 'transform 0.3s, box-shadow 0.3s',
+                  '&:hover': {
+                    transform: 'translateY(-5px)',
+                    boxShadow: '0 14px 40px 0 rgba(0,0,0,0.12)'
+                  }
+                }}
+              >
+                <Box sx={{ 
+                  p: 3, 
+                  pb: 2, 
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderBottom: '1px solid',
+                  borderColor: 'divider'
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Avatar
+                      sx={{
+                        bgcolor: theme => theme.palette.mode === 'light' 
+                          ? 'rgba(46, 125, 50, 0.1)' 
+                          : 'rgba(46, 125, 50, 0.3)',
+                        color: 'success.main',
+                        mr: 2
+                      }}
+                    >
+                      <CompressIcon />
+                    </Avatar>
+                    <Typography 
+                      variant="h6" 
+                      fontWeight="medium"
+                      sx={{
+                        background: theme.palette.mode === 'dark' 
+                          ? 'linear-gradient(90deg, #e8f5e9, #c8e6c9)' 
+                          : 'linear-gradient(90deg, #2e7d32, #66bb6a)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        display: 'inline-block'
+                      }}
+                    >
+                      Управление сжатием
+                    </Typography>
+                  </Box>
+                </Box>
+                
+                <Box sx={{ px: 3, pt: 3, pb: 2 }}>
+                  {image && image.compressionLevel > 0 && (
+                    <Alert 
+                      severity="info" 
+                      icon={<InfoIcon fontSize="inherit" />}
+                      sx={{ 
+                        mb: 3,
+                        borderRadius: '12px',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+                        animation: 'fadeIn 0.5s ease-in-out',
+                        '@keyframes fadeIn': {
+                          '0%': { opacity: 0, transform: 'translateY(-10px)' },
+                          '100%': { opacity: 1, transform: 'translateY(0)' }
+                        }
+                      }}
+                    >
+                      Изображение сжато с уровнем <strong>{image.compressionLevel}%</strong>.
+                      Вы можете изменить уровень сжатия или восстановить оригинал.
+                    </Alert>
+                  )}
+                  
+                  <Box px={2}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center', 
+                      mb: 1.5
+                    }}>
+                      <Typography fontWeight="medium">
+                        Уровень сжатия
+                      </Typography>
+                      <Chip 
+                        label={`${compressionLevel}%`}
+                        color={getCompressionColor(compressionLevel)}
+                        size="small"
+                        sx={{ 
+                          minWidth: '60px', 
+                          fontWeight: 'medium',
+                          transition: 'all 0.3s ease',
+                          borderRadius: '8px',
+                          boxShadow: compressionLevel > 0 
+                            ? '0 2px 8px rgba(0, 0, 0, 0.1)' 
+                            : 'none'
+                        }}
+                      />
+                    </Box>
+                    
+                    <Slider
+                      value={compressionLevel}
+                      onChange={(_, value) => setCompressionLevel(value as number)}
+                      step={1}
+                      marks={[
+                        { value: 0, label: '0' },
+                        { value: 25, label: '25' },
+                        { value: 50, label: '50' },
+                        { value: 75, label: '75' },
+                        { value: 100, label: '100' }
+                      ]}
+                      min={0}
+                      max={100}
+                      valueLabelDisplay="auto"
+                      color={getCompressionColor(compressionLevel)}
+                      sx={{ 
+                        '& .MuiSlider-markLabel': { 
+                          fontSize: '0.75rem',
+                          color: 'text.secondary'
+                        },
+                        '& .MuiSlider-thumb': {
+                          transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                          '&:hover': {
+                            boxShadow: `0 0 0 8px ${alpha(theme.palette.primary.main, 0.16)}`
+                          },
+                          '&:active': {
+                            transform: 'scale(1.2)'
+                          }
+                        },
+                        '& .MuiSlider-rail': {
+                          opacity: 0.3
+                        }
+                      }}
+                    />
+                    
+                    <Box sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      mt: 1, 
+                      color: 'text.secondary',
+                      fontSize: '0.75rem'
+                    }}>
+                      <Typography variant="caption">Без сжатия</Typography>
+                      <Typography variant="caption">Максимальное сжатие</Typography>
+                    </Box>
+                    
+                    <Paper 
+                      elevation={0}
+                      sx={{ 
+                        mt: 3, 
+                        p: 2.5,
+                        borderRadius: '12px',
+                        bgcolor: theme => theme.palette.mode === 'light'
+                          ? alpha(theme.palette.info.main, 0.05)
+                          : alpha(theme.palette.info.main, 0.2),
+                        border: '1px solid',
+                        borderColor: theme => theme.palette.mode === 'light'
+                          ? alpha(theme.palette.info.main, 0.2)
+                          : alpha(theme.palette.info.main, 0.3)
+                      }}
+                    >
+                      <Typography variant="body2" component="div">
+                        <Box component="span" sx={{ fontWeight: 'bold', mr: 1, color: 'info.main' }}>0%:</Box>
+                        без сжатия (оригинальное качество)
+                      </Typography>
+                      <Typography variant="body2" component="div" sx={{ mt: 1 }}>
+                        <Box component="span" sx={{ fontWeight: 'bold', mr: 1, color: 'primary.main' }}>50%:</Box>
+                        среднее сжатие (баланс качества и размера)
+                      </Typography>
+                      <Typography variant="body2" component="div" sx={{ mt: 1 }}>
+                        <Box component="span" sx={{ fontWeight: 'bold', mr: 1, color: 'error.main' }}>100%:</Box>
+                        максимальное сжатие (низкое качество)
+                      </Typography>
+                    </Paper>
+                  </Box>
+                </Box>
+                
+                <Box sx={{ px: 3, pb: 3 }}>
+                  <Alert 
+                    severity="warning" 
+                    variant="outlined"
+                    icon={<InfoIcon />}
+                    sx={{ 
+                      mt: 2,
+                      borderRadius: '12px',
+                      borderWidth: '1.5px',
+                      '& .MuiAlert-icon': {
+                        alignItems: 'center'
+                      }
+                    }}
+                  >
+                    <Typography variant="body2">
+                      <strong>Важно:</strong> Сжатие применяется напрямую к изображению. 
+                      Оригинал сохраняется в системе и может быть восстановлен в любой момент.
+                    </Typography>
+                  </Alert>
+                </Box>
+                
+                <Box 
+                  sx={{ 
+                    display: 'flex', 
+                    gap: 2, 
+                    p: 3, 
+                    pt: 0,
+                    borderTop: compressing || restoring ? '1px solid' : 'none',
+                    borderColor: 'divider'
+                  }}
+                >
+                  <Button 
+                    variant="contained" 
+                    color="primary"
+                    startIcon={compressing ? <CircularProgress size={16} color="inherit" /> : <CompressIcon />}
+                    onClick={handleCompress}
+                    disabled={!!compressing || !!(image && compressionLevel === image.compressionLevel)}
+                    sx={{ 
+                      borderRadius: '12px',
+                      textTransform: 'none',
+                      fontWeight: 'medium',
+                      background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
+                      transition: 'all 0.3s',
+                      px: 3,
+                      py: 1.2,
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 6px 15px rgba(0,0,0,0.15)',
+                        background: 'linear-gradient(45deg, #1565c0, #1976d2)'
+                      },
+                      '&.Mui-disabled': {
+                        background: theme => theme.palette.mode === 'light'
+                          ? alpha(theme.palette.primary.main, 0.3)
+                          : alpha(theme.palette.primary.main, 0.2)
+                      }
+                    }}
+                  >
+                    {compressing ? 'Сжатие...' : 'Применить сжатие'}
+                  </Button>
+                  
+                  {image && image.compressionLevel > 0 && (
+                    <Button 
+                      variant="outlined" 
+                      color="warning"
+                      startIcon={restoring ? <CircularProgress size={16} color="inherit" /> : <RestoreIcon />}
+                      onClick={handleRestore}
+                      disabled={restoring}
+                      sx={{ 
+                        borderRadius: '12px',
+                        textTransform: 'none',
+                        fontWeight: 'medium',
+                        borderWidth: '1.5px',
+                        transition: 'all 0.3s',
+                        '&:hover': {
+                          borderWidth: '1.5px',
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                        }
+                      }}
+                    >
+                      {restoring ? 'Восстановление...' : 'Восстановить оригинал'}
+                    </Button>
+                  )}
+                </Box>
+                
+                {(compressing || restoring) && (
+                  <LinearProgress 
+                    sx={{ 
+                      height: '4px',
+                      borderBottomLeftRadius: '16px',
+                      borderBottomRightRadius: '16px'
+                    }}
+                  />
+                )}
+              </Paper>
+            </Box>
+
+            {/* Sidebar column */}
+            <Box sx={{ width: { xs: '100%', md: '33.333%' } }}>
+              <Paper 
+                elevation={0} 
+                sx={{ 
+                  borderRadius: '16px',
+                  boxShadow: '0 8px 32px 0 rgba(0,0,0,0.08)',
+                  border: '1px solid',
+                  borderColor: theme => theme.palette.mode === 'light'
+                    ? 'rgba(255, 255, 255, 0.5)'
+                    : 'rgba(255, 255, 255, 0.1)',
+                  height: '100%',
+                  transition: 'transform 0.3s, box-shadow 0.3s',
+                  '&:hover': {
+                    transform: 'translateY(-5px)',
+                    boxShadow: '0 14px 40px 0 rgba(0,0,0,0.12)'
+                  }
+                }}
+              >
+                <Box sx={{ 
+                  p: 3, 
+                  pb: 2, 
+                  borderBottom: '1px solid',
+                  borderColor: 'divider'
+                }}>
+                  <Typography 
+                    variant="h6" 
+                    fontWeight="medium"
+                    sx={{
+                      background: theme.palette.mode === 'dark' 
+                        ? 'linear-gradient(90deg, #e8f5e9, #c8e6c9)' 
+                        : 'linear-gradient(90deg, #2e7d32, #66bb6a)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      display: 'inline-block'
+                    }}
+                  >
+                    Информация о сжатии
+                  </Typography>
+                </Box>
+                
+                <Box sx={{ px: 3, py: 2.5 }}>
+                  {image && image.compressionLevel === 0 ? (
+                    <Alert 
+                      severity="info"
+                      sx={{ 
+                        borderRadius: '12px',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+                        '& .MuiAlert-icon': {
+                          alignItems: 'flex-start',
+                          py: 1
+                        }
+                      }}
+                    >
+                      Это оригинальное изображение без сжатия. Используйте панель слева для применения сжатия.
+                    </Alert>
+                  ) : (
+                    <>
+                      <Alert 
+                        severity="success" 
+                        icon={<CheckIcon fontSize="inherit" />}
+                        sx={{ 
+                          mb: 3,
+                          borderRadius: '12px',
+                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+                          animation: 'pulse 1.5s infinite',
+                          '@keyframes pulse': {
+                            '0%': { boxShadow: '0 0 0 0 rgba(76, 175, 80, 0.4)' },
+                            '70%': { boxShadow: '0 0 0 6px rgba(76, 175, 80, 0)' },
+                            '100%': { boxShadow: '0 0 0 0 rgba(76, 175, 80, 0)' }
+                          }
+                        }}
+                      >
+                        <Typography variant="body1" fontWeight="medium">
+                          {image && `Текущий уровень сжатия: ${image.compressionLevel}%`}
+                        </Typography>
+                      </Alert>
+                      
+                      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>Статистика сжатия</Typography>
+                      
+                      {originalSize && image && (
+                        <>
+                          <Box 
+                            sx={{ 
+                              display: 'grid',
+                              gridTemplateColumns: 'repeat(2, 1fr)',
+                              gap: 2,
+                              my: 2,
+                              p: 2.5,
+                              borderRadius: '12px',
+                              bgcolor: theme => alpha(theme.palette.success.main, theme.palette.mode === 'light' ? 0.05 : 0.15),
+                              border: '1px solid',
+                              borderColor: theme => alpha(theme.palette.success.main, theme.palette.mode === 'light' ? 0.1 : 0.2)
+                            }}
+                          >
+                            <Box sx={{ textAlign: 'center' }}>
+                              <Typography variant="body2" color="text.secondary" gutterBottom>
+                                Уменьшение размера
+                              </Typography>
+                              <Typography 
+                                variant="h5" 
+                                fontWeight="bold" 
+                                color="success.main"
+                                sx={{
+                                  background: 'linear-gradient(90deg, #4caf50, #8bc34a)',
+                                  WebkitBackgroundClip: 'text',
+                                  WebkitTextFillColor: 'transparent',
+                                  display: 'inline-block'
+                                }}
+                              >
+                                {(100 - ((image.size * 100) / originalSize)).toFixed(1)}%
+                              </Typography>
+                            </Box>
+                            
+                            <Box sx={{ textAlign: 'center' }}>
+                              <Typography variant="body2" color="text.secondary" gutterBottom>
+                                Сохранено места
+                              </Typography>
+                              <Typography 
+                                variant="h5" 
+                                fontWeight="bold" 
+                                color="success.main"
+                                sx={{
+                                  background: 'linear-gradient(90deg, #4caf50, #8bc34a)',
+                                  WebkitBackgroundClip: 'text',
+                                  WebkitTextFillColor: 'transparent',
+                                  display: 'inline-block'
+                                }}
+                              >
+                                {formatFileSize(originalSize - image.size)}
+                              </Typography>
+                            </Box>
+                          </Box>
+                          
+                          <Divider sx={{ my: 3 }} />
+                          
+                          <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                            Сравнение размеров:
+                          </Typography>
+                          
+                          <Box sx={{ mb: 3 }}>
+                            <Box display="flex" alignItems="center" mb={1.5}>
+                              <Typography variant="body2" color="text.secondary" minWidth={100}>Оригинал:</Typography>
+                              <Box flex={1} ml={2}>
+                                <LinearProgress 
+                                  variant="determinate" 
+                                  value={100} 
+                                  color="primary"
+                                  sx={{ 
+                                    height: 10, 
+                                    borderRadius: '5px',
+                                    backgroundColor: theme => alpha(theme.palette.primary.main, 0.1)
+                                  }}
+                                />
+                              </Box>
+                              <Typography variant="body2" ml={2} minWidth={80} textAlign="right" fontWeight="medium">
+                                {formatFileSize(originalSize)}
+                              </Typography>
+                            </Box>
+                            
+                            <Box display="flex" alignItems="center">
+                              <Typography variant="body2" color="text.secondary" minWidth={100}>Сжато:</Typography>
+                              <Box flex={1} ml={2}>
+                                <LinearProgress 
+                                  variant="determinate" 
+                                  value={(image.size * 100) / originalSize} 
+                                  color="success"
+                                  sx={{ 
+                                    height: 10, 
+                                    borderRadius: '5px',
+                                    backgroundColor: theme => alpha(theme.palette.success.main, 0.1),
+                                    '& .MuiLinearProgress-bar': {
+                                      background: 'linear-gradient(90deg, #4caf50, #8bc34a)',
+                                      transition: 'transform 1.5s cubic-bezier(0.4, 0, 0.2, 1)'
+                                    }
+                                  }}
+                                />
+                              </Box>
+                              <Typography variant="body2" ml={2} minWidth={80} textAlign="right" fontWeight="medium">
+                                {formatFileSize(image.size)}
+                              </Typography>
+                            </Box>
+                          </Box>
+                          
+                          <Divider sx={{ my: 3 }} />
+                          
+                          <Box sx={{ mb: 3 }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                              Эффективность сжатия:
+                            </Typography>
+                            <Box 
+                              sx={{ 
+                                display: 'flex', 
+                                alignItems: 'center',
+                                mt: 1,
+                                p: 2,
+                                borderRadius: '12px',
+                                bgcolor: theme => alpha(theme.palette.success.main, theme.palette.mode === 'light' ? 0.08 : 0.2),
+                              }}
+                            >
+                              <Typography 
+                                variant="h4" 
+                                sx={{ 
+                                  fontWeight: 'bold', 
+                                  background: 'linear-gradient(90deg, #4caf50, #8bc34a)',
+                                  WebkitBackgroundClip: 'text',
+                                  WebkitTextFillColor: 'transparent',
+                                  mr: 1,
+                                  animation: 'fadeScale 1s ease-out',
+                                  '@keyframes fadeScale': {
+                                    '0%': { opacity: 0, transform: 'scale(0.8)' },
+                                    '100%': { opacity: 1, transform: 'scale(1)' }
+                                  }
+                                }}
+                              >
+                                {((100 - ((image.size * 100) / originalSize)) / image.compressionLevel).toFixed(2)}x
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                коэффициент
+                              </Typography>
+                            </Box>
+                            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                              (уменьшение размера в % / уровень сжатия)
+                            </Typography>
+                          </Box>
+                        </>
+                      )}
+                    </>
+                  )}
+                  
+                  <Divider sx={{ my: 3 }} />
+                  
+                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom>Рекомендации по сжатию</Typography>
+                  
+                  <Box 
+                    sx={{ 
+                      mt: 2,
+                      p: 2.5,
+                      borderRadius: '12px',
+                      bgcolor: theme => theme.palette.mode === 'light'
+                        ? alpha(theme.palette.info.main, 0.05)
+                        : alpha(theme.palette.info.main, 0.15),
+                      border: '1px solid',
+                      borderColor: theme => theme.palette.mode === 'light'
+                        ? alpha(theme.palette.info.main, 0.1)
+                        : alpha(theme.palette.info.main, 0.2)
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                      <Box 
+                        sx={{
+                          width: 12,
+                          height: 12,
+                          borderRadius: '50%',
+                          bgcolor: 'success.light',
+                          mr: 1.5
+                        }}
+                      />
+                      <Typography variant="body2">
+                        <strong>10-30%</strong>: Минимальное сжатие, почти незаметное для глаза
+                      </Typography>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                      <Box 
+                        sx={{
+                          width: 12,
+                          height: 12,
+                          borderRadius: '50%',
+                          bgcolor: 'info.light',
+                          mr: 1.5
+                        }}
+                      />
+                      <Typography variant="body2">
+                        <strong>40-60%</strong>: Хороший баланс размера и качества
+                      </Typography>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                      <Box 
+                        sx={{
+                          width: 12,
+                          height: 12,
+                          borderRadius: '50%',
+                          bgcolor: 'warning.light',
+                          mr: 1.5
+                        }}
+                      />
+                      <Typography variant="body2">
+                        <strong>70-90%</strong>: Значительное сжатие, заметное снижение качества
+                      </Typography>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Box 
+                        sx={{
+                          width: 12,
+                          height: 12,
+                          borderRadius: '50%',
+                          bgcolor: 'error.light',
+                          mr: 1.5
+                        }}
+                      />
+                      <Typography variant="body2">
+                        <strong>100%</strong>: Максимальное сжатие, серьезные потери качества
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              </Paper>
+            </Box>
+          </Box>
+          
+          {/* Delete Confirmation Dialog */}
+          <Dialog
+            open={openDeleteDialog}
+            onClose={() => setOpenDeleteDialog(false)}
+            PaperProps={{
+              sx: {
+                borderRadius: '16px',
+                boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+                backdropFilter: 'blur(10px)',
+                background: theme => theme.palette.mode === 'light' 
+                  ? 'rgba(255, 255, 255, 0.9)' 
+                  : 'rgba(40, 40, 40, 0.9)',
+                border: '1px solid',
+                borderColor: theme => theme.palette.mode === 'light'
+                  ? 'rgba(255, 255, 255, 0.5)'
+                  : 'rgba(255, 255, 255, 0.05)',
+                overflow: 'hidden'
+              }
+            }}
+          >
+            <DialogTitle 
+              sx={{ 
+                fontWeight: 'medium',
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+                p: 3,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}
+            >
+              <DeleteIcon color="error" />
+              Подтверждение удаления
+            </DialogTitle>
+            <DialogContent sx={{ p: 3 }}>
+              <DialogContentText sx={{ mb: 2 }}>
+                {image && `Вы действительно хотите удалить изображение "${image.originalFilename}"?`}
+              </DialogContentText>
+              <Box 
+                sx={{ 
+                  mt: 2,
+                  p: 2,
+                  bgcolor: alpha(theme.palette.error.main, theme.palette.mode === 'light' ? 0.1 : 0.25),
+                  color: 'error.main',
+                  borderRadius: '12px',
+                  fontWeight: 'medium',
+                  border: '1px solid',
+                  borderColor: alpha(theme.palette.error.main, 0.3),
+                  animation: 'pulse-error 2s infinite',
+                  '@keyframes pulse-error': {
+                    '0%': { boxShadow: '0 0 0 0 rgba(211, 47, 47, 0.4)' },
+                    '70%': { boxShadow: '0 0 0 6px rgba(211, 47, 47, 0)' },
+                    '100%': { boxShadow: '0 0 0 0 rgba(211, 47, 47, 0)' }
+                  }
+                }}
+              >
+                <Typography variant="body2" fontWeight="medium">
+                  <strong>Внимание!</strong> Это действие невозможно отменить.
+                </Typography>
+              </Box>
+            </DialogContent>
+            <DialogActions sx={{ p: 3, pt: 1 }}>
+              <Button 
+                onClick={() => setOpenDeleteDialog(false)}
+                sx={{ 
+                  borderRadius: '12px',
+                  textTransform: 'none',
+                  fontWeight: 'medium',
+                  px: 3
+                }}
+              >
+                Отмена
               </Button>
               <Button 
-                variant="outlined" 
-                color="error" 
-                startIcon={<DeleteIcon />}
-                onClick={confirmDelete}
+                onClick={handleDeleteImage} 
+                color="error"
+                variant="contained"
+                sx={{ 
+                  borderRadius: '12px',
+                  textTransform: 'none',
+                  fontWeight: 'medium',
+                  px: 3,
+                  background: 'linear-gradient(45deg, #d32f2f, #f44336)',
+                  transition: 'all 0.3s',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 6px 15px rgba(211, 47, 47, 0.3)',
+                    background: 'linear-gradient(45deg, #c62828, #e53935)'
+                  }
+                }}
               >
                 Удалить
               </Button>
-            </CardActions>
-          </Card>
+            </DialogActions>
+          </Dialog>
+        </>
+      )}
 
-          <Card sx={{ mb: 3 }}>
-            <CardHeader 
-              title="Управление сжатием изображения"
-              titleTypographyProps={{ variant: 'h6' }}
-            />
-            <CardContent>
-              {image.compressionLevel > 0 && (
-                <Alert severity="info" sx={{ mb: 2 }}>
-                  Изображение сжато с уровнем <strong>{image.compressionLevel}%</strong>.
-                  Вы можете изменить уровень сжатия или восстановить оригинал.
-                </Alert>
-              )}
-              
-              <Box px={2}>
-                <Typography gutterBottom>
-                  Уровень сжатия: {compressionLevel}%
-                </Typography>
-                <Slider
-                  value={compressionLevel}
-                  onChange={(_, value) => setCompressionLevel(value as number)}
-                  step={1}
-                  marks={[
-                    { value: 0, label: '0' },
-                    { value: 25, label: '25' },
-                    { value: 50, label: '50' },
-                    { value: 75, label: '75' },
-                    { value: 100, label: '100' }
-                  ]}
-                  min={0}
-                  max={100}
-                  valueLabelDisplay="auto"
-                  color={getCompressionColor(compressionLevel)}
-                />
-                <Box mt={1} display="flex" justifyContent="space-between">
-                  <Typography variant="body2" color="text.secondary">Без сжатия</Typography>
-                  <Typography variant="body2" color="text.secondary">Максимальное сжатие</Typography>
-                </Box>
-                <Typography variant="body2" color="text.secondary" mt={1}>
-                  <strong>0</strong> - без сжатия (оригинальное качество)<br />
-                  <strong>50</strong> - среднее сжатие (баланс качества и размера)<br />
-                  <strong>100</strong> - максимальное сжатие (низкое качество)
-                </Typography>
-              </Box>
-
-              <Typography variant="body2" sx={{ mt: 2 }}>
-                <strong>Важно:</strong> Сжатие применяется напрямую к изображению. 
-                Оригинал сохраняется в системе и может быть восстановлен в любой момент.
-              </Typography>
-            </CardContent>
-            <CardActions>
-              <Button 
-                variant="contained" 
-                color="primary"
-                startIcon={<CompressIcon />}
-                onClick={handleCompress}
-                disabled={compressing || (compressionLevel === image.compressionLevel)}
-              >
-                {compressing ? 'Сжатие...' : 'Применить сжатие'}
-              </Button>
-              
-              {image.compressionLevel > 0 && (
-                <Button 
-                  variant="outlined" 
-                  color="warning"
-                  startIcon={<RestoreIcon />}
-                  onClick={handleRestore}
-                  disabled={restoring}
-                >
-                  {restoring ? 'Восстановление...' : 'Восстановить оригинал'}
-                </Button>
-              )}
-            </CardActions>
-            {(compressing || restoring) && <LinearProgress />}
-          </Card>
-        </Box>
-
-        <Box sx={{ width: { xs: '100%', md: '33.333%' } }}>
-          <Card>
-            <CardHeader 
-              title="Информация о сжатии" 
-              titleTypographyProps={{ variant: 'h6' }}
-            />
-            <CardContent>
-              {image.compressionLevel === 0 ? (
-                <Alert severity="info">
-                  Это оригинальное изображение без сжатия. Используйте панель слева для применения сжатия.
-                </Alert>
-              ) : (
-                <>
-                  <Alert severity="success" sx={{ mb: 3 }}>
-                    <Typography variant="body1">
-                      Текущий уровень сжатия: <strong>{image.compressionLevel}%</strong>
-                    </Typography>
-                  </Alert>
-                  
-                  <Typography variant="h6" gutterBottom>Статистика сжатия</Typography>
-                  
-                  {originalSize && (
-                    <>
-                      <Box display="flex" justifyContent="space-between" mb={2}>
-                        <Box>
-                          <Typography variant="body2" color="text.secondary">Уменьшение размера:</Typography>
-                          <Typography variant="h6">
-                            {(100 - ((image.size * 100) / originalSize)).toFixed(1)}%
-                          </Typography>
-                        </Box>
-                        <Box textAlign="right">
-                          <Typography variant="body2" color="text.secondary">Сохранено:</Typography>
-                          <Typography variant="h6">
-                            {formatFileSize(originalSize - image.size)}
-                          </Typography>
-                        </Box>
-                      </Box>
-                      
-                      <Divider sx={{ my: 2 }} />
-                      
-                      <Box mb={2}>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                          Сравнение размеров:
-                        </Typography>
-                        <Box display="flex" alignItems="center" mb={1}>
-                          <Typography variant="body2" minWidth={100}>Оригинал:</Typography>
-                          <Box flex={1} ml={2}>
-                            <LinearProgress 
-                              variant="determinate" 
-                              value={100} 
-                              color="primary"
-                              sx={{ height: 10, borderRadius: 1 }}
-                            />
-                          </Box>
-                          <Typography variant="body2" ml={2} minWidth={70} textAlign="right">
-                            {formatFileSize(originalSize)}
-                          </Typography>
-                        </Box>
-                        <Box display="flex" alignItems="center">
-                          <Typography variant="body2" minWidth={100}>Сжато:</Typography>
-                          <Box flex={1} ml={2}>
-                            <LinearProgress 
-                              variant="determinate" 
-                              value={(image.size * 100) / originalSize} 
-                              color="success"
-                              sx={{ height: 10, borderRadius: 1 }}
-                            />
-                          </Box>
-                          <Typography variant="body2" ml={2} minWidth={70} textAlign="right">
-                            {formatFileSize(image.size)}
-                          </Typography>
-                        </Box>
-                      </Box>
-                      
-                      <Divider sx={{ my: 2 }} />
-                      
-                      <Box>
-                        <Typography variant="body2" fontWeight="bold">Эффективность:</Typography>
-                        <Typography>
-                          {((100 - ((image.size * 100) / originalSize)) / image.compressionLevel).toFixed(2)}x
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          (уменьшение размера в % / уровень сжатия)
-                        </Typography>
-                      </Box>
-                    </>
-                  )}
-                </>
-              )}
-              
-              <Divider sx={{ my: 2 }} />
-              
-              <Typography variant="h6" gutterBottom>Рекомендации</Typography>
-              <Typography variant="body2" paragraph>
-                <strong>10-30%</strong>: Минимальное сжатие, почти незаметное для глаза
-              </Typography>
-              <Typography variant="body2" paragraph>
-                <strong>40-60%</strong>: Хороший баланс размера и качества
-              </Typography>
-              <Typography variant="body2" paragraph>
-                <strong>70-90%</strong>: Значительное сжатие, заметное снижение качества
-              </Typography>
-              <Typography variant="body2">
-                <strong>100%</strong>: Максимальное сжатие, серьезные потери качества
-              </Typography>
-            </CardContent>
-          </Card>
-        </Box>
-      </Box>
-
-      <Dialog
-        open={openDeleteDialog}
-        onClose={() => setOpenDeleteDialog(false)}
-      >
-        <DialogTitle>
-          Подтверждение удаления
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Вы действительно хотите удалить изображение "{image.originalFilename}"? 
-            <br /><br />
-            <strong>Внимание!</strong> Это действие невозможно отменить.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDeleteDialog(false)}>Отмена</Button>
-          <Button onClick={handleDeleteImage} color="error">
-            Удалить
-          </Button>
-        </DialogActions>
-      </Dialog>
-
+      {/* Notifications */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
@@ -547,7 +1280,22 @@ const ImageDetailPage: React.FC = () => {
         <Alert 
           onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} 
           severity={snackbar.severity} 
-          sx={{ width: '100%' }}
+          sx={{ 
+            width: '100%',
+            borderRadius: '12px',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+            backdropFilter: 'blur(8px)',
+            backgroundColor: theme => alpha(
+              theme.palette[snackbar.severity === 'success' ? 'success' : 'error'].main, 
+              theme.palette.mode === 'light' ? 0.9 : 0.8
+            ),
+            border: '1px solid',
+            borderColor: theme => alpha(
+              theme.palette[snackbar.severity === 'success' ? 'success' : 'error'].main, 
+              0.2
+            ),
+          }}
+          icon={snackbar.severity === 'success' ? <CheckIcon /> : undefined}
         >
           {snackbar.message}
         </Alert>

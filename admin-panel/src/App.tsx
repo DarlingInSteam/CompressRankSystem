@@ -9,7 +9,6 @@ import Navigation from './components/Navigation';
 import HomePage from './pages/home/HomePage';
 import UploadPage from './pages/upload/UploadPage';
 import ImageDetailPage from './pages/detail/ImageDetailPage';
-import MetricsPage from './pages/metrics/MetricsPage';
 
 // Создание контекста для темы
 export const ColorModeContext = createContext({
@@ -121,7 +120,6 @@ const App: React.FC = () => {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/upload" element={<UploadPage />} />
                 <Route path="/images/:id/view" element={<ImageDetailPage />} />
-                <Route path="/metrics" element={<MetricsPage />} />
                 
                 {/* Заглушки для страниц, которые будут добавлены позже */}
                 <Route path="/analytics" element={<div>Страница аналитики будет добавлена позже</div>} />
