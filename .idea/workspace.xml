@@ -5,18 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0ec3192d-774f-49c4-adbc-f36601cea625" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CompressionService/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin-panel/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin-panel/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin-panel/src/components/Navigation.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin-panel/src/components/Navigation.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin-panel/src/components/dashboard/QuickActions.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin-panel/src/components/dashboard/RecentActivity.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin-panel/src/components/dashboard/StatCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin-panel/src/components/dashboard/StatCard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin-panel/src/pages/detail/ImageDetailPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin-panel/src/pages/detail/ImageDetailPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin-panel/src/pages/home/HomePage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin-panel/src/pages/home/HomePage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin-panel/src/pages/metrics/MetricsPage.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/compression-db.mv.db" beforeDir="false" afterPath="$PROJECT_DIR$/data/compression-db.mv.db" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -164,7 +154,7 @@
       <workItem from="1744571693039" duration="165000" />
       <workItem from="1744571994693" duration="13487000" />
       <workItem from="1744634438644" duration="11937000" />
-      <workItem from="1744664947411" duration="6498000" />
+      <workItem from="1744664947411" duration="11356000" />
     </task>
     <servers />
   </component>
