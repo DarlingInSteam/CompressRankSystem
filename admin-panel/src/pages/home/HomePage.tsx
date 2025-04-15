@@ -77,6 +77,7 @@ const HomePage: React.FC = () => {
     spaceSaved: 0,
     compressionEfficiency: 0
   });
+  const [imageStatistics, setImageStatistics] = useState<Record<string, ImageStatistics>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -111,22 +112,35 @@ const HomePage: React.FC = () => {
       const imagesData = await ImageService.getAllImages();
       setImages(imagesData);
       
+      // Получаем статистику изображений
+      try {
+        const statisticsData = await ImageService.getAllImageStatistics();
+        setImageStatistics(statisticsData);
+      } catch (err) {
+        console.error('Ошибка при загрузке статистики:', err);
+        // Не прерываем общий процесс загрузки, если статистика недоступна
+      }
+      
       // Вычисляем статистику
       const imagesArray = Object.values(imagesData);
       const totalCount = imagesArray.length;
       const compressedCount = imagesArray.filter(img => img.compressionLevel > 0).length;
       const totalSize = imagesArray.reduce((sum, img) => sum + img.size, 0);
       
-      // Приблизительная оценка сохраненного места (на основе уровня сжатия)
+      // Корректная оценка сохраненного места
       const spaceSaved = imagesArray
         .filter(img => img.compressionLevel > 0)
         .reduce((sum, img) => {
-          // Приблизительное оригинальное значение размера (если есть)
-          const estimatedOriginalSize = img.size / (1 - img.compressionLevel / 100);
-          return sum + (estimatedOriginalSize - img.size);
+          // Вычисляем оригинальный размер на основе формулы:
+          // current = original * (1 - compressionLevel/100)
+          // original = current / (1 - compressionLevel/100)
+          if (img.compressionLevel <= 0) return sum;
+          
+          const originalSize = img.size / (1 - img.compressionLevel / 100);
+          return sum + (originalSize - img.size);
         }, 0);
       
-      const compressionEfficiency = totalSize > 0 
+      const compressionEfficiency = totalSize + spaceSaved > 0 
         ? Math.round((spaceSaved / (totalSize + spaceSaved)) * 100) 
         : 0;
       
@@ -315,17 +329,129 @@ const HomePage: React.FC = () => {
     }
   };
 
-  return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          Каталог изображений
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Управление и мониторинг загруженных изображений
-        </Typography>
-      </Box>
+  // Функции для поиска и фильтрации изображений
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+  
+  const handleSortChange = (e: SelectChangeEvent) => {
+    setSortType(e.target.value as SortType);
+  };
+  
+  const handleDateFilterChange = (e: SelectChangeEvent) => {
+    setDateFilter(e.target.value as DateFilterType);
+  };
+  
+  const handleSizeFilterChange = (e: SelectChangeEvent) => {
+    setSizeFilter(e.target.value as SizeFilterType);
+  };
+  
+  const handleCompressionFilterChange = (e: SelectChangeEvent) => {
+    setCompressionFilter(e.target.value);
+  };
+  
+  const resetFilters = () => {
+    setSearchQuery('');
+    setSortType('uploadedAt');
+    setDateFilter('');
+    setSizeFilter('');
+    setCompressionFilter('all');
+  };
+  
+  // Применение фильтров и сортировки к изображениям
+  const filteredAndSortedImages = React.useMemo(() => {
+    // Получаем только оригинальные изображения (не результаты сжатия)
+    let result = Object.entries(images)
+      .filter(([_, image]) => image.originalImageId === null);
+    
+    // Применяем поиск по имени файла
+    if (searchQuery) {
+      result = result.filter(([_, image]) => 
+        image.originalFilename.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    // Применяем фильтр по дате
+    if (dateFilter) {
+      const now = new Date();
+      let compareDate = new Date();
       
+      switch(dateFilter) {
+        case 'today':
+          compareDate.setHours(0, 0, 0, 0);
+          break;
+        case 'week':
+          compareDate.setDate(now.getDate() - 7);
+          break;
+        case 'month':
+          compareDate.setMonth(now.getMonth() - 1);
+          break;
+        case 'year':
+          compareDate.setFullYear(now.getFullYear() - 1);
+          break;
+      }
+      
+      result = result.filter(([_, image]) => {
+        const uploadDate = new Date(image.uploadedAt);
+        return uploadDate >= compareDate;
+      });
+    }
+    
+    // Применяем фильтр по размеру
+    if (sizeFilter) {
+      result = result.filter(([_, image]) => {
+        switch(sizeFilter) {
+          case 'small': // < 100KB
+            return image.size < 100 * 1024;
+          case 'medium': // 100KB - 1MB
+            return image.size >= 100 * 1024 && image.size < 1024 * 1024;
+          case 'large': // 1MB - 10MB
+            return image.size >= 1024 * 1024 && image.size < 10 * 1024 * 1024;
+          case 'xlarge': // > 10MB
+            return image.size >= 10 * 1024 * 1024;
+          default:
+            return true;
+        }
+      });
+    }
+    
+    // Применяем фильтр по сжатию
+    if (compressionFilter !== 'all') {
+      result = result.filter(([_, image]) => {
+        return compressionFilter === 'compressed' 
+          ? image.compressionLevel > 0 
+          : image.compressionLevel === 0;
+      });
+    }
+    
+    // Применяем сортировку
+    result.sort(([id1, img1], [id2, img2]) => {
+      const stat1 = imageStatistics[id1] || { viewCount: 0, downloadCount: 0, popularityScore: 0 };
+      const stat2 = imageStatistics[id2] || { viewCount: 0, downloadCount: 0, popularityScore: 0 };
+      
+      switch(sortType) {
+        case 'uploadedAt':
+          return new Date(img2.uploadedAt).getTime() - new Date(img1.uploadedAt).getTime();
+        case 'views':
+          return (stat2.viewCount || 0) - (stat1.viewCount || 0);
+        case 'downloads':
+          return (stat2.downloadCount || 0) - (stat1.downloadCount || 0);
+        case 'popularity':
+          return (stat2.popularityScore || 0) - (stat1.popularityScore || 0);
+        case 'size_asc':
+          return img1.size - img2.size;
+        case 'size_desc':
+          return img2.size - img1.size;
+        default:
+          return 0;
+      }
+    });
+    
+    return result;
+  }, [images, imageStatistics, searchQuery, sortType, dateFilter, sizeFilter, compressionFilter]);
+
+  return (
+    <Container maxWidth={false} sx={{ mt: 4, mb: 4, px: { xs: 2, sm: 3, md: 4 } }}>
       {/* Уведомления */}
       <Snackbar 
         open={!!error} 
@@ -356,8 +482,12 @@ const HomePage: React.FC = () => {
       ) : (
         <>
           {/* Карточки со статистикой */}
-          <Grid container spacing={3} sx={{ mb: 4 }}>
-            <Grid component="div" xs={12} sm={6} lg={3}>
+          <Grid 
+            container 
+            spacing={3} 
+            sx={{ mb: 4, width: '100%', mx: 0 }}
+          >
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
               <StatCard
                 title="Всего изображений"
                 value={stats.totalImages}
@@ -366,7 +496,7 @@ const HomePage: React.FC = () => {
                 color="primary.main"
               />
             </Grid>
-            <Grid component="div" xs={12} sm={6} lg={3}>
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
               <StatCard
                 title="Сжатых изображений"
                 value={`${stats.compressedImages} / ${stats.totalImages}`}
@@ -375,7 +505,7 @@ const HomePage: React.FC = () => {
                 color="success.main"
               />
             </Grid>
-            <Grid component="div" xs={12} sm={6} lg={3}>
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
               <StatCard
                 title="Общий объем"
                 value={formatFileSize(stats.totalSize)}
@@ -384,7 +514,7 @@ const HomePage: React.FC = () => {
                 color="info.main"
               />
             </Grid>
-            <Grid component="div" xs={12} sm={6} lg={3}>
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
               <StatCard
                 title="Экономия места"
                 value={formatFileSize(stats.spaceSaved)}
@@ -396,232 +526,604 @@ const HomePage: React.FC = () => {
           </Grid>
           
           {/* Быстрые действия */}
-          <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between' }}>
-            <Box>
-              <Button 
-                variant="contained" 
-                startIcon={<UploadIcon />}
-                onClick={handleOpenUploadModal}
-                sx={{ mr: 2 }}
-              >
-                Загрузить изображения
-              </Button>
-            </Box>
-            
-            <Box>
-              <Button 
-                variant={selectionMode ? "contained" : "outlined"}
-                color={selectionMode ? "primary" : "inherit"}
-                onClick={handleToggleSelectionMode}
-                sx={{ mr: 2 }}
-              >
-                {selectionMode ? "Отменить выделение" : "Выделить изображения"}
-              </Button>
+          <Paper 
+            elevation={0} 
+            sx={{ 
+              p: 3, 
+              mb: 4, 
+              borderRadius: '16px',
+              backdropFilter: 'blur(10px)',
+              backgroundColor: theme => theme.palette.mode === 'light' 
+                ? 'rgba(255, 255, 255, 0.9)' 
+                : 'rgba(66, 66, 66, 0.8)',
+              boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+              border: '1px solid',
+              borderColor: theme => theme.palette.mode === 'light'
+                ? 'rgba(255, 255, 255, 0.4)'
+                : 'rgba(255, 255, 255, 0.1)',
+              transition: 'all 0.3s ease-in-out',
+              '&:hover': {
+                boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.25)'
+              }
+            }}
+          >
+            <Box sx={{ 
+              display: 'flex',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 2
+            }}>
+              <Box>
+                <Button 
+                  variant="contained" 
+                  startIcon={<UploadIcon />}
+                  onClick={handleOpenUploadModal}
+                  sx={{ 
+                    borderRadius: '8px', 
+                    textTransform: 'none',
+                    px: 3,
+                    py: 1,
+                    fontWeight: 'medium',
+                    boxShadow: '0 4px 10px 0 rgba(0,0,0,0.12)'
+                  }}
+                >
+                  Загрузить изображения
+                </Button>
+              </Box>
               
-              {selectionMode && (
-                <>
-                  <Button 
-                    variant="outlined"
-                    onClick={handleSelectAll}
-                    sx={{ mr: 2 }}
-                  >
-                    {selectedImages.length === Object.keys(images).filter(key => !images[key].originalImageId).length 
-                      ? "Снять выделение" 
-                      : "Выделить все"}
-                  </Button>
-                  
-                  <Button 
-                    variant="outlined"
-                    color="error"
-                    startIcon={<DeleteIcon />}
-                    onClick={() => handleOpenDeleteConfirm(null)}
-                    disabled={selectedImages.length === 0}
-                  >
-                    Удалить выбранные ({selectedImages.length})
-                  </Button>
-                </>
-              )}
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <Button 
+                  variant={selectionMode ? "contained" : "outlined"}
+                  color={selectionMode ? "primary" : "inherit"}
+                  onClick={handleToggleSelectionMode}
+                  sx={{ 
+                    borderRadius: '8px',
+                    textTransform: 'none',
+                    fontWeight: 'medium'
+                  }}
+                >
+                  {selectionMode ? "Отменить выделение" : "Выделить изображения"}
+                </Button>
+                
+                {selectionMode && (
+                  <>
+                    <Button 
+                      variant="outlined"
+                      onClick={handleSelectAll}
+                      sx={{ 
+                        borderRadius: '8px',
+                        textTransform: 'none',
+                        fontWeight: 'medium'
+                      }}
+                    >
+                      {selectedImages.length === Object.keys(images).filter(key => !images[key].originalImageId).length 
+                        ? "Снять выделение" 
+                        : "Выделить все"}
+                    </Button>
+                    
+                    <Button 
+                      variant="outlined"
+                      color="error"
+                      startIcon={<DeleteIcon />}
+                      onClick={() => handleOpenDeleteConfirm(null)}
+                      disabled={selectedImages.length === 0}
+                      sx={{ 
+                        borderRadius: '8px',
+                        textTransform: 'none',
+                        fontWeight: 'medium'
+                      }}
+                    >
+                      Удалить выбранные ({selectedImages.length})
+                    </Button>
+                  </>
+                )}
+              </Box>
             </Box>
-          </Box>
+          </Paper>
+          
+          {/* Фильтры и поиск */}
+          <Paper 
+            elevation={0}
+            sx={{ 
+              mb: 4,
+              p: 2, 
+              borderRadius: '16px',
+              backdropFilter: 'blur(8px)',
+              backgroundColor: theme => theme.palette.mode === 'light' 
+                ? 'rgba(255, 255, 255, 0.8)' 
+                : 'rgba(50, 50, 50, 0.8)',
+              border: '1px solid',
+              borderColor: theme => theme.palette.mode === 'light'
+                ? 'rgba(255, 255, 255, 0.6)'
+                : 'rgba(100, 100, 100, 0.2)',
+              boxShadow: theme => theme.palette.mode === 'light'
+                ? '0 8px 20px rgba(0,0,0,0.06)'
+                : '0 8px 20px rgba(0,0,0,0.25)'
+            }}
+          >
+            <Box sx={{ 
+              display: 'flex', 
+              flexWrap: 'wrap', 
+              gap: 2,
+              '& .MuiFormControl-root, & .MuiButton-root': {
+                transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 5px 10px rgba(0,0,0,0.1)'
+                }
+              }
+            }}>
+              <TextField
+                label="Поиск"
+                variant="outlined"
+                size="small"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  )
+                }}
+                sx={{ 
+                  flexGrow: 1, 
+                  minWidth: 200,
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '10px',
+                    backgroundColor: theme => theme.palette.mode === 'light'
+                      ? 'rgba(255, 255, 255, 0.9)'
+                      : 'rgba(66, 66, 66, 0.6)',
+                    backdropFilter: 'blur(5px)',
+                    transition: 'all 0.3s'
+                  }
+                }}
+              />
+              
+              <FormControl size="small" sx={{ minWidth: 150 }}>
+                <InputLabel>Сортировка</InputLabel>
+                <Select
+                  value={sortType}
+                  onChange={handleSortChange}
+                  label="Сортировка"
+                  sx={{
+                    borderRadius: '10px',
+                    backgroundColor: theme => theme.palette.mode === 'light'
+                      ? 'rgba(255, 255, 255, 0.9)'
+                      : 'rgba(66, 66, 66, 0.6)',
+                  }}
+                >
+                  <MenuItem value="uploadedAt">Дата загрузки</MenuItem>
+                  <MenuItem value="views">Просмотры</MenuItem>
+                  <MenuItem value="downloads">Загрузки</MenuItem>
+                  <MenuItem value="popularity">Популярность</MenuItem>
+                  <MenuItem value="size_asc">Размер (по возрастанию)</MenuItem>
+                  <MenuItem value="size_desc">Размер (по убыванию)</MenuItem>
+                </Select>
+              </FormControl>
+              
+              <FormControl size="small" sx={{ minWidth: 150 }}>
+                <InputLabel>Фильтр по дате</InputLabel>
+                <Select
+                  value={dateFilter}
+                  onChange={handleDateFilterChange}
+                  label="Фильтр по дате"
+                  sx={{
+                    borderRadius: '10px',
+                    backgroundColor: theme => theme.palette.mode === 'light'
+                      ? 'rgba(255, 255, 255, 0.9)'
+                      : 'rgba(66, 66, 66, 0.6)',
+                  }}
+                >
+                  <MenuItem value="">Все</MenuItem>
+                  <MenuItem value="today">Сегодня</MenuItem>
+                  <MenuItem value="week">Последняя неделя</MenuItem>
+                  <MenuItem value="month">Последний месяц</MenuItem>
+                  <MenuItem value="year">Последний год</MenuItem>
+                </Select>
+              </FormControl>
+              
+              <FormControl size="small" sx={{ minWidth: 150 }}>
+                <InputLabel>Фильтр по размеру</InputLabel>
+                <Select
+                  value={sizeFilter}
+                  onChange={handleSizeFilterChange}
+                  label="Фильтр по размеру"
+                  sx={{
+                    borderRadius: '10px',
+                    backgroundColor: theme => theme.palette.mode === 'light'
+                      ? 'rgba(255, 255, 255, 0.9)'
+                      : 'rgba(66, 66, 66, 0.6)',
+                  }}
+                >
+                  <MenuItem value="">Все</MenuItem>
+                  <MenuItem value="small">Маленькие (&lt; 100KB)</MenuItem>
+                  <MenuItem value="medium">Средние (100KB - 1MB)</MenuItem>
+                  <MenuItem value="large">Большие (1MB - 10MB)</MenuItem>
+                  <MenuItem value="xlarge">Очень большие (&gt; 10MB)</MenuItem>
+                </Select>
+              </FormControl>
+              
+              <FormControl size="small" sx={{ minWidth: 150 }}>
+                <InputLabel>Фильтр по сжатию</InputLabel>
+                <Select
+                  value={compressionFilter}
+                  onChange={handleCompressionFilterChange}
+                  label="Фильтр по сжатию"
+                  sx={{
+                    borderRadius: '10px',
+                    backgroundColor: theme => theme.palette.mode === 'light'
+                      ? 'rgba(255, 255, 255, 0.9)'
+                      : 'rgba(66, 66, 66, 0.6)',
+                  }}
+                >
+                  <MenuItem value="all">Все</MenuItem>
+                  <MenuItem value="compressed">Сжатые</MenuItem>
+                  <MenuItem value="original">Оригиналы</MenuItem>
+                </Select>
+              </FormControl>
+              
+              <Button 
+                variant="outlined" 
+                onClick={resetFilters}
+                endIcon={<FilterListIcon fontSize="small" />}
+                sx={{
+                  borderRadius: '10px',
+                  textTransform: 'none',
+                  fontWeight: 'medium'
+                }}
+              >
+                Сбросить
+              </Button>
+            </Box>
+          </Paper>
           
           {/* Каталог изображений */}
-          {Object.keys(images).length === 0 ? (
+          {filteredAndSortedImages.length === 0 ? (
             <Alert severity="info" sx={{ mt: 2 }}>
-              Нет загруженных изображений. Загрузите ваше первое изображение.
+              Нет изображений, соответствующих заданным критериям.
             </Alert>
           ) : (
             <Box sx={{ width: '100%' }}>
               <Grid 
                 container 
-                spacing={3} 
+                spacing={2}
                 sx={{ 
                   mb: 4,
                   display: 'grid',
                   gridTemplateColumns: {
-                    xs: '1fr',              // На маленьких экранах - 1 колонка
-                    sm: 'repeat(2, 1fr)',   // На средних экранах - 2 колонки
-                    md: 'repeat(3, 1fr)'    // На больших экранах - строго 3 колонки
+                    xs: 'repeat(1, 1fr)',  // На маленьких экранах - 1 колонка
+                    sm: 'repeat(2, 1fr)',  // На средних экранах - 2 колонки
+                    md: 'repeat(3, 1fr)',  // На средних-больших экранах - 3 колонки
+                    lg: 'repeat(5, minmax(0, 1fr))'   // На больших экранах - строго 5 колонок
                   },
-                  gap: 3
+                  gap: '16px',
+                  width: '100%'
                 }}
               >
-                {Object.entries(images)
-                  .filter(([_, image]) => image.originalImageId === null) // Показываем только оригинальные изображения
-                  .map(([id, image]) => (
-                    <Card 
-                      key={id}
-                      sx={{ 
-                        height: '100%',
+                {filteredAndSortedImages.map(([id, image]) => (
+                  <Card 
+                    key={id}
+                    sx={{ 
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      borderRadius: '16px',
+                      backdropFilter: 'blur(8px)',
+                      backgroundColor: theme => theme.palette.mode === 'light' 
+                        ? 'rgba(255, 255, 255, 0.9)' 
+                        : 'rgba(30, 30, 30, 0.75)',
+                      border: '1px solid',
+                      borderColor: theme => theme.palette.mode === 'light'
+                        ? 'rgba(255, 255, 255, 0.5)'
+                        : 'rgba(255, 255, 255, 0.1)',
+                      boxShadow: theme => theme.palette.mode === 'light'
+                        ? '0 8px 16px rgba(70, 70, 70, 0.1)'
+                        : '0 8px 16px rgba(0, 0, 0, 0.3)',
+                      transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                      transform: selectedImages.includes(id) ? 'scale(0.98)' : 'scale(1)',
+                      '&:hover': {
+                        transform: 'translateY(-10px) scale(1.02)',
+                        boxShadow: theme => theme.palette.mode === 'light'
+                          ? '0 14px 28px rgba(70, 70, 70, 0.2), 0 10px 10px rgba(70, 70, 70, 0.15)'
+                          : '0 14px 28px rgba(0, 0, 0, 0.3), 0 10px 10px rgba(0, 0, 0, 0.22)'
+                      },
+                      outline: selectedImages.includes(id) ? '2px solid' : 'none',
+                      outlineColor: 'primary.main',
+                      outlineOffset: 2,
+                      position: 'relative',
+                      overflow: 'visible'
+                    }}
+                  >
+                    {selectionMode && (
+                      <Checkbox 
+                        checked={selectedImages.includes(id)}
+                        onChange={() => handleToggleSelection(id)}
+                        sx={{ 
+                          position: 'absolute', 
+                          top: -6, 
+                          right: -6, 
+                          zIndex: 2,
+                          bgcolor: 'background.paper', 
+                          width: 24,
+                          height: 24,
+                          borderRadius: '50%',
+                          boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                          transition: 'transform 0.2s ease',
+                          '&:hover': {
+                            transform: 'scale(1.15)'
+                          }
+                        }}
+                      />
+                    )}
+                    
+                    {/* Статус сжатия */}
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 14,
+                        left: 14,
+                        zIndex: 1,
                         display: 'flex',
-                        flexDirection: 'column',
-                        transition: 'transform 0.2s, box-shadow 0.2s',
-                        '&:hover': {
-                          transform: 'translateY(-5px)',
-                          boxShadow: 4
-                        },
-                        border: selectedImages.includes(id) ? '2px solid' : 'none',
-                        borderColor: 'primary.main',
+                        alignItems: 'center',
+                        bgcolor: theme => theme.palette.mode === 'light'
+                          ? 'rgba(255, 255, 255, 0.9)'
+                          : 'rgba(40, 40, 40, 0.9)',
+                        backdropFilter: 'blur(5px)',
+                        borderRadius: '50px',
+                        px: 1.5,
+                        py: 0.5,
+                        boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
+                        border: '1px solid',
+                        borderColor: theme => theme.palette.mode === 'light'
+                          ? 'rgba(255, 255, 255, 0.5)'
+                          : 'rgba(255, 255, 255, 0.1)',
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      <CompressIcon 
+                        fontSize="small" 
+                        color={image.compressionLevel > 0 ? "success" : "disabled"} 
+                        sx={{ 
+                          mr: 0.5,
+                          animation: image.compressionLevel > 0 ? 'pulse 2s infinite' : 'none',
+                          '@keyframes pulse': {
+                            '0%': { opacity: 0.7 },
+                            '50%': { opacity: 1 },
+                            '100%': { opacity: 0.7 }
+                          }
+                        }}
+                      />
+                      <Typography 
+                        variant="caption" 
+                        fontWeight="medium"
+                        component="span"
+                        sx={{
+                          background: image.compressionLevel > 0 
+                            ? 'linear-gradient(90deg, #4caf50, #8bc34a)' 
+                            : 'none',
+                          WebkitBackgroundClip: image.compressionLevel > 0 ? 'text' : 'none',
+                          WebkitTextFillColor: image.compressionLevel > 0 ? 'transparent' : 'inherit'
+                        }}
+                      >
+                        {image.compressionLevel > 0 ? `Сжато ${image.compressionLevel}%` : 'Оригинал'}
+                      </Typography>
+                    </Box>
+                    
+                    <Box 
+                      sx={{ 
+                        overflow: 'hidden', 
+                        borderTopLeftRadius: '16px', 
+                        borderTopRightRadius: '16px',
                         position: 'relative'
                       }}
                     >
-                      {selectionMode && (
-                        <Checkbox 
-                          checked={selectedImages.includes(id)}
-                          onChange={() => handleToggleSelection(id)}
-                          sx={{ 
-                            position: 'absolute', 
-                            top: 0, 
-                            right: 0, 
-                            zIndex: 1,
-                            bgcolor: 'rgba(255,255,255,0.7)', 
-                            m: 1,
-                            borderRadius: '50%'
-                          }}
-                        />
-                      )}
-                      
-                      {/* Статус сжатия - добавлен в верхний левый угол */}
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          top: 8,
-                          left: 8,
-                          zIndex: 1,
-                          display: 'flex',
-                          alignItems: 'center',
-                          bgcolor: 'rgba(255,255,255,0.85)',
-                          borderRadius: '4px',
-                          px: 1,
-                          py: 0.5,
-                          boxShadow: 1
-                        }}
-                      >
-                        <CompressIcon fontSize="small" color={image.compressionLevel > 0 ? "success" : "disabled"} sx={{ mr: 0.5 }} />
-                        <Typography variant="caption" fontWeight="medium">
-                          {image.compressionLevel > 0 ? `Сжато ${image.compressionLevel}%` : 'Оригинал'}
-                        </Typography>
-                      </Box>
-                      
                       <CardActionArea 
                         onClick={selectionMode ? () => handleToggleSelection(id) : () => handleViewImage(id)}
                         sx={{ flexGrow: 0 }}
                       >
                         <CardMedia
                           component="img"
-                          height="200"
+                          height="220"
                           image={ImageService.getImageUrl(id)}
                           alt={image.originalFilename}
                           sx={{ 
-                            objectFit: 'contain', 
-                            bgcolor: 'background.default',
-                            borderBottom: '1px solid',
-                            borderBottomColor: 'divider'
+                            objectFit: 'cover', 
+                            transition: 'transform 0.5s ease',
+                            '&:hover': {
+                              transform: 'scale(1.05)'
+                            }
                           }}
                         />
                       </CardActionArea>
+                    </Box>
+                    
+                    <CardContent sx={{ flexGrow: 1, p: 3, pb: 2 }}>
+                      <Typography 
+                        variant="h6" 
+                        noWrap 
+                        title={image.originalFilename}
+                        sx={{
+                          fontSize: '1.1rem',
+                          fontWeight: 600,
+                          mb: 0.5
+                        }}
+                      >
+                        {image.originalFilename}
+                      </Typography>
                       
-                      <CardContent sx={{ flexGrow: 1 }}>
-                        <Typography variant="h6" noWrap title={image.originalFilename}>
-                          {image.originalFilename}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                          {formatFileSize(image.size)} • {new Date(image.uploadedAt).toLocaleDateString()}
-                        </Typography>
-                        
-                        {/* Информация о размере до/после сжатия */}
-                        {image.compressionLevel > 0 && (
-                          <Box sx={{ mt: 1, mb: 1 }}>
-                            <Typography variant="body2" color="text.secondary">
-                              Изначальный размер: {formatFileSize(Math.round(image.size / (1 - image.compressionLevel / 100)))}
-                            </Typography>
-                            <Typography variant="body2" color="success.main">
-                              Сэкономлено: {formatFileSize(Math.round(image.size / (1 - image.compressionLevel / 100)) - image.size)}
+                      <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        mb: 2,
+                        color: 'text.secondary',
+                        fontSize: '0.875rem'
+                      }}>
+                        <Box component="span" sx={{ fontWeight: 500 }}>
+                          {formatFileSize(image.size)}
+                        </Box>
+                        <Box 
+                          component="span" 
+                          sx={{ 
+                            mx: 0.7,
+                            width: '4px',
+                            height: '4px',
+                            borderRadius: '50%',
+                            backgroundColor: 'text.disabled',
+                            display: 'inline-block'
+                          }} 
+                        />
+                        <Box component="span">
+                          {new Date(image.uploadedAt).toLocaleDateString()}
+                        </Box>
+                      </Box>
+                      
+                      {/* Информация о размере до/после сжатия */}
+                      {image.compressionLevel > 0 && (
+                        <Paper 
+                          elevation={0} 
+                          sx={{ 
+                            mt: 1, 
+                            mb: 1.5, 
+                            p: 1.5, 
+                            backgroundColor: theme => theme.palette.mode === 'light'
+                              ? 'rgba(237, 247, 237, 0.8)'
+                              : 'rgba(46, 125, 50, 0.1)',
+                            borderRadius: 2,
+                            border: '1px solid',
+                            borderColor: theme => theme.palette.mode === 'light'
+                              ? 'rgba(76, 175, 80, 0.2)'
+                              : 'rgba(76, 175, 80, 0.1)',
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                            <Typography variant="body2" color="text.secondary">Исходный:</Typography>
+                            <Typography variant="body2" fontWeight="medium">
+                              {formatFileSize(Math.round(image.size / (1 - image.compressionLevel / 100)))}
                             </Typography>
                           </Box>
-                        )}
-                        
-                        <Box display="flex" flexWrap="wrap" gap={1} mt={1}>
-                          <Chip 
-                            size="small" 
-                            label={image.compressionLevel > 0 ? 'Сжато' : 'Оригинал'}
-                            color={image.compressionLevel > 0 ? 'success' : 'info'}
-                          />
-                          {image.compressionLevel > 0 && (
-                            <Chip 
-                              size="small"
-                              label={`${image.compressionLevel}%`}
-                              variant="outlined"
-                            />
-                          )}
-                          <Chip 
-                            size="small" 
-                            icon={<VisibilityIcon fontSize="small" />}
-                            label={image.accessCount}
-                            variant="outlined"
-                            title="Количество просмотров"
-                          />
-                          <Chip 
-                            size="small" 
-                            icon={<CloudDownloadIcon fontSize="small" />}
-                            label={image.accessCount > 0 ? Math.floor(image.accessCount * 0.4) : 0}
-                            variant="outlined"
-                            title="Количество загрузок"
-                          />
-                        </Box>
-                      </CardContent>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography variant="body2" color="success.main" fontWeight="medium">
+                              Экономия:
+                            </Typography>
+                            <Typography variant="body2" color="success.main" fontWeight="medium">
+                              {formatFileSize(Math.round(image.size / (1 - image.compressionLevel / 100)) - image.size)}
+                            </Typography>
+                          </Box>
+                        </Paper>
+                      )}
                       
-                      <CardActions>
-                        <Button 
+                      <Box display="flex" flexWrap="wrap" gap={0.8} mt={1.5}>
+                        <Chip 
                           size="small" 
-                          startIcon={<InfoIcon />} 
-                          onClick={() => handleViewImage(id)}
-                        >
-                          Просмотр
-                        </Button>
-                        <Button 
-                          size="small" 
-                          startIcon={<DownloadIcon />}
-                          component="a"
-                          href={ImageService.getImageUrl(id, true)}
-                          download={image.originalFilename}
-                        >
-                          Скачать
-                        </Button>
-                        
-                        <Box flexGrow={1} />
-                        
-                        <Tooltip title="Удалить">
-                          <IconButton 
-                            color="error"
-                            onClick={() => handleOpenDeleteConfirm(id)}
+                          label={image.compressionLevel > 0 ? 'Сжато' : 'Оригинал'}
+                          color={image.compressionLevel > 0 ? 'success' : 'info'}
+                          sx={{ 
+                            borderRadius: '50px',
+                            px: 0.5,
+                            fontWeight: 500,
+                            boxShadow: '0 2px 5px rgba(0,0,0,0.08)'
+                          }}
+                        />
+                        {image.compressionLevel > 0 && (
+                          <Chip 
                             size="small"
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </CardActions>
-                    </Card>
-                  ))}
+                            label={`${image.compressionLevel}%`}
+                            variant="outlined"
+                            sx={{ 
+                              borderRadius: '50px',
+                              fontWeight: 500 
+                            }}
+                          />
+                        )}
+                        <Chip 
+                          size="small" 
+                          icon={<VisibilityIcon sx={{ fontSize: '1rem !important' }} />}
+                          label={image.accessCount}
+                          variant="outlined"
+                          title="Количество просмотров"
+                          sx={{ 
+                            borderRadius: '50px',
+                            fontWeight: 500 
+                          }}
+                        />
+                        <Chip 
+                          size="small" 
+                          icon={<CloudDownloadIcon sx={{ fontSize: '1rem !important' }} />}
+                          label={image.accessCount > 0 ? Math.floor(image.accessCount * 0.4) : 0}
+                          variant="outlined"
+                          title="Количество загрузок"
+                          sx={{ 
+                            borderRadius: '50px',
+                            fontWeight: 500 
+                          }}
+                        />
+                      </Box>
+                    </CardContent>
+                    
+                    <CardActions sx={{ px: 2, pb: 2, pt: 0 }}>
+                      <Button 
+                        size="small" 
+                        startIcon={<InfoIcon />} 
+                        onClick={() => handleViewImage(id)}
+                        sx={{ 
+                          borderRadius: '8px',
+                          textTransform: 'none',
+                          fontWeight: 500,
+                          background: theme => theme.palette.mode === 'light'
+                            ? 'linear-gradient(to right, rgba(25, 118, 210, 0.1), rgba(25, 118, 210, 0.05))'
+                            : 'linear-gradient(to right, rgba(25, 118, 210, 0.15), rgba(25, 118, 210, 0.05))',
+                          '&:hover': {
+                            background: theme => theme.palette.mode === 'light'
+                              ? 'linear-gradient(to right, rgba(25, 118, 210, 0.2), rgba(25, 118, 210, 0.1))'
+                              : 'linear-gradient(to right, rgba(25, 118, 210, 0.25), rgba(25, 118, 210, 0.1))'
+                          }
+                        }}
+                      >
+                        Просмотр
+                      </Button>
+                      <Button 
+                        size="small" 
+                        startIcon={<DownloadIcon />}
+                        component="a"
+                        href={ImageService.getImageUrl(id, true)}
+                        download={image.originalFilename}
+                        sx={{ 
+                          borderRadius: '8px',
+                          textTransform: 'none',
+                          fontWeight: 500,
+                          ml: 1
+                        }}
+                      >
+                        Скачать
+                      </Button>
+                      
+                      <Box flexGrow={1} />
+                      
+                      <Tooltip title="Удалить">
+                        <IconButton 
+                          color="error"
+                          onClick={() => handleOpenDeleteConfirm(id)}
+                          size="small"
+                          sx={{ 
+                            width: 32, 
+                            height: 32,
+                            borderRadius: '8px',
+                            transition: 'all 0.2s',
+                            '&:hover': {
+                              backgroundColor: 'error.light',
+                              '& .MuiSvgIcon-root': {
+                                color: 'white'
+                              }
+                            }
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </CardActions>
+                  </Card>
+                ))}
               </Grid>
             </Box>
           )}
