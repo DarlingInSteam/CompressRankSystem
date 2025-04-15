@@ -98,7 +98,7 @@ const ImageDetailPage: React.FC = () => {
 
       // Получаем статистику для изображения
       try {
-        const statistics = await ImageService.getImageStatistics(imageId);
+        const statistics = await ImageService.getImageStatisticById(imageId);
         setImageStatistics(statistics);
       } catch (err) {
         console.warn('Could not fetch image statistics:', err);
@@ -434,7 +434,7 @@ const ImageDetailPage: React.FC = () => {
                 </Box>
                 <Box sx={{ p: 3 }}>
                   <Grid container spacing={2} sx={{ mb: 3 }}>
-                    <Grid xs={12} sm={6} md={3}>
+                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                       <Box sx={{ 
                         p: 2, 
                         borderRadius: '12px', 
@@ -448,7 +448,7 @@ const ImageDetailPage: React.FC = () => {
                         </Typography>
                       </Box>
                     </Grid>
-                    <Grid xs={12} sm={6} md={2}>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
                       <Box sx={{ 
                         p: 2, 
                         borderRadius: '12px', 
@@ -462,7 +462,7 @@ const ImageDetailPage: React.FC = () => {
                         </Typography>
                       </Box>
                     </Grid>
-                    <Grid xs={12} sm={6} md={2}>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
                       <Box sx={{ 
                         p: 2, 
                         borderRadius: '12px', 
@@ -477,7 +477,7 @@ const ImageDetailPage: React.FC = () => {
                         </Typography>
                       </Box>
                     </Grid>
-                    <Grid xs={12} sm={6} md={2}>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
                       <Box sx={{ 
                         p: 2, 
                         borderRadius: '12px', 
@@ -492,7 +492,7 @@ const ImageDetailPage: React.FC = () => {
                         </Typography>
                       </Box>
                     </Grid>
-                    <Grid xs={12} sm={6} md={3}>
+                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                       <Box sx={{ 
                         p: 2, 
                         borderRadius: '12px', 

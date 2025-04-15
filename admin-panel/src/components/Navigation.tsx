@@ -506,7 +506,9 @@ const Navigation: React.FC = () => {
                   sx={{ position: 'relative' }}
                   onMouseEnter={() => toggleSubmenu(item.text)}
                   onMouseLeave={() => toggleSubmenu(null)}
-                  ref={(el) => menuRefs.current[item.text] = el}
+                  ref={(el: HTMLElement | null) => {
+                    menuRefs.current[item.text] = el;
+                  }}
                 >
                   <Button
                     onClick={() => {

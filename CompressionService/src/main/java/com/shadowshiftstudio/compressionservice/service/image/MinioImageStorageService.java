@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,7 +30,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/**
+ * Реализация сервиса хранения изображений, использующая MinIO напрямую.
+ * Эта реализация отключена в пользу RemoteImageStorageService, которая следует 
+ * микросервисной архитектуре и взаимодействует с ImageStorageService через API.
+ */
 @Service
+@ConditionalOnProperty(name = "minio.direct.connection", havingValue = "true", matchIfMissing = false)
 public class MinioImageStorageService implements ImageStorageService {
 
     private static final Logger logger = LoggerFactory.getLogger(MinioImageStorageService.class);
@@ -54,6 +61,9 @@ public class MinioImageStorageService implements ImageStorageService {
         this.imageRepository = imageRepository;
         this.imageMapper = imageMapper;
         this.webpService = webpService;
+        
+        logger.warn("Инициализирована прямая реализация MinioImageStorageService, " +
+                    "что нарушает микросервисную архитектуру. Рекомендуется использовать RemoteImageStorageService.");
     }
 
     @PostConstruct

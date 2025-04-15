@@ -28,6 +28,10 @@ public class Image {
         this.objectName = id + "_" + originalFilename.replaceAll("\\s+", "_");
     }
 
+    public Image() {
+
+    }
+
     public String getId() {
         return id;
     }

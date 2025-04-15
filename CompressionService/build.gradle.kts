@@ -9,8 +9,12 @@ version = "0.0.1-SNAPSHOT"
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(23)
+		languageVersion = JavaLanguageVersion.of(21)
 	}
+}
+
+springBoot {
+	mainClass.set("com.shadowshiftstudio.compressionservice.CompressionServiceApplication")
 }
 
 repositories {
@@ -38,6 +42,8 @@ dependencies {
 
 	// Добавляем встроенный MinIO сервер для эмуляции
 	implementation("de.bwaldvogel:mongo-java-server:1.44.0") // Помогает запустить встроенный сервер
+
+	implementation("org.springframework.boot:spring-boot-starter-amqp")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")

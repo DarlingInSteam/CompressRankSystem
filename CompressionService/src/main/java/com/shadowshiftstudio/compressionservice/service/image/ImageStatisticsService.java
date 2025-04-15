@@ -72,4 +72,12 @@ public class ImageStatisticsService {
     public ImageStatisticsEntity getImageStatistics(String imageId) {
         return getStatisticsForImage(imageId);
     }
+    
+    /**
+     * Получает статистику для всех изображений
+     * @return список объектов статистики для всех изображений
+     */
+    public List<ImageStatisticsEntity> getAllImageStatistics() {
+        return statisticsRepository.findAll();
+    }
 }
