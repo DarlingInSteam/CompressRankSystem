@@ -64,11 +64,6 @@ public class ImageController {
             @Parameter(description = "Image file to upload", required = true)
             @RequestParam("file") MultipartFile file) {
         try {
-            // For file uploads, we need to forward to the storage service's REST API
-            // Since we can't easily send binary data through the message broker
-            // In a real implementation, you might use RestTemplate to forward the request
-            
-            // Redirect the client to upload directly to the storage service
             HttpHeaders headers = new HttpHeaders();
             headers.add("Location", storageServiceUrl + "/api/images");
             
@@ -111,27 +106,21 @@ public class ImageController {
             @Parameter(description = "Whether to download the image")
             @RequestParam(required = false, defaultValue = "false") boolean download) {
         try {
-            // Get image data from storage service
             byte[] imageData = imageStorageClient.getImage(id);
             if (imageData == null) {
                 return ResponseEntity.notFound().build();
             }
-            
-            // Get metadata for proper content type
             Image metadata = imageStorageClient.getImageMetadata(id);
             if (metadata == null) {
                 return ResponseEntity.notFound().build();
             }
 
-            // Update view statistics
             statisticsService.incrementViewCount(id);
             
-            // If download requested, increment download counter
             if (download) {
                 statisticsService.incrementDownloadCount(id);
             }
             
-            // Set appropriate headers
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.parseMediaType(metadata.getContentType()));
             

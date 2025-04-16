@@ -69,7 +69,6 @@ public class MinioImageStorageService implements ImageStorageService {
     @PostConstruct
     public void init() {
         try {
-            // Инициализация основного бакета
             boolean bucketExists = minioClient.bucketExists(
                     BucketExistsArgs.builder().bucket(bucketName).build()
             );
@@ -81,7 +80,6 @@ public class MinioImageStorageService implements ImageStorageService {
                 logger.info("Created new bucket: {}", bucketName);
             }
 
-            // Инициализация бакета для бэкапов
             boolean backupBucketExists = minioClient.bucketExists(
                     BucketExistsArgs.builder().bucket(backupBucketName).build()
             );
@@ -201,7 +199,6 @@ public class MinioImageStorageService implements ImageStorageService {
                                 .build()
                 );
                 
-                // Сохраняем резервную копию исходного изображения для возможности восстановления
                 String backupObjectName = BACKUP_PREFIX + image.getObjectName();
                 minioClient.putObject(
                         PutObjectArgs.builder()
@@ -229,7 +226,6 @@ public class MinioImageStorageService implements ImageStorageService {
     @Override
     @Transactional
     public Image storeCompressedImage(String imageId, byte[] compressedData, int compressionLevel) throws IOException {
-        // Эта функция оставлена для обратной совместимости, но теперь использует updateImageCompression
         return updateImageCompression(imageId, compressedData, compressionLevel);
     }
 
@@ -243,11 +239,9 @@ public class MinioImageStorageService implements ImageStorageService {
         }
 
         try {
-            // Если это первое сжатие изображения, сохраняем оригинал
             if (image.getCompressionLevel() == 0 && compressionLevel > 0) {
                 byte[] originalData = getImage(imageId);
                 
-                // Сохраняем резервную копию оригинала, если её еще нет
                 String backupObjectName = BACKUP_PREFIX + image.getObjectName();
                 boolean backupExists = false;
                 
@@ -260,7 +254,6 @@ public class MinioImageStorageService implements ImageStorageService {
                     );
                     backupExists = true;
                 } catch (Exception e) {
-                    // Объект не существует, продолжаем
                 }
                 
                 if (!backupExists) {
@@ -278,7 +271,6 @@ public class MinioImageStorageService implements ImageStorageService {
                 }
             }
 
-            // Сохраняем новые данные в то же хранилище
             try (ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData)) {
                 minioClient.putObject(
                         PutObjectArgs.builder()
@@ -290,7 +282,6 @@ public class MinioImageStorageService implements ImageStorageService {
                 );
             }
 
-            // Обновляем метаданные
             ImageEntity entity = imageRepository.findById(imageId).orElse(null);
             if (entity == null) {
                 throw new IOException("Image entity not found in database: " + imageId);
@@ -321,7 +312,6 @@ public class MinioImageStorageService implements ImageStorageService {
             return null;
         }
 
-        // Если уровень сжатия 0, значит это уже оригинал
         if (image.getCompressionLevel() == 0) {
             return getImage(id);
         }
@@ -418,7 +408,6 @@ public class MinioImageStorageService implements ImageStorageService {
         Image image = imageMapper.toModel(entity);
 
         try {
-            // Удаляем изображение из основного хранилища
             minioClient.removeObject(
                     RemoveObjectArgs.builder()
                             .bucket(bucketName)
@@ -426,7 +415,6 @@ public class MinioImageStorageService implements ImageStorageService {
                             .build()
             );
 
-            // Удаляем бэкап, если он существует
             try {
                 String backupObjectName = BACKUP_PREFIX + image.getObjectName();
                 minioClient.removeObject(
@@ -437,7 +425,6 @@ public class MinioImageStorageService implements ImageStorageService {
                 );
                 logger.info("Deleted backup for image: id={}", id);
             } catch (Exception e) {
-                // Игнорируем ошибки при удалении бэкапа
                 logger.warn("Failed to delete backup for image id={}, it might not exist", id);
             }
 
@@ -463,9 +450,6 @@ public class MinioImageStorageService implements ImageStorageService {
     }
 
     private int mapCompressionLevelToQuality(int compressionLevel) {
-        // Инвертируем значение сжатия для WebP качества
-        // Уровень сжатия 0 - качество WebP 100
-        // Уровень сжатия 100 - качество WebP 0
         return Math.max(0, Math.min(100, 100 - compressionLevel));
     }
 }

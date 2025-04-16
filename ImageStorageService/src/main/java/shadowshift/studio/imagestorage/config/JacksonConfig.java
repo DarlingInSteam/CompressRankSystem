@@ -18,10 +18,8 @@ public class JacksonConfig {
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         
-        // Регистрируем модуль для работы с Java 8 Date & Time API (LocalDateTime и т.д.)
         objectMapper.registerModule(new JavaTimeModule());
         
-        // Отключаем сериализацию дат как временных меток
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         
         return objectMapper;

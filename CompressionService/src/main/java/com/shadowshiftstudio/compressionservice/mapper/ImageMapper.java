@@ -7,9 +7,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class ImageMapper {
 
-    /**
-     * Конвертирует модель Image в сущность ImageEntity для сохранения в базе данных
-     */
     public ImageEntity toEntity(Image image) {
         if (image == null) {
             return null;
@@ -29,9 +26,6 @@ public class ImageMapper {
         );
     }
     
-    /**
-     * Конвертирует сущность ImageEntity в модель Image для использования в приложении
-     */
     public Image toModel(ImageEntity entity) {
         if (entity == null) {
             return null;

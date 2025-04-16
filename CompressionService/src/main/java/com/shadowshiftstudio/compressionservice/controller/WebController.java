@@ -39,9 +39,6 @@ public class WebController {
         this.statisticsService = statisticsService;
     }
 
-    /**
-     * Главная страница с галереей изображений
-     */
     @Operation(
         summary = "Главная страница",
         description = "Отображает главную страницу с галереей всех исходных изображений, с возможностью фильтрации и сортировки"
@@ -229,9 +226,6 @@ public class WebController {
         return "index";
     }
 
-    /**
-     * Загрузка нового изображения через форму
-     */
     @Operation(
         summary = "Загрузка изображения через форму",
         description = "Обрабатывает загрузку нового изображения через веб-форму"
@@ -268,9 +262,6 @@ public class WebController {
         return "redirect:/";
     }
     
-    /**
-     * Страница просмотра изображения и его сжатых версий
-     */
     @Operation(
         summary = "Страница просмотра изображения",
         description = "Отображает страницу с детальной информацией о изображении и его сжатых версиях"
@@ -316,9 +307,6 @@ public class WebController {
         return "view";
     }
     
-    /**
-     * Сжатие изображения через форму
-     */
     @Operation(
         summary = "Сжатие изображения через форму",
         description = "Обрабатывает запрос на сжатие изображения с указанным уровнем компрессии"
@@ -350,9 +338,6 @@ public class WebController {
         return "redirect:/images/" + id + "/view";
     }
     
-    /**
-     * Восстановление изображения через форму
-     */
     @Operation(
         summary = "Восстановление изображения через форму",
         description = "Обрабатывает запрос на восстановление изображения до исходного качества"
@@ -376,9 +361,6 @@ public class WebController {
         return "redirect:/images/" + id + "/view";
     }
     
-    /**
-     * Удаление изображения
-     */
     @Operation(
         summary = "Удаление изображения через форму",
         description = "Обрабатывает запрос на удаление изображения"

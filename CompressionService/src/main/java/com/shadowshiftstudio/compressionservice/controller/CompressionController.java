@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/compression")
 @Tag(name = "Сервис сжатия", description = "API для обработки и сжатия изображений")
 public class CompressionController {
-    // TODO : добавить отдельный сервис ранжирования. Пока что автоматизации нет.
     private final CompressionService compressionService;
 
     @Autowired
@@ -153,9 +152,7 @@ public class CompressionController {
             @PathVariable String imageId) {
         
         try {
-            // Получаем оригинальный размер из сервиса сжатия
             long originalSize = compressionService.getOriginalSize(imageId);
-            // Возвращаем в формате JSON с ключом originalSize
             return ResponseEntity.ok(java.util.Map.of("originalSize", originalSize));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(java.util.Map.of("error", "Изображение не найдено"));

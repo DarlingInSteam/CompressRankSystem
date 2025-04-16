@@ -26,7 +26,6 @@ import java.util.concurrent.TimeoutException;
 public class ImageStorageClient {
 
     private static final Logger logger = LoggerFactory.getLogger(ImageStorageClient.class);
-    // Increasing timeout from 10 to 60 seconds to accommodate larger image transfers
     private static final int DEFAULT_TIMEOUT_SECONDS = 60;
 
     private final MessageSender messageSender;
@@ -46,8 +45,6 @@ public class ImageStorageClient {
      * @throws IOException if storage operation fails
      */
     public Image storeImage(MultipartFile file) throws IOException {
-        // This is a direct REST API call since we need to transfer the file
-        // The actual implementation would use a REST client to call the storage service directly
         throw new UnsupportedOperationException("Direct upload via message broker is not supported. Use REST API instead.");
     }
 
@@ -62,7 +59,6 @@ public class ImageStorageClient {
         logger.info("Getting image data for image ID: {}", id);
         CompletableFuture<byte[]> future = new CompletableFuture<>();
 
-        // Register callback to process the response
         messageListener.registerCallback(id, message -> {
             if ("IMAGE_DATA".equals(message.getAction())) {
                 byte[] imageData = messageListener.getImageData(id);
@@ -82,7 +78,6 @@ public class ImageStorageClient {
             }
         });
 
-        // Send request to storage service
         ImageMessage message = new ImageMessage();
         message.setImageId(id);
         message.setAction("GET_IMAGE");
@@ -113,7 +108,6 @@ public class ImageStorageClient {
     public byte[] getOriginalImageBackup(String id) throws IOException {
         CompletableFuture<byte[]> future = new CompletableFuture<>();
 
-        // Register callback to process the response
         messageListener.registerCallback(id, message -> {
             if ("ORIGINAL_DATA".equals(message.getAction())) {
                 byte[] imageData = messageListener.getImageData(id);
@@ -123,7 +117,6 @@ public class ImageStorageClient {
             }
         });
 
-        // Send request to storage service
         ImageMessage message = new ImageMessage();
         message.setImageId(id);
         message.setAction("GET_ORIGINAL");
@@ -147,14 +140,11 @@ public class ImageStorageClient {
         logger.info("Getting metadata for image ID: {}", id);
         CompletableFuture<Image> future = new CompletableFuture<>();
 
-        // Register callback to process the response
         messageListener.registerCallback(id, message -> {
             if ("METADATA".equals(message.getAction())) {
-                // Получаем все метаданные из сообщения и создаем полный объект Image
                 Image image = new Image();
                 image.setId(id);
                 
-                // Устанавливаем дополнительные поля из сообщения
                 if (message.getMetadata() != null) {
                     if (message.getMetadata().containsKey("originalFilename")) {
                         image.setOriginalFilename(message.getMetadata().get("originalFilename").toString());
@@ -168,7 +158,6 @@ public class ImageStorageClient {
                     if (message.getMetadata().containsKey("compressionLevel")) {
                         image.setCompressionLevel(Integer.parseInt(message.getMetadata().get("compressionLevel").toString()));
                     } else {
-                        // По умолчанию устанавливаем 0, чтобы избежать ошибок при проверках
                         image.setCompressionLevel(0);
                     }
                     if (message.getMetadata().containsKey("objectName")) {
@@ -184,11 +173,10 @@ public class ImageStorageClient {
                 future.complete(image);
             } else if ("NOT_FOUND".equals(message.getAction()) || "ERROR".equals(message.getAction())) {
                 logger.warn("Image metadata not found for ID: {}", id);
-                future.complete(null); // Image not found
+                future.complete(null);
             }
         });
 
-        // Send request to storage service
         ImageMessage message = new ImageMessage();
         message.setImageId(id);
         message.setAction("GET_METADATA");
@@ -221,15 +209,12 @@ public class ImageStorageClient {
     public Image updateImageCompression(String imageId, byte[] imageData, int compressionLevel) throws IOException {
         CompletableFuture<Image> future = new CompletableFuture<>();
 
-        // Register callback to process the response
         messageListener.registerCallback(imageId, message -> {
             if ("UPDATED".equals(message.getAction())) {
-                // Создаем полный объект Image с обновленными метаданными
                 Image image = new Image();
                 image.setId(imageId);
                 image.setCompressionLevel(compressionLevel);
                 
-                // Добавляем все доступные метаданные из ответа
                 if (message.getMetadata() != null) {
                     if (message.getMetadata().containsKey("originalFilename")) {
                         image.setOriginalFilename(message.getMetadata().get("originalFilename").toString());
@@ -256,7 +241,6 @@ public class ImageStorageClient {
             }
         });
 
-        // Send request to storage service with image data
         CompressionMessage message = new CompressionMessage();
         message.setImageId(imageId);
         message.setAction("UPDATE_COMPRESSION");
@@ -282,7 +266,6 @@ public class ImageStorageClient {
     public boolean deleteImage(String id) throws IOException {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
 
-        // Register callback to process the response
         messageListener.registerCallback(id, message -> {
             if ("DELETED".equals(message.getAction())) {
                 future.complete(true);
@@ -293,7 +276,6 @@ public class ImageStorageClient {
             }
         });
 
-        // Send request to storage service
         ImageMessage message = new ImageMessage();
         message.setImageId(id);
         message.setAction("DELETE");
@@ -315,20 +297,16 @@ public class ImageStorageClient {
     public Map<String, Image> getAllImages() {
         CompletableFuture<Map<String, Image>> future = new CompletableFuture<>();
 
-        // Register callback to process the response
         String requestId = "all_images_" + System.currentTimeMillis();
         messageListener.registerCallback(requestId, message -> {
             if ("ALL_METADATA".equals(message.getAction())) {
-                // In a real implementation, we'd deserialize the complete map from the message
-                // For this example, we'll create a simplified empty map
                 Map<String, Image> images = messageListener.getAllImagesData(requestId);
                 future.complete(images);
             } else if ("ERROR".equals(message.getAction())) {
-                future.complete(new HashMap<>()); // Return empty map on error
+                future.complete(new HashMap<>());
             }
         });
 
-        // Send request to storage service
         ImageMessage message = new ImageMessage();
         message.setImageId(requestId);
         message.setAction("GET_ALL_METADATA");
@@ -338,7 +316,7 @@ public class ImageStorageClient {
             return future.get(DEFAULT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             logger.error("Failed to get all images metadata", e);
-            return new HashMap<>(); // Return empty map on exception
+            return new HashMap<>();
         }
     }
 }

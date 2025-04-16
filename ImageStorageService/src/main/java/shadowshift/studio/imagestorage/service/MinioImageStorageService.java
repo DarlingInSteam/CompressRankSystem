@@ -55,7 +55,6 @@ public class MinioImageStorageService implements ImageStorageService {
     @PostConstruct
     public void init() {
         try {
-            // Initialize main bucket
             boolean bucketExists = minioClient.bucketExists(
                     BucketExistsArgs.builder().bucket(bucketName).build()
             );
@@ -67,7 +66,6 @@ public class MinioImageStorageService implements ImageStorageService {
                 logger.info("Created new bucket: {}", bucketName);
             }
 
-            // Initialize backup bucket
             boolean backupBucketExists = minioClient.bucketExists(
                     BucketExistsArgs.builder().bucket(backupBucketName).build()
             );
@@ -187,7 +185,6 @@ public class MinioImageStorageService implements ImageStorageService {
                                 .build()
                 );
                 
-                // Save a backup of the original image for future restoration
                 String backupObjectName = BACKUP_PREFIX + image.getObjectName();
                 minioClient.putObject(
                         PutObjectArgs.builder()
@@ -215,7 +212,6 @@ public class MinioImageStorageService implements ImageStorageService {
     @Override
     @Transactional
     public Image storeCompressedImage(String imageId, byte[] compressedData, int compressionLevel) throws IOException {
-        // This function is kept for backwards compatibility but now uses updateImageCompression
         return updateImageCompression(imageId, compressedData, compressionLevel);
     }
 
@@ -229,11 +225,9 @@ public class MinioImageStorageService implements ImageStorageService {
         }
 
         try {
-            // If this is the first compression of the image, save the original
             if (image.getCompressionLevel() == 0 && compressionLevel > 0) {
                 byte[] originalData = getImage(imageId);
                 
-                // Save a backup of the original if it doesn't exist yet
                 String backupObjectName = BACKUP_PREFIX + image.getObjectName();
                 boolean backupExists = false;
                 
@@ -246,7 +240,6 @@ public class MinioImageStorageService implements ImageStorageService {
                     );
                     backupExists = true;
                 } catch (Exception e) {
-                    // Object doesn't exist, continue
                 }
                 
                 if (!backupExists) {
@@ -264,7 +257,6 @@ public class MinioImageStorageService implements ImageStorageService {
                 }
             }
 
-            // Save the new data to the same storage
             try (ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData)) {
                 minioClient.putObject(
                         PutObjectArgs.builder()
@@ -276,7 +268,6 @@ public class MinioImageStorageService implements ImageStorageService {
                 );
             }
 
-            // Update metadata
             ImageEntity entity = imageRepository.findById(imageId).orElse(null);
             if (entity == null) {
                 throw new IOException("Image entity not found in database: " + imageId);
@@ -307,7 +298,6 @@ public class MinioImageStorageService implements ImageStorageService {
             return null;
         }
 
-        // If compression level is 0, it's already the original
         if (image.getCompressionLevel() == 0) {
             return getImage(id);
         }
@@ -404,7 +394,6 @@ public class MinioImageStorageService implements ImageStorageService {
         Image image = imageMapper.toModel(entity);
 
         try {
-            // Remove image from main storage
             minioClient.removeObject(
                     RemoveObjectArgs.builder()
                             .bucket(bucketName)
@@ -412,7 +401,6 @@ public class MinioImageStorageService implements ImageStorageService {
                             .build()
             );
 
-            // Remove backup if it exists
             try {
                 String backupObjectName = BACKUP_PREFIX + image.getObjectName();
                 minioClient.removeObject(
@@ -423,7 +411,6 @@ public class MinioImageStorageService implements ImageStorageService {
                 );
                 logger.info("Deleted backup for image: id={}", id);
             } catch (Exception e) {
-                // Ignore errors when deleting backup
                 logger.warn("Failed to delete backup for image id={}, it might not exist", id);
             }
 

@@ -46,7 +46,6 @@ public class DockerComposeRunner implements ApplicationListener<ApplicationStart
         
         Process process = processBuilder.start();
         
-        // Читаем вывод команды
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {

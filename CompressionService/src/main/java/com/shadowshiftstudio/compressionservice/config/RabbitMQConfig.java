@@ -21,15 +21,11 @@ import java.util.Map;
 
 @Configuration
 public class RabbitMQConfig {
-
-    // Exchange names
     public static final String IMAGE_EXCHANGE = "image-exchange";
-    
-    // Routing keys
+
     public static final String STORAGE_KEY = "image.storage";
     public static final String COMPRESSION_KEY = "image.compression";
-    
-    // Queue names
+
     public static final String STORAGE_QUEUE = "image-storage-queue";
     public static final String COMPRESSION_QUEUE = "image-compression-queue";
 
@@ -52,18 +48,14 @@ public class RabbitMQConfig {
     public ClassMapper classMapper() {
         DefaultClassMapper classMapper = new DefaultClassMapper();
         Map<String, Class<?>> idClassMapping = new HashMap<>();
-        
-        // Настраиваем маппинг типов для корректной десериализации сообщений из ImageStorageService
+
         idClassMapping.put("shadowshift.studio.imagestorage.dto.message.ImageMessage", ImageMessage.class);
         idClassMapping.put("shadowshift.studio.imagestorage.dto.message.CompressionMessage", CompressionMessage.class);
-        
-        // Добавляем маппинг для собственных типов сообщений (для полноты)
         idClassMapping.put("com.shadowshiftstudio.compressionservice.dto.message.ImageMessage", ImageMessage.class);
         idClassMapping.put("com.shadowshiftstudio.compressionservice.dto.message.CompressionMessage", CompressionMessage.class);
         
         classMapper.setIdClassMapping(idClassMapping);
-        
-        // Добавляем доверенные пакеты для десериализации
+
         classMapper.setTrustedPackages(new String[] {
             "shadowshift.studio.imagestorage.dto.message",
             "com.shadowshiftstudio.compressionservice.dto.message",
@@ -77,17 +69,14 @@ public class RabbitMQConfig {
     @Bean
     public MessageConverter jsonMessageConverter(ClassMapper classMapper) {
         ObjectMapper mapper = new ObjectMapper();
-        
-        // Регистрируем наши классы сообщений
+
         mapper.registerSubtypes(
                 new NamedType(ImageMessage.class, "com.shadowshiftstudio.compressionservice.dto.message.ImageMessage"),
                 new NamedType(CompressionMessage.class, "com.shadowshiftstudio.compressionservice.dto.message.CompressionMessage")
         );
-        
-        // Создаем конвертер с настроенным мапером
+
         Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter(mapper);
-        
-        // Устанавливаем маппер классов
+
         converter.setClassMapper(classMapper);
         
         return converter;
@@ -99,11 +88,7 @@ public class RabbitMQConfig {
         template.setMessageConverter(jsonMessageConverter);
         return template;
     }
-    
-    /**
-     * Создаем собственный контейнер для прослушивания сообщений,
-     * который будет использовать ImageMessageListener напрямую вместо стандартного подхода
-     */
+
     @Bean
     public SimpleMessageListenerContainer messageListenerContainer(
             ConnectionFactory connectionFactory, 
@@ -113,8 +98,7 @@ public class RabbitMQConfig {
         container.setConnectionFactory(connectionFactory);
         container.setQueueNames(COMPRESSION_QUEUE);
         container.setMessageListener(messageListener);
-        
-        // Отключаем автоматическую десериализацию сообщений
+
         container.setAutoStartup(true);
         return container;
     }
