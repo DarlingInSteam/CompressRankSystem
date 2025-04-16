@@ -35,6 +35,9 @@ dependencies {
 	// Message broker: RabbitMQ
 	implementation("org.springframework.boot:spring-boot-starter-amqp")
 	
+	// JSON serialization for Java 8 Date/Time API
+	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+	
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

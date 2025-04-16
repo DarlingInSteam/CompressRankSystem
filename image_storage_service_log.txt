@@ -1,0 +1,76 @@
+2025-04-16 19:17:19.254 | 
+2025-04-16 19:17:19.254 |   .   ____          _            __ _ _
+2025-04-16 19:17:19.254 |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+2025-04-16 19:17:19.254 | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+2025-04-16 19:17:19.254 |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+2025-04-16 19:17:19.254 |   '  |____| .__|_| |_|_| |_\__, | / / / /
+2025-04-16 19:17:19.254 |  =========|_|==============|___/=/_/_/_/
+2025-04-16 19:17:19.254 | 
+2025-04-16 19:17:19.257 |  :: Spring Boot ::                (v3.4.4)
+2025-04-16 19:17:19.257 | 
+2025-04-16 19:17:19.333 | 2025-04-16T12:17:19.331Z  INFO 1 --- [image-storage-service] [           main] s.s.i.ImageStorageServiceApplication     : Starting ImageStorageServiceApplication v0.0.1-SNAPSHOT using Java 21.0.6 with PID 1 (/app.jar started by root in /)
+2025-04-16 19:17:19.334 | 2025-04-16T12:17:19.333Z DEBUG 1 --- [image-storage-service] [           main] s.s.i.ImageStorageServiceApplication     : Running with Spring Boot v3.4.4, Spring v6.2.5
+2025-04-16 19:17:19.335 | 2025-04-16T12:17:19.334Z  INFO 1 --- [image-storage-service] [           main] s.s.i.ImageStorageServiceApplication     : The following 1 profile is active: "docker"
+2025-04-16 19:17:20.588 | 2025-04-16T12:17:20.587Z  INFO 1 --- [image-storage-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-04-16 19:17:20.642 | 2025-04-16T12:17:20.641Z  INFO 1 --- [image-storage-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 43 ms. Found 1 JPA repository interface.
+2025-04-16 19:17:21.548 | 2025-04-16T12:17:21.547Z  INFO 1 --- [image-storage-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
+2025-04-16 19:17:21.563 | 2025-04-16T12:17:21.563Z  INFO 1 --- [image-storage-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-04-16 19:17:21.564 | 2025-04-16T12:17:21.563Z  INFO 1 --- [image-storage-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.39]
+2025-04-16 19:17:21.591 | 2025-04-16T12:17:21.591Z  INFO 1 --- [image-storage-service] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-04-16 19:17:21.592 | 2025-04-16T12:17:21.592Z  INFO 1 --- [image-storage-service] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2214 ms
+2025-04-16 19:17:21.898 | 2025-04-16T12:17:21.897Z  INFO 1 --- [image-storage-service] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-04-16 19:17:21.967 | 2025-04-16T12:17:21.967Z  INFO 1 --- [image-storage-service] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.11.Final
+2025-04-16 19:17:22.004 | 2025-04-16T12:17:22.004Z  INFO 1 --- [image-storage-service] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-04-16 19:17:22.317 | 2025-04-16T12:17:22.316Z  INFO 1 --- [image-storage-service] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-04-16 19:17:22.348 | 2025-04-16T12:17:22.348Z  INFO 1 --- [image-storage-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-04-16 19:17:22.558 | 2025-04-16T12:17:22.558Z  INFO 1 --- [image-storage-service] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:file:/app/data/storage-db user=SA
+2025-04-16 19:17:22.560 | 2025-04-16T12:17:22.560Z  INFO 1 --- [image-storage-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-04-16 19:17:22.587 | 2025-04-16T12:17:22.587Z  WARN 1 --- [image-storage-service] [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-04-16 19:17:22.606 | 2025-04-16T12:17:22.606Z  INFO 1 --- [image-storage-service] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+2025-04-16 19:17:22.606 | 	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+2025-04-16 19:17:22.606 | 	Database driver: undefined/unknown
+2025-04-16 19:17:22.606 | 	Database version: 2.3.232
+2025-04-16 19:17:22.606 | 	Autocommit mode: undefined/unknown
+2025-04-16 19:17:22.606 | 	Isolation level: undefined/unknown
+2025-04-16 19:17:22.606 | 	Minimum pool size: undefined/unknown
+2025-04-16 19:17:22.606 | 	Maximum pool size: undefined/unknown
+2025-04-16 19:17:23.488 | 2025-04-16T12:17:23.487Z  INFO 1 --- [image-storage-service] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-04-16 19:17:23.527 | 2025-04-16T12:17:23.526Z  INFO 1 --- [image-storage-service] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-04-16 19:17:25.000 | 2025-04-16T12:17:25.000Z  INFO 1 --- [image-storage-service] [           main] s.s.i.service.MinioImageStorageService   : Database already contains 1 image metadata records
+2025-04-16 19:17:25.359 | 2025-04-16T12:17:25.358Z  WARN 1 --- [image-storage-service] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-04-16 19:17:26.010 | 2025-04-16T12:17:26.010Z  INFO 1 --- [image-storage-service] [           main] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:file:/app/data/storage-db'
+2025-04-16 19:17:26.038 | 2025-04-16T12:17:26.038Z  INFO 1 --- [image-storage-service] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2025-04-16 19:17:26.132 | 2025-04-16T12:17:26.132Z  INFO 1 --- [image-storage-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path '/'
+2025-04-16 19:17:26.136 | 2025-04-16T12:17:26.136Z  INFO 1 --- [image-storage-service] [           main] o.s.a.r.c.CachingConnectionFactory       : Attempting to connect to: [rabbitmq:5672]
+2025-04-16 19:17:26.177 | 2025-04-16T12:17:26.177Z  INFO 1 --- [image-storage-service] [           main] o.s.a.r.c.CachingConnectionFactory       : Created new connection: rabbitConnectionFactory#5c14c284:0/SimpleConnection@5a54d05f [delegate=amqp://guest@172.18.0.2:5672/, localPort=45522]
+2025-04-16 19:17:26.239 | 2025-04-16T12:17:26.239Z  INFO 1 --- [image-storage-service] [           main] s.s.i.ImageStorageServiceApplication     : Started ImageStorageServiceApplication in 7.379 seconds (process running for 8.13)
+2025-04-16 19:17:26.285 | 2025-04-16T12:17:26.284Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Received message with content type: application/json, correlation ID: null
+2025-04-16 19:17:26.285 | 2025-04-16T12:17:26.285Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Processing storage message: 40115354-1c1c-4c7f-b5eb-57870e6023e4, action: GET_IMAGE
+2025-04-16 19:17:26.380 | 2025-04-16T12:17:26.379Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.service.MinioImageStorageService   : Retrieved image: id=9bb94a36-bc09-4cb0-882c-0cab567a5513, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp, accessCount=2
+2025-04-16 19:17:26.426 | 2025-04-16T12:17:26.425Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Preparing to send image data: ID=9bb94a36-bc09-4cb0-882c-0cab567a5513, size=8064044, compressionLevel=0, imageData null=false
+2025-04-16 19:17:26.426 | 2025-04-16T12:17:26.426Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Sending binary image data to compression service: 4dc47789-1293-4eb1-b0bb-2a333eabf875, action: IMAGE_DATA, size: 8064044 bytes, correlationId: aeff4c77-0d11-4291-8c8d-2a15f2c0a805
+2025-04-16 19:17:26.427 | 2025-04-16T12:17:26.427Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Sending single binary message with all metadata in headers for imageId: 9bb94a36-bc09-4cb0-882c-0cab567a5513
+2025-04-16 19:17:26.445 | 2025-04-16T12:17:26.445Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Successfully sent binary message with correlationId: aeff4c77-0d11-4291-8c8d-2a15f2c0a805
+2025-04-16 19:17:26.445 | 2025-04-16T12:17:26.445Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Sent image data response for image ID: 9bb94a36-bc09-4cb0-882c-0cab567a5513, data size: 8064044 bytes
+2025-04-16 19:17:27.544 | 2025-04-16T12:17:27.543Z  INFO 1 --- [image-storage-service] [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-04-16 19:17:27.544 | 2025-04-16T12:17:27.544Z  INFO 1 --- [image-storage-service] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-04-16 19:17:27.546 | 2025-04-16T12:17:27.545Z  INFO 1 --- [image-storage-service] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2025-04-16 19:17:27.599 | Found 1 images in storage
+2025-04-16 19:17:27.640 | 2025-04-16T12:17:27.640Z  WARN 1 --- [image-storage-service] [nio-8081-exec-2] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics
+2025-04-16 19:17:27.692 | 2025-04-16T12:17:27.691Z  INFO 1 --- [image-storage-service] [nio-8081-exec-3] s.s.i.service.MinioImageStorageService   : Retrieved image: id=9bb94a36-bc09-4cb0-882c-0cab567a5513, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp, accessCount=3
+2025-04-16 19:17:36.080 | Found 1 images in storage
+2025-04-16 19:17:36.095 | 2025-04-16T12:17:36.094Z  WARN 1 --- [image-storage-service] [nio-8081-exec-5] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics
+2025-04-16 19:17:36.143 | 2025-04-16T12:17:36.143Z  INFO 1 --- [image-storage-service] [nio-8081-exec-6] s.s.i.service.MinioImageStorageService   : Retrieved image: id=9bb94a36-bc09-4cb0-882c-0cab567a5513, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp, accessCount=4
+2025-04-16 19:17:59.144 | Found 1 images in storage
+2025-04-16 19:17:59.163 | 2025-04-16T12:17:59.163Z  WARN 1 --- [image-storage-service] [nio-8081-exec-8] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics
+2025-04-16 19:17:59.205 | 2025-04-16T12:17:59.204Z  INFO 1 --- [image-storage-service] [nio-8081-exec-9] s.s.i.service.MinioImageStorageService   : Retrieved image: id=9bb94a36-bc09-4cb0-882c-0cab567a5513, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp, accessCount=5
+2025-04-16 19:18:09.200 | 2025-04-16T12:18:09.199Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Received message with content type: application/json, correlation ID: null
+2025-04-16 19:18:09.200 | 2025-04-16T12:18:09.200Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Processing storage message: 21ae3470-84f6-430e-b3ad-cf40e541df2d, action: GET_IMAGE
+2025-04-16 19:18:09.222 | 2025-04-16T12:18:09.222Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.service.MinioImageStorageService   : Retrieved image: id=9bb94a36-bc09-4cb0-882c-0cab567a5513, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp, accessCount=6
+2025-04-16 19:18:09.230 | 2025-04-16T12:18:09.229Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Preparing to send image data: ID=9bb94a36-bc09-4cb0-882c-0cab567a5513, size=8064044, compressionLevel=0, imageData null=false
+2025-04-16 19:18:09.230 | 2025-04-16T12:18:09.230Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Sending binary image data to compression service: b487106d-d45e-4dd3-bebc-71ed6aa461a2, action: IMAGE_DATA, size: 8064044 bytes, correlationId: 1e40e0ea-4475-4570-89e5-36c790b0218e
+2025-04-16 19:18:09.230 | 2025-04-16T12:18:09.230Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Sending single binary message with all metadata in headers for imageId: 9bb94a36-bc09-4cb0-882c-0cab567a5513
+2025-04-16 19:18:09.245 | 2025-04-16T12:18:09.245Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Successfully sent binary message with correlationId: 1e40e0ea-4475-4570-89e5-36c790b0218e
+2025-04-16 19:18:09.245 | 2025-04-16T12:18:09.245Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Sent image data response for image ID: 9bb94a36-bc09-4cb0-882c-0cab567a5513, data size: 8064044 bytes
+2025-04-16 19:18:33.958 | Found 1 images in storage
+2025-04-16 19:18:33.971 | 2025-04-16T12:18:33.970Z  WARN 1 --- [image-storage-service] [nio-8081-exec-3] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics

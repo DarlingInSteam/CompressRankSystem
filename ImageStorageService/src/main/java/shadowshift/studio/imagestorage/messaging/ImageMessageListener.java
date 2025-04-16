@@ -2,7 +2,12 @@ package shadowshift.studio.imagestorage.messaging;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.support.converter.MessageConversionException;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shadowshift.studio.imagestorage.config.RabbitMQConfig;
@@ -21,17 +26,65 @@ public class ImageMessageListener {
     
     private final ImageStorageService imageStorageService;
     private final MessageSender messageSender;
+    private final MessageConverter messageConverter;
 
     @Autowired
-    public ImageMessageListener(ImageStorageService imageStorageService, MessageSender messageSender) {
+    public ImageMessageListener(ImageStorageService imageStorageService, MessageSender messageSender, 
+                              MessageConverter messageConverter) {
         this.imageStorageService = imageStorageService;
         this.messageSender = messageSender;
+        this.messageConverter = messageConverter;
     }
 
     @RabbitListener(queues = {RabbitMQConfig.STORAGE_QUEUE})
-    public void processStorageMessage(ImageMessage message) {
-        logger.info("Received storage message: {}, action: {}", message.getMessageId(), message.getAction());
-        
+    public void processStorageMessage(Message amqpMessage) {
+        try {
+            MessageProperties props = amqpMessage.getMessageProperties();
+            String contentType = props.getContentType();
+            String correlationId = props.getCorrelationId();
+            
+            logger.debug("Received message with content type: {}, correlation ID: {}", 
+                    contentType, correlationId);
+            
+            // Special handling for binary messages if needed
+            if ("application/octet-stream".equals(contentType)) {
+                logger.warn("Received binary message directly to storage queue - not expected");
+                return;
+            }
+            
+            // Convert message to our expected message type
+            Object convertedMessage;
+            try {
+                convertedMessage = messageConverter.fromMessage(amqpMessage);
+            } catch (MessageConversionException e) {
+                logger.error("Failed to convert message: {}", e.getMessage(), e);
+                return;
+            }
+            
+            if (!(convertedMessage instanceof ImageMessage)) {
+                logger.error("Received message is not an ImageMessage: {}", 
+                        convertedMessage != null ? convertedMessage.getClass().getName() : "null");
+                return;
+            }
+            
+            ImageMessage message = (ImageMessage) convertedMessage;
+            logger.info("Processing storage message: {}, action: {}", message.getMessageId(), message.getAction());
+            
+            processImageMessage(message);
+            
+        } catch (Exception e) {
+            logger.error("Error processing message", e);
+            
+            // Try to extract imageId from message headers if possible
+            MessageProperties props = amqpMessage.getMessageProperties();
+            if (props != null && props.getHeaders() != null && props.getHeaders().containsKey("imageId")) {
+                String imageId = props.getHeaders().get("imageId").toString();
+                sendErrorResponse(imageId, "Message processing error: " + e.getMessage());
+            }
+        }
+    }
+    
+    private void processImageMessage(ImageMessage message) {
         try {
             String action = message.getAction();
             String imageId = message.getImageId();
@@ -86,8 +139,21 @@ public class ImageMessageListener {
                 response.setImageData(imageData);
                 response.setCompressionLevel(metadata.getCompressionLevel());
                 
-                messageSender.sendToCompression(response);
+                // Добавляем важную информацию в метаданные
+                response.addMetadata("contentType", metadata.getContentType());
+                response.addMetadata("size", imageData.length);
+                response.addMetadata("originalFilename", metadata.getOriginalFilename());
+                
+                // Explicitly confirming image data is set
+                logger.debug("Preparing to send image data: ID={}, size={}, compressionLevel={}, imageData null={}", 
+                    imageId, imageData.length, metadata.getCompressionLevel(), (response.getImageData() == null));
+                
+                // Send using direct custom binary message for large data
+                messageSender.sendBinaryToCompression(response, imageData);
+                logger.info("Sent image data response for image ID: {}, data size: {} bytes", 
+                    imageId, imageData.length);
             } else {
+                logger.warn("Image or metadata not found for ID: {}", imageId);
                 sendNotFoundResponse(imageId);
             }
             
@@ -108,8 +174,16 @@ public class ImageMessageListener {
                 response.setImageData(originalData);
                 response.setCompressionLevel(0);
                 
+                // Добавляем размер данных в метаданные
+                response.addMetadata("imageDataLength", originalData.length);
+                
+                logger.debug("Sending original image data: ID={}, size={}", imageId, originalData.length);
+                
                 messageSender.sendToCompression(response);
+                logger.info("Sent original image data response for image ID: {}, data size: {} bytes",
+                    imageId, originalData.length);
             } else {
+                logger.warn("Original image backup not found for ID: {}", imageId);
                 sendNotFoundResponse(imageId);
             }
             
@@ -126,6 +200,20 @@ public class ImageMessageListener {
             ImageMessage response = new ImageMessage();
             response.setImageId(imageId);
             response.setAction("METADATA");
+            
+            // Добавляем все метаданные изображения в сообщение
+            response.addMetadata("originalFilename", metadata.getOriginalFilename());
+            response.addMetadata("contentType", metadata.getContentType());
+            response.addMetadata("size", metadata.getSize());
+            response.addMetadata("compressionLevel", metadata.getCompressionLevel());
+            response.addMetadata("objectName", metadata.getObjectName());
+            
+            if (metadata.getOriginalImageId() != null) {
+                response.addMetadata("originalImageId", metadata.getOriginalImageId());
+            }
+            
+            logger.info("Sending metadata for image ID: {}, compressionLevel: {}", 
+                imageId, metadata.getCompressionLevel());
             
             messageSender.sendToCompression(response);
         } else {
@@ -179,6 +267,15 @@ public class ImageMessageListener {
             byte[] imageData = message.getImageData();
             int compressionLevel = message.getCompressionLevel();
             
+            if (imageData == null || imageData.length == 0) {
+                logger.error("Received UPDATE_COMPRESSION request with no image data for ID: {}", imageId);
+                sendErrorResponse(imageId, "No image data provided");
+                return;
+            }
+            
+            logger.debug("Received image data for compression: ID={}, size={}, compressionLevel={}", 
+                imageId, imageData.length, compressionLevel);
+            
             Image updatedImage = imageStorageService.updateImageCompression(
                     imageId, imageData, compressionLevel);
             
@@ -186,6 +283,20 @@ public class ImageMessageListener {
                 ImageMessage response = new ImageMessage();
                 response.setImageId(imageId);
                 response.setAction("UPDATED");
+                
+                // Добавляем обновленные метаданные в ответ
+                response.addMetadata("originalFilename", updatedImage.getOriginalFilename());
+                response.addMetadata("contentType", updatedImage.getContentType());
+                response.addMetadata("size", updatedImage.getSize());
+                response.addMetadata("compressionLevel", updatedImage.getCompressionLevel());
+                response.addMetadata("objectName", updatedImage.getObjectName());
+                
+                if (updatedImage.getOriginalImageId() != null) {
+                    response.addMetadata("originalImageId", updatedImage.getOriginalImageId());
+                }
+                
+                logger.info("Sending updated metadata for image ID: {}, compressionLevel: {}", 
+                    imageId, updatedImage.getCompressionLevel());
                 
                 messageSender.sendToCompression(response);
             } else {
@@ -210,6 +321,7 @@ public class ImageMessageListener {
         ImageMessage response = new ImageMessage();
         response.setImageId(imageId);
         response.setAction("ERROR");
+        response.addMetadata("errorMessage", errorMessage);
         
         messageSender.sendToCompression(response);
     }

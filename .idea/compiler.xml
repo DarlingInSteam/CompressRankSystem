@@ -7,4 +7,11 @@
       <module name="WebpConverter.test" target="17" />
     </bytecodeTargetLevel>
   </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="CompressionService" options="-parameters" />
+      <module name="CompressionService.main" options="-parameters" />
+      <module name="CompressionService.test" options="-parameters" />
+    </option>
+  </component>
 </project>

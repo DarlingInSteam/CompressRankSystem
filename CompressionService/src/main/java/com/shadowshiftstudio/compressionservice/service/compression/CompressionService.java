@@ -31,25 +31,53 @@ public class CompressionService {
      * @return updated image metadata
      */
     public Image compressImage(String imageId, int compressionLevel) throws Exception {
+        logger.info("Starting compression for image: {}, level: {}", imageId, compressionLevel);
+        
         if (compressionLevel < 0 || compressionLevel > 100) {
+            logger.warn("Invalid compression level: {}", compressionLevel);
             throw new IllegalArgumentException("Compression level must be between 0 and 100");
         }
         
         // Get image data and metadata from storage service
-        byte[] imageData = imageStorageClient.getImage(imageId);
-        Image imageMetadata = imageStorageClient.getImageMetadata(imageId);
+        byte[] imageData = null;
+        Image imageMetadata = null;
         
-        if (imageData == null || imageMetadata == null) {
-            throw new IOException("Image not found with id: " + imageId);
+        try {
+            imageData = imageStorageClient.getImage(imageId);
+            logger.info("Retrieved image data for ID: {}, size: {} bytes", imageId, 
+                imageData != null ? imageData.length : 0);
+        } catch (IOException e) {
+            logger.error("Failed to retrieve image data for ID: {}", imageId, e);
+            throw new IOException("Failed to retrieve image data: " + e.getMessage(), e);
+        }
+        
+        try {
+            imageMetadata = imageStorageClient.getImageMetadata(imageId);
+            logger.info("Retrieved metadata for image ID: {}, metadata present: {}", 
+                imageId, imageMetadata != null);
+        } catch (Exception e) {
+            logger.error("Failed to retrieve image metadata for ID: {}", imageId, e);
+        }
+        
+        if (imageData == null) {
+            logger.error("Image data not found for ID: {}", imageId);
+            throw new IOException("Image data not found with id: " + imageId);
+        }
+        
+        if (imageMetadata == null) {
+            logger.error("Image metadata not found for ID: {}", imageId);
+            throw new IOException("Image metadata not found with id: " + imageId);
         }
 
         // If requested compression level is 0, and current compression level is also 0, do nothing
         if (compressionLevel == 0 && imageMetadata.getCompressionLevel() == 0) {
+            logger.info("No compression needed, image is already uncompressed");
             return imageMetadata;
         }
         
         // If requested compression level is 0, restore original image instead of compressing
         if (compressionLevel == 0) {
+            logger.info("Restoring original image instead of compressing");
             return restoreImage(imageId);
         }
 
@@ -58,13 +86,17 @@ public class CompressionService {
         options.withQuality(mapCompressionLevelToQuality(compressionLevel));
         
         // Convert image to WebP with specified compression
+        logger.info("Converting image to WebP with quality: {}", mapCompressionLevelToQuality(compressionLevel));
         byte[] compressedData = webpService.convertToWebp(imageData, options);
         
         if (compressedData == null) {
+            logger.error("WebP conversion failed for image ID: {}", imageId);
             throw new IOException("WebP conversion failed");
         }
         
         // Save compressed data directly to original image
+        logger.info("Saving compressed image data, original size: {}, compressed size: {}", 
+            imageData.length, compressedData.length);
         Image updatedImage = imageStorageClient.updateImageCompression(imageId, compressedData, compressionLevel);
         
         logger.info("Image compressed successfully: id={}, compressionLevel={}, originalSize={}, compressedSize={}",
@@ -79,14 +111,18 @@ public class CompressionService {
      * @return updated image metadata
      */
     public Image restoreImage(String imageId) throws Exception {
+        logger.info("Restoring original image for ID: {}", imageId);
+        
         Image imageMetadata = imageStorageClient.getImageMetadata(imageId);
         
         if (imageMetadata == null) {
+            logger.error("Image metadata not found for restore operation, ID: {}", imageId);
             throw new IOException("Image not found with id: " + imageId);
         }
         
         // If image is already not compressed, just return its metadata
         if (imageMetadata.getCompressionLevel() == 0) {
+            logger.info("Image is already in original state, no restore needed");
             return imageMetadata;
         }
         
@@ -94,8 +130,12 @@ public class CompressionService {
         byte[] originalData = imageStorageClient.getOriginalImageBackup(imageId);
         
         if (originalData == null) {
+            logger.error("Original image backup not found for ID: {}", imageId);
             throw new IOException("Original image backup not found for id: " + imageId);
         }
+        
+        logger.info("Retrieved original backup data for image ID: {}, size: {} bytes", 
+            imageId, originalData.length);
         
         // Update current image, setting compression level to 0 (no compression)
         return imageStorageClient.updateImageCompression(imageId, originalData, 0);

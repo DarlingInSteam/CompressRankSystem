@@ -6,6 +6,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 @Configuration
 public class CorsConfig {
 
@@ -14,27 +17,43 @@ public class CorsConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         
-        // Allow all origins for development, but you can restrict to specific origins in production
-        config.addAllowedOrigin("http://localhost:3000"); // Admin panel in development mode
-        config.addAllowedOrigin("http://localhost:80"); // Admin panel in Docker container
+        // Разрешаем все возможные источники запросов
+        config.setAllowedOriginPatterns(Collections.singletonList("*"));
         
-        // Allow credentials (cookies, authentication headers)
+        // Разрешаем конкретные хосты, если нужно более строгое ограничение
+        config.addAllowedOrigin("http://localhost:3000"); // Frontend в режиме разработки
+        config.addAllowedOrigin("http://localhost"); // Frontend в Docker
+        config.addAllowedOrigin("http://localhost:80"); // Frontend в Docker на явном порту
+        config.addAllowedOrigin("http://admin-panel"); // Docker service name
+        
+        // Разрешаем учетные данные (cookies, заголовки аутентификации)
         config.setAllowCredentials(true);
         
-        // Allow common HTTP methods
-        config.addAllowedMethod("GET");
-        config.addAllowedMethod("POST");
-        config.addAllowedMethod("PUT");
-        config.addAllowedMethod("DELETE");
-        config.addAllowedMethod("OPTIONS");
+        // Разрешаем все методы HTTP
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         
-        // Allow common headers
-        config.addAllowedHeader("Origin");
-        config.addAllowedHeader("Content-Type");
-        config.addAllowedHeader("Accept");
-        config.addAllowedHeader("Authorization");
+        // Разрешаем все заголовки
+        config.setAllowedHeaders(Arrays.asList(
+                "Origin", 
+                "Content-Type", 
+                "Accept", 
+                "Authorization",
+                "Access-Control-Allow-Origin",
+                "Access-Control-Request-Method",
+                "Access-Control-Request-Headers",
+                "X-Requested-With"
+        ));
         
-        // Apply this configuration to all paths
+        // Устанавливаем время кэширования предварительных запросов CORS
+        config.setMaxAge(3600L);
+        
+        // Определение заголовков, которые клиент может использовать в фактическом запросе
+        config.setExposedHeaders(Arrays.asList(
+                "Authorization", 
+                "Content-Disposition"
+        ));
+        
+        // Применяем эту конфигурацию ко всем путям
         source.registerCorsConfiguration("/**", config);
         
         return new CorsFilter(source);

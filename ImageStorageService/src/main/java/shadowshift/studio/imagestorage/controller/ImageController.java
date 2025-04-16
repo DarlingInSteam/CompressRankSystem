@@ -107,12 +107,27 @@ public class ImageController {
 
     @Operation(summary = "Get all images", description = "Returns metadata for all images")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Metadata returned successfully")
+            @ApiResponse(responseCode = "200", description = "Metadata returned successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping
-    public ResponseEntity<Map<String, Image>> getAllImages() {
-        Map<String, Image> images = imageStorageService.getAllImageMetadata();
-        return ResponseEntity.ok(images);
+    public ResponseEntity<?> getAllImages() {
+        try {
+            Map<String, Image> images = imageStorageService.getAllImageMetadata();
+            
+            // Логируем количество найденных изображений
+            System.out.println("Found " + images.size() + " images in storage");
+            
+            return ResponseEntity.ok(images);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Error retrieving all images: " + e.getMessage());
+            
+            // Возвращаем подробную информацию об ошибке для отладки
+            return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error retrieving images: " + e.getMessage());
+        }
     }
 
     @Operation(summary = "Delete image", description = "Deletes an image from storage")

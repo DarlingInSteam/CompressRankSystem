@@ -1,19 +1,16 @@
 package shadowshift.studio.imagestorage.dto.message;
 
+/**
+ * Расширенное сообщение, содержащее бинарные данные изображения
+ * и уровень сжатия для компрессии
+ */
 public class CompressionMessage extends ImageMessage {
+    
+    private byte[] imageData;
     private int compressionLevel;
-    private byte[] imageData; // Base64 encoded if sent via JSON
     
     public CompressionMessage() {
         super();
-    }
-    
-    public int getCompressionLevel() {
-        return compressionLevel;
-    }
-    
-    public void setCompressionLevel(int compressionLevel) {
-        this.compressionLevel = compressionLevel;
     }
     
     public byte[] getImageData() {
@@ -22,5 +19,13 @@ public class CompressionMessage extends ImageMessage {
     
     public void setImageData(byte[] imageData) {
         this.imageData = imageData;
+    }
+    
+    public int getCompressionLevel() {
+        return compressionLevel;
+    }
+    
+    public void setCompressionLevel(int compressionLevel) {
+        this.compressionLevel = compressionLevel;
     }
 }

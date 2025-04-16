@@ -26,7 +26,8 @@ import java.util.concurrent.TimeoutException;
 public class ImageStorageClient {
 
     private static final Logger logger = LoggerFactory.getLogger(ImageStorageClient.class);
-    private static final int DEFAULT_TIMEOUT_SECONDS = 10;
+    // Increasing timeout from 10 to 60 seconds to accommodate larger image transfers
+    private static final int DEFAULT_TIMEOUT_SECONDS = 60;
 
     private final MessageSender messageSender;
     private final ImageMessageListener messageListener;
@@ -58,15 +59,26 @@ public class ImageStorageClient {
      * @throws IOException if retrieval fails
      */
     public byte[] getImage(String id) throws IOException {
+        logger.info("Getting image data for image ID: {}", id);
         CompletableFuture<byte[]> future = new CompletableFuture<>();
 
         // Register callback to process the response
         messageListener.registerCallback(id, message -> {
             if ("IMAGE_DATA".equals(message.getAction())) {
                 byte[] imageData = messageListener.getImageData(id);
-                future.complete(imageData);
+                if (imageData != null) {
+                    logger.info("Image data successfully retrieved for ID: {}, size: {} bytes", 
+                        id, imageData.length);
+                    future.complete(imageData);
+                } else {
+                    logger.error("Retrieved null image data for ID: {} despite receiving IMAGE_DATA action", id);
+                    future.completeExceptionally(new IOException("Received IMAGE_DATA action but actual data is null"));
+                }
             } else if ("NOT_FOUND".equals(message.getAction()) || "ERROR".equals(message.getAction())) {
+                logger.error("Storage service reported image not found or error for ID: {}", id);
                 future.completeExceptionally(new IOException("Image not found or error retrieving image"));
+            } else {
+                logger.warn("Received unexpected action: {} for image ID: {}", message.getAction(), id);
             }
         });
 
@@ -75,11 +87,18 @@ public class ImageStorageClient {
         message.setImageId(id);
         message.setAction("GET_IMAGE");
         messageSender.sendToStorage(message);
+        logger.debug("Sent GET_IMAGE request for image ID: {}", id);
 
         try {
-            return future.get(DEFAULT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            byte[] result = future.get(DEFAULT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            if (result != null) {
+                logger.info("Successfully fetched image data for ID: {}, size: {} bytes", id, result.length);
+            } else {
+                logger.warn("Fetched null image data for ID: {}", id);
+            }
+            return result;
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            logger.error("Failed to get image data for id: {}", id, e);
+            logger.error("Failed to get image data for id: {}, error: {}", id, e.getMessage(), e);
             throw new IOException("Failed to get image: " + e.getMessage(), e);
         }
     }
@@ -125,17 +144,46 @@ public class ImageStorageClient {
      * @return image metadata
      */
     public Image getImageMetadata(String id) {
+        logger.info("Getting metadata for image ID: {}", id);
         CompletableFuture<Image> future = new CompletableFuture<>();
 
         // Register callback to process the response
         messageListener.registerCallback(id, message -> {
             if ("METADATA".equals(message.getAction())) {
-                // For this example, we're creating a simplified Image object
-                // In a real implementation, we'd need to deserialize a more complete response
+                // Получаем все метаданные из сообщения и создаем полный объект Image
                 Image image = new Image();
                 image.setId(id);
+                
+                // Устанавливаем дополнительные поля из сообщения
+                if (message.getMetadata() != null) {
+                    if (message.getMetadata().containsKey("originalFilename")) {
+                        image.setOriginalFilename(message.getMetadata().get("originalFilename").toString());
+                    }
+                    if (message.getMetadata().containsKey("contentType")) {
+                        image.setContentType(message.getMetadata().get("contentType").toString());
+                    }
+                    if (message.getMetadata().containsKey("size")) {
+                        image.setSize(Long.parseLong(message.getMetadata().get("size").toString()));
+                    }
+                    if (message.getMetadata().containsKey("compressionLevel")) {
+                        image.setCompressionLevel(Integer.parseInt(message.getMetadata().get("compressionLevel").toString()));
+                    } else {
+                        // По умолчанию устанавливаем 0, чтобы избежать ошибок при проверках
+                        image.setCompressionLevel(0);
+                    }
+                    if (message.getMetadata().containsKey("objectName")) {
+                        image.setObjectName(message.getMetadata().get("objectName").toString());
+                    }
+                    if (message.getMetadata().containsKey("originalImageId")) {
+                        image.setOriginalImageId(message.getMetadata().get("originalImageId").toString());
+                    }
+                }
+                
+                logger.info("Received metadata for image ID: {}, compressionLevel: {}", 
+                    id, image.getCompressionLevel());
                 future.complete(image);
             } else if ("NOT_FOUND".equals(message.getAction()) || "ERROR".equals(message.getAction())) {
+                logger.warn("Image metadata not found for ID: {}", id);
                 future.complete(null); // Image not found
             }
         });
@@ -145,9 +193,16 @@ public class ImageStorageClient {
         message.setImageId(id);
         message.setAction("GET_METADATA");
         messageSender.sendToStorage(message);
+        logger.debug("Sent GET_METADATA request for image ID: {}", id);
 
         try {
-            return future.get(DEFAULT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            Image result = future.get(DEFAULT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            if (result != null) {
+                logger.info("Successfully retrieved metadata for image ID: {}", id);
+            } else {
+                logger.warn("No metadata found for image ID: {}", id);
+            }
+            return result;
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             logger.error("Failed to get metadata for image id: {}", id, e);
             return null;
@@ -169,10 +224,32 @@ public class ImageStorageClient {
         // Register callback to process the response
         messageListener.registerCallback(imageId, message -> {
             if ("UPDATED".equals(message.getAction())) {
-                // For this example, we're creating a simplified Image object with updated compression level
+                // Создаем полный объект Image с обновленными метаданными
                 Image image = new Image();
                 image.setId(imageId);
                 image.setCompressionLevel(compressionLevel);
+                
+                // Добавляем все доступные метаданные из ответа
+                if (message.getMetadata() != null) {
+                    if (message.getMetadata().containsKey("originalFilename")) {
+                        image.setOriginalFilename(message.getMetadata().get("originalFilename").toString());
+                    }
+                    if (message.getMetadata().containsKey("contentType")) {
+                        image.setContentType(message.getMetadata().get("contentType").toString());
+                    }
+                    if (message.getMetadata().containsKey("size")) {
+                        image.setSize(Long.parseLong(message.getMetadata().get("size").toString()));
+                    }
+                    if (message.getMetadata().containsKey("objectName")) {
+                        image.setObjectName(message.getMetadata().get("objectName").toString());
+                    }
+                    if (message.getMetadata().containsKey("originalImageId")) {
+                        image.setOriginalImageId(message.getMetadata().get("originalImageId").toString());
+                    }
+                }
+                
+                logger.info("Image successfully updated: id={}, compressionLevel={}", 
+                    imageId, compressionLevel);
                 future.complete(image);
             } else if ("NOT_FOUND".equals(message.getAction()) || "ERROR".equals(message.getAction())) {
                 future.completeExceptionally(new IOException("Image not found or error updating image"));
