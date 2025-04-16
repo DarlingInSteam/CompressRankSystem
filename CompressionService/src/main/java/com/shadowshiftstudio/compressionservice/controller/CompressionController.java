@@ -119,4 +119,50 @@ public class CompressionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+    
+    /**
+     * Получение оригинального размера изображения
+     *
+     * @param imageId идентификатор изображения
+     * @return оригинальный размер изображения в байтах
+     */
+    @Operation(
+        summary = "Получить оригинальный размер изображения",
+        description = "Возвращает оригинальный размер изображения до сжатия в байтах"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Оригинальный размер успешно получен",
+            content = @Content(mediaType = "application/json")
+        ),
+        @ApiResponse(
+            responseCode = "404", 
+            description = "Изображение не найдено",
+            content = @Content
+        ),
+        @ApiResponse(
+            responseCode = "500", 
+            description = "Внутренняя ошибка сервера",
+            content = @Content
+        )
+    })
+    @GetMapping("/{imageId}/original-size")
+    public ResponseEntity<Object> getOriginalSize(
+            @Parameter(description = "Идентификатор изображения", required = true)
+            @PathVariable String imageId) {
+        
+        try {
+            // Получаем оригинальный размер из сервиса сжатия
+            long originalSize = compressionService.getOriginalSize(imageId);
+            // Возвращаем в формате JSON с ключом originalSize
+            return ResponseEntity.ok(java.util.Map.of("originalSize", originalSize));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(java.util.Map.of("error", "Изображение не найдено"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(java.util.Map.of("error", "Внутренняя ошибка сервера"));
+        }
+    }
 }

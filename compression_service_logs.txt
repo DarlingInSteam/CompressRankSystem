@@ -1,0 +1,245 @@
+2025-04-16 20:29:08.068 | 
+2025-04-16 20:29:08.068 |   .   ____          _            __ _ _
+2025-04-16 20:29:08.068 |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+2025-04-16 20:29:08.068 | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+2025-04-16 20:29:08.068 |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+2025-04-16 20:29:08.068 |   '  |____| .__|_| |_|_| |_\__, | / / / /
+2025-04-16 20:29:08.068 |  =========|_|==============|___/=/_/_/_/
+2025-04-16 20:29:08.068 | 
+2025-04-16 20:29:08.075 |  :: Spring Boot ::       (v3.4.1-SNAPSHOT)
+2025-04-16 20:29:08.075 | 
+2025-04-16 20:29:08.237 | 2025-04-16T13:29:08.235Z  INFO 1 --- [compression-service] [           main] c.s.c.CompressionServiceApplication      : Starting CompressionServiceApplication v0.0.1-SNAPSHOT using Java 21.0.6 with PID 1 (/app.jar started by root in /)
+2025-04-16 20:29:08.238 | 2025-04-16T13:29:08.238Z DEBUG 1 --- [compression-service] [           main] c.s.c.CompressionServiceApplication      : Running with Spring Boot v3.4.1-SNAPSHOT, Spring v6.2.1
+2025-04-16 20:29:08.239 | 2025-04-16T13:29:08.238Z  INFO 1 --- [compression-service] [           main] c.s.c.CompressionServiceApplication      : The following 1 profile is active: "docker"
+2025-04-16 20:29:09.374 | 2025-04-16T13:29:09.374Z  INFO 1 --- [compression-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-04-16 20:29:09.437 | 2025-04-16T13:29:09.436Z  INFO 1 --- [compression-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 52 ms. Found 2 JPA repository interfaces.
+2025-04-16 20:29:10.071 | 2025-04-16T13:29:10.071Z  INFO 1 --- [compression-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-04-16 20:29:10.086 | 2025-04-16T13:29:10.086Z  INFO 1 --- [compression-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-04-16 20:29:10.086 | 2025-04-16T13:29:10.086Z  INFO 1 --- [compression-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.34]
+2025-04-16 20:29:10.136 | 2025-04-16T13:29:10.135Z  INFO 1 --- [compression-service] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-04-16 20:29:10.137 | 2025-04-16T13:29:10.137Z  INFO 1 --- [compression-service] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1845 ms
+2025-04-16 20:29:10.373 | 2025-04-16T13:29:10.372Z  INFO 1 --- [compression-service] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-04-16 20:29:10.451 | 2025-04-16T13:29:10.451Z  INFO 1 --- [compression-service] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.4.Final
+2025-04-16 20:29:10.488 | 2025-04-16T13:29:10.487Z  INFO 1 --- [compression-service] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-04-16 20:29:10.802 | 2025-04-16T13:29:10.801Z  INFO 1 --- [compression-service] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-04-16 20:29:10.838 | 2025-04-16T13:29:10.837Z  INFO 1 --- [compression-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-04-16 20:29:11.031 | 2025-04-16T13:29:11.030Z  INFO 1 --- [compression-service] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:file:/app/data/compression-db user=SA
+2025-04-16 20:29:11.033 | 2025-04-16T13:29:11.033Z  INFO 1 --- [compression-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-04-16 20:29:11.065 | 2025-04-16T13:29:11.065Z  WARN 1 --- [compression-service] [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-04-16 20:29:11.091 | 2025-04-16T13:29:11.090Z  INFO 1 --- [compression-service] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+2025-04-16 20:29:11.091 | 	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+2025-04-16 20:29:11.091 | 	Database driver: undefined/unknown
+2025-04-16 20:29:11.091 | 	Database version: 2.3.232
+2025-04-16 20:29:11.091 | 	Autocommit mode: undefined/unknown
+2025-04-16 20:29:11.091 | 	Isolation level: undefined/unknown
+2025-04-16 20:29:11.091 | 	Minimum pool size: undefined/unknown
+2025-04-16 20:29:11.091 | 	Maximum pool size: undefined/unknown
+2025-04-16 20:29:11.968 | 2025-04-16T13:29:11.968Z  INFO 1 --- [compression-service] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-04-16 20:29:12.033 | 2025-04-16T13:29:12.032Z  INFO 1 --- [compression-service] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-04-16 20:29:12.044 | 2025-04-16T13:29:12.044Z  INFO 1 --- [compression-service] [           main] c.s.c.config.RemoteStorageConfig         : Инициализирована конфигурация удаленного хранилища. CompressionService будет использовать RemoteImageStorageService.
+2025-04-16 20:29:12.564 | 2025-04-16T13:29:12.563Z  INFO 1 --- [compression-service] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-04-16 20:29:12.993 | 2025-04-16T13:29:12.993Z  INFO 1 --- [compression-service] [           main] c.s.c.s.image.RemoteImageStorageService  : Инициализирована реализация RemoteImageStorageService
+2025-04-16 20:29:13.159 | 2025-04-16T13:29:13.159Z  WARN 1 --- [compression-service] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-04-16 20:29:13.183 | 2025-04-16T13:29:13.183Z  INFO 1 --- [compression-service] [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
+2025-04-16 20:29:13.615 | 2025-04-16T13:29:13.614Z  INFO 1 --- [compression-service] [           main] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:file:/app/data/compression-db'
+2025-04-16 20:29:13.697 | 2025-04-16T13:29:13.696Z  INFO 1 --- [compression-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-04-16 20:29:13.702 | 2025-04-16T13:29:13.702Z  INFO 1 --- [compression-service] [           main] o.s.a.r.c.CachingConnectionFactory       : Attempting to connect to: [rabbitmq:5672]
+2025-04-16 20:29:13.791 | 2025-04-16T13:29:13.791Z  INFO 1 --- [compression-service] [           main] o.s.a.r.c.CachingConnectionFactory       : Created new connection: rabbitConnectionFactory#7f08c343:0/SimpleConnection@549fc0b3 [delegate=amqp://guest@172.18.0.2:5672/, localPort=35724]
+2025-04-16 20:29:13.896 | 2025-04-16T13:29:13.896Z  INFO 1 --- [compression-service] [           main] c.s.c.CompressionServiceApplication      : Started CompressionServiceApplication in 6.534 seconds (process running for 7.25)
+2025-04-16 20:29:13.897 | 2025-04-16T13:29:13.897Z  WARN 1 --- [compression-service] [           main] c.s.c.config.DockerComposeRunner         : docker-compose.yml not found in the current directory
+2025-04-16 20:29:13.897 | 2025-04-16T13:29:13.897Z ERROR 1 --- [compression-service] [           main] c.s.c.config.DockerComposeRunner         : docker-compose.yml not found
+2025-04-16 20:29:13.902 | 2025-04-16T13:29:13.901Z  INFO 1 --- [compression-service] [           main] c.s.c.config.WebpInitializer             : Initializing WebP binary...
+2025-04-16 20:29:13.902 | 2025-04-16T13:29:13.902Z  INFO 1 --- [compression-service] [           main] c.s.c.config.WebpInitializer             : Searching for WebP binary in project directories...
+2025-04-16 20:29:13.908 | 2025-04-16T13:29:13.908Z  INFO 1 --- [compression-service] [           main] c.s.c.config.WebpInitializer             : WebP binary not found locally, downloading...
+2025-04-16 20:29:13.908 | 2025-04-16T13:29:13.908Z  INFO 1 --- [compression-service] [           main] c.s.c.config.WebpInitializer             : Downloading WebP binary from: https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.3.2-linux-x86-64.tar.gz
+2025-04-16 20:29:16.418 | 2025-04-16T13:29:16.417Z  INFO 1 --- [compression-service] [           main] c.s.c.config.WebpInitializer             : Extracting WebP binary from: /app/webp_binaries/webp-linux.tar.gz
+2025-04-16 20:29:16.687 | 2025-04-16T13:29:16.687Z  INFO 1 --- [compression-service] [           main] c.s.c.config.WebpInitializer             : tar extraction completed with exit code: 0
+2025-04-16 20:29:16.691 | 2025-04-16T13:29:16.691Z  INFO 1 --- [compression-service] [           main] c.s.c.config.WebpInitializer             : Set executable permissions on: /app/webp_binaries/cwebp
+2025-04-16 20:29:16.692 | 2025-04-16T13:29:16.691Z  INFO 1 --- [compression-service] [           main] c.s.c.config.WebpInitializer             : WebP binary path set to: /app/webp_binaries/cwebp
+2025-04-16 20:29:16.749 | 2025-04-16T13:29:16.749Z  INFO 1 --- [compression-service] [           main] c.s.c.config.WebpInitializer             : WebP binary successfully initialized and verified
+2025-04-16 20:29:39.305 | 2025-04-16T13:29:39.305Z  INFO 1 --- [compression-service] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-04-16 20:29:39.305 | 2025-04-16T13:29:39.305Z  INFO 1 --- [compression-service] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-04-16 20:29:39.307 | 2025-04-16T13:29:39.306Z  INFO 1 --- [compression-service] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2025-04-16 20:29:39.357 | 2025-04-16T13:29:39.357Z  INFO 1 --- [compression-service] [nio-8080-exec-2] c.s.c.s.compression.CompressionService   : Starting compression for image: b16097c8-8cc2-4cee-af4c-318d8ef985f8, level: 37
+2025-04-16 20:29:39.357 | 2025-04-16T13:29:39.357Z  INFO 1 --- [compression-service] [nio-8080-exec-2] c.s.c.service.client.ImageStorageClient  : Getting image data for image ID: b16097c8-8cc2-4cee-af4c-318d8ef985f8
+2025-04-16 20:29:39.358 | 2025-04-16T13:29:39.357Z DEBUG 1 --- [compression-service] [nio-8080-exec-2] c.s.c.messaging.ImageMessageListener     : Registering callback for image ID: b16097c8-8cc2-4cee-af4c-318d8ef985f8
+2025-04-16 20:29:39.358 | 2025-04-16T13:29:39.358Z  INFO 1 --- [compression-service] [nio-8080-exec-2] c.s.c.messaging.MessageSender            : Sending message to storage service: 8d5248d1-08b6-4222-801a-fa8796a6bcf4, action: GET_IMAGE
+2025-04-16 20:29:39.403 | 2025-04-16T13:29:39.403Z DEBUG 1 --- [compression-service] [nio-8080-exec-2] c.s.c.service.client.ImageStorageClient  : Sent GET_IMAGE request for image ID: b16097c8-8cc2-4cee-af4c-318d8ef985f8
+2025-04-16 20:29:39.525 | 2025-04-16T13:29:39.525Z DEBUG 1 --- [compression-service] [enerContainer-1] c.s.c.messaging.ImageMessageListener     : Received message with content type: application/octet-stream, correlation ID: 864a93f6-2f50-4dc2-b330-87e9894443ab, imageId: b16097c8-8cc2-4cee-af4c-318d8ef985f8, action: IMAGE_DATA
+2025-04-16 20:29:39.526 | 2025-04-16T13:29:39.525Z  INFO 1 --- [compression-service] [enerContainer-1] c.s.c.messaging.ImageMessageListener     : Received binary data message: correlationId=864a93f6-2f50-4dc2-b330-87e9894443ab, imageId=b16097c8-8cc2-4cee-af4c-318d8ef985f8, action=IMAGE_DATA, size=8064044 bytes
+2025-04-16 20:29:39.526 | 2025-04-16T13:29:39.525Z DEBUG 1 --- [compression-service] [enerContainer-1] c.s.c.messaging.ImageMessageListener     : Storing binary data in cache for image ID: b16097c8-8cc2-4cee-af4c-318d8ef985f8, data length: 8064044 bytes
+2025-04-16 20:29:39.526 | 2025-04-16T13:29:39.526Z  INFO 1 --- [compression-service] [enerContainer-1] c.s.c.messaging.ImageMessageListener     : Found and executing callback for image ID: b16097c8-8cc2-4cee-af4c-318d8ef985f8
+2025-04-16 20:29:39.526 | 2025-04-16T13:29:39.526Z  INFO 1 --- [compression-service] [enerContainer-1] c.s.c.messaging.ImageMessageListener     : Retrieved image data from cache for image ID: b16097c8-8cc2-4cee-af4c-318d8ef985f8, data length: 8064044
+2025-04-16 20:29:39.526 | 2025-04-16T13:29:39.526Z  INFO 1 --- [compression-service] [enerContainer-1] c.s.c.service.client.ImageStorageClient  : Image data successfully retrieved for ID: b16097c8-8cc2-4cee-af4c-318d8ef985f8, size: 8064044 bytes
+2025-04-16 20:29:39.526 | 2025-04-16T13:29:39.526Z  INFO 1 --- [compression-service] [nio-8080-exec-2] c.s.c.service.client.ImageStorageClient  : Successfully fetched image data for ID: b16097c8-8cc2-4cee-af4c-318d8ef985f8, size: 8064044 bytes
+2025-04-16 20:29:39.526 | 2025-04-16T13:29:39.526Z  INFO 1 --- [compression-service] [nio-8080-exec-2] c.s.c.s.compression.CompressionService   : Retrieved image data for ID: b16097c8-8cc2-4cee-af4c-318d8ef985f8, size: 8064044 bytes
+2025-04-16 20:29:39.526 | 2025-04-16T13:29:39.526Z  INFO 1 --- [compression-service] [nio-8080-exec-2] c.s.c.service.client.ImageStorageClient  : Getting metadata for image ID: b16097c8-8cc2-4cee-af4c-318d8ef985f8
+2025-04-16 20:29:39.527 | 2025-04-16T13:29:39.527Z DEBUG 1 --- [compression-service] [nio-8080-exec-2] c.s.c.messaging.ImageMessageListener     : Registering callback for image ID: b16097c8-8cc2-4cee-af4c-318d8ef985f8
+2025-04-16 20:29:39.527 | 2025-04-16T13:29:39.527Z  INFO 1 --- [compression-service] [nio-8080-exec-2] c.s.c.messaging.MessageSender            : Sending message to storage service: 5caa5b80-bef2-4f39-9915-ad937e27739c, action: GET_METADATA
+2025-04-16 20:29:39.528 | 2025-04-16T13:29:39.528Z DEBUG 1 --- [compression-service] [nio-8080-exec-2] c.s.c.service.client.ImageStorageClient  : Sent GET_METADATA request for image ID: b16097c8-8cc2-4cee-af4c-318d8ef985f8
+2025-04-16 20:29:39.535 | 2025-04-16T13:29:39.535Z DEBUG 1 --- [compression-service] [enerContainer-1] c.s.c.messaging.ImageMessageListener     : Received message with content type: application/json, correlation ID: null, imageId: null, action: null
+2025-04-16 20:29:39.561 | 2025-04-16T13:29:39.561Z  INFO 1 --- [compression-service] [enerContainer-1] c.s.c.messaging.ImageMessageListener     : Received message from storage service: 3ced1f92-2ca3-4da1-9f46-e6c5c4712dc5, action: METADATA
+2025-04-16 20:29:39.561 | 2025-04-16T13:29:39.561Z DEBUG 1 --- [compression-service] [enerContainer-1] c.s.c.messaging.ImageMessageListener     : Processing message with action: METADATA for imageId: b16097c8-8cc2-4cee-af4c-318d8ef985f8
+2025-04-16 20:29:39.561 | 2025-04-16T13:29:39.561Z  INFO 1 --- [compression-service] [enerContainer-1] c.s.c.service.client.ImageStorageClient  : Received metadata for image ID: b16097c8-8cc2-4cee-af4c-318d8ef985f8, compressionLevel: 0
+2025-04-16 20:29:39.561 | 2025-04-16T13:29:39.561Z  INFO 1 --- [compression-service] [nio-8080-exec-2] c.s.c.service.client.ImageStorageClient  : Successfully retrieved metadata for image ID: b16097c8-8cc2-4cee-af4c-318d8ef985f8
+2025-04-16 20:29:39.561 | 2025-04-16T13:29:39.561Z  INFO 1 --- [compression-service] [nio-8080-exec-2] c.s.c.s.compression.CompressionService   : Retrieved metadata for image ID: b16097c8-8cc2-4cee-af4c-318d8ef985f8, metadata present: true
+2025-04-16 20:29:39.562 | 2025-04-16T13:29:39.561Z  INFO 1 --- [compression-service] [nio-8080-exec-2] c.s.c.s.compression.CompressionService   : Converting image to WebP with quality: 63
+2025-04-16 20:29:39.564 | 2025-04-16T13:29:39.564Z  INFO 1 --- [compression-service] [nio-8080-exec-2] c.s.compressionservice.util.webp.CWebp   : Successfully initialized WebP binary at: /app/webp_binaries/cwebp
+2025-04-16 20:29:39.582 | 2025-04-16T13:29:39.581Z  INFO 1 --- [compression-service] [nio-8080-exec-2] c.s.compressionservice.util.webp.CWebp   : Executing WebP command: /app/webp_binaries/cwebp -q 63 -alpha_q 100  -o /tmp/webp_conversion_10571707797182252051/output_image.webp /tmp/webp_conversion_10571707797182252051/input_image.bin
+2025-04-16 20:29:39.802 | 2025-04-16T13:29:39.802Z  WARN 1 --- [compression-service] [nio-8080-exec-2] c.s.compressionservice.util.webp.CWebp   : cwebp process error: Saving file '/tmp/webp_conversion_10571707797182252051/output_image.webp'
+2025-04-16 20:29:39.802 | Error! Cannot encode picture as WebP
+2025-04-16 20:29:39.802 | Error code: 5 (BAD_DIMENSION: Bad picture dimension. Maximum width and height allowed is 16383 pixels.)
+2025-04-16 20:29:39.802 | 
+2025-04-16 20:29:39.808 | 2025-04-16T13:29:39.804Z ERROR 1 --- [compression-service] [nio-8080-exec-2] c.s.c.service.webp.WebpService           : Failed to convert image to WebP with custom options: Error processing image: WebP conversion failed with exit code: 255
+2025-04-16 20:29:39.808 | 
+2025-04-16 20:29:39.808 | com.shadowshiftstudio.compressionservice.util.webp.CWebpException: Error processing image: WebP conversion failed with exit code: 255
+2025-04-16 20:29:39.808 | 	at com.shadowshiftstudio.compressionservice.util.webp.WebpConverter.imageToWebpByte(WebpConverter.java:121) ~[!/:0.0.1-SNAPSHOT]
+2025-04-16 20:29:39.808 | 	at com.shadowshiftstudio.compressionservice.service.webp.WebpService.convertToWebp(WebpService.java:72) ~[!/:0.0.1-SNAPSHOT]
+2025-04-16 20:29:39.808 | 	at com.shadowshiftstudio.compressionservice.service.compression.CompressionService.compressImage(CompressionService.java:90) ~[!/:0.0.1-SNAPSHOT]
+2025-04-16 20:29:39.808 | 	at com.shadowshiftstudio.compressionservice.controller.CompressionController.compressImage(CompressionController.java:70) ~[!/:0.0.1-SNAPSHOT]
+2025-04-16 20:29:39.808 | 	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source) ~[na:na]
+2025-04-16 20:29:39.808 | java.io.IOException: WebP conversion failed
+2025-04-16 20:29:39.808 | 	at com.shadowshiftstudio.compressionservice.service.compression.CompressionService.compressImage(CompressionService.java:94)
+2025-04-16 20:29:39.808 | 	at com.shadowshiftstudio.compressionservice.controller.CompressionController.compressImage(CompressionController.java:70)
+2025-04-16 20:29:39.808 | 	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
+2025-04-16 20:29:39.808 | 	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+2025-04-16 20:29:39.808 | 	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:257)
+2025-04-16 20:29:39.808 | 	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:190)
+2025-04-16 20:29:39.808 | 	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+2025-04-16 20:29:39.808 | 	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+2025-04-16 20:29:39.808 | 	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+2025-04-16 20:29:39.808 | 	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+2025-04-16 20:29:39.808 | 	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088)
+2025-04-16 20:29:39.808 | 	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+2025-04-16 20:29:39.808 | 	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+2025-04-16 20:29:39.808 | 	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+2025-04-16 20:29:39.808 | 	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+2025-04-16 20:29:39.808 | 	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+2025-04-16 20:29:39.809 | 	at java.base/java.lang.reflect.Method.invoke(Unknown Source) ~[na:na]
+2025-04-16 20:29:39.809 | 	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+2025-04-16 20:29:39.809 | 	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+2025-04-16 20:29:39.809 | 	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:257) ~[spring-web-6.2.1.jar!/:6.2.1]
+2025-04-16 20:29:39.809 | 	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:190) ~[spring-web-6.2.1.jar!/:6.2.1]
+2025-04-16 20:29:39.809 | 	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118) ~[spring-webmvc-6.2.1.jar!/:6.2.1]
+2025-04-16 20:29:39.809 | 	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986) ~[spring-webmvc-6.2.1.jar!/:6.2.1]
+2025-04-16 20:29:39.809 | 	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891) ~[spring-webmvc-6.2.1.jar!/:6.2.1]
+2025-04-16 20:29:39.809 | 	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87) ~[spring-webmvc-6.2.1.jar!/:6.2.1]
+2025-04-16 20:29:39.809 | 	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088) ~[spring-webmvc-6.2.1.jar!/:6.2.1]
+2025-04-16 20:29:39.809 | 	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978) ~[spring-webmvc-6.2.1.jar!/:6.2.1]
+2025-04-16 20:29:39.809 | 	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.2.1.jar!/:6.2.1]
+2025-04-16 20:29:39.809 | 	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914) ~[spring-webmvc-6.2.1.jar!/:6.2.1]
+2025-04-16 20:29:39.809 | 	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.2.1.jar!/:6.2.1]
+2025-04-16 20:29:39.809 | 	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91) ~[spring-web-6.2.1.jar!/:6.2.1]
+2025-04-16 20:29:39.809 | 	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.1.jar!/:6.2.1]
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.2.1.jar!/:6.2.1]
+2025-04-16 20:29:39.809 | 	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.1.jar!/:6.2.1]
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+2025-04-16 20:29:39.809 | 	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+2025-04-16 20:29:39.809 | 	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+2025-04-16 20:29:39.809 | 	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+2025-04-16 20:29:39.809 | 	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+2025-04-16 20:29:39.809 | 	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+2025-04-16 20:29:39.809 | 	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+2025-04-16 20:29:39.809 | 	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+2025-04-16 20:29:39.809 | 	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+2025-04-16 20:29:39.809 | 	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.2.1.jar!/:6.2.1]
+2025-04-16 20:29:39.809 | 	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.1.jar!/:6.2.1]
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.2.1.jar!/:6.2.1]
+2025-04-16 20:29:39.809 | 	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.1.jar!/:6.2.1]
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.34.jar!/:na]
+2025-04-16 20:29:39.809 | 	at java.base/java.lang.Thread.run(Unknown Source) ~[na:na]
+2025-04-16 20:29:39.809 | Caused by: java.io.IOException: WebP conversion failed with exit code: 255
+2025-04-16 20:29:39.809 | 	at com.shadowshiftstudio.compressionservice.util.webp.CWebp.convertFromBytes(CWebp.java:534) ~[!/:0.0.1-SNAPSHOT]
+2025-04-16 20:29:39.809 | 	at com.shadowshiftstudio.compressionservice.util.webp.WebpConverter.imageToWebpByte(WebpConverter.java:119) ~[!/:0.0.1-SNAPSHOT]
+2025-04-16 20:29:39.809 | 	... 55 common frames omitted
+2025-04-16 20:29:39.809 | 
+2025-04-16 20:29:39.809 | 2025-04-16T13:29:39.808Z ERROR 1 --- [compression-service] [nio-8080-exec-2] c.s.c.s.compression.CompressionService   : WebP conversion failed for image ID: b16097c8-8cc2-4cee-af4c-318d8ef985f8
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+2025-04-16 20:29:39.809 | 	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+2025-04-16 20:29:39.809 | 	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+2025-04-16 20:29:39.809 | 	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+2025-04-16 20:29:39.809 | 	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+2025-04-16 20:29:39.809 | 	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+2025-04-16 20:29:39.809 | 	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+2025-04-16 20:29:39.809 | 	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+2025-04-16 20:29:39.809 | 	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+2025-04-16 20:29:39.810 | 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+2025-04-16 20:29:39.810 | 	at java.base/java.lang.Thread.run(Unknown Source)
+2025-04-16 20:30:23.291 | 2025-04-16T13:30:23.291Z  INFO 1 --- [compression-service] [nio-8080-exec-4] c.s.c.s.compression.CompressionService   : Starting compression for image: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, level: 35
+2025-04-16 20:30:23.291 | 2025-04-16T13:30:23.291Z  INFO 1 --- [compression-service] [nio-8080-exec-4] c.s.c.service.client.ImageStorageClient  : Getting image data for image ID: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79
+2025-04-16 20:30:23.291 | 2025-04-16T13:30:23.291Z DEBUG 1 --- [compression-service] [nio-8080-exec-4] c.s.c.messaging.ImageMessageListener     : Registering callback for image ID: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79
+2025-04-16 20:30:23.291 | 2025-04-16T13:30:23.291Z  INFO 1 --- [compression-service] [nio-8080-exec-4] c.s.c.messaging.MessageSender            : Sending message to storage service: 1a6bb88d-ec97-426b-a198-4ec2f5487634, action: GET_IMAGE
+2025-04-16 20:30:23.292 | 2025-04-16T13:30:23.292Z DEBUG 1 --- [compression-service] [nio-8080-exec-4] c.s.c.service.client.ImageStorageClient  : Sent GET_IMAGE request for image ID: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79
+2025-04-16 20:30:23.328 | 2025-04-16T13:30:23.328Z DEBUG 1 --- [compression-service] [enerContainer-1] c.s.c.messaging.ImageMessageListener     : Received message with content type: application/octet-stream, correlation ID: 02a4ca60-8f77-4d96-a370-1f7f63f64564, imageId: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, action: IMAGE_DATA
+2025-04-16 20:30:23.328 | 2025-04-16T13:30:23.328Z  INFO 1 --- [compression-service] [enerContainer-1] c.s.c.messaging.ImageMessageListener     : Received binary data message: correlationId=02a4ca60-8f77-4d96-a370-1f7f63f64564, imageId=4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, action=IMAGE_DATA, size=2084668 bytes
+2025-04-16 20:30:23.328 | 2025-04-16T13:30:23.328Z DEBUG 1 --- [compression-service] [enerContainer-1] c.s.c.messaging.ImageMessageListener     : Storing binary data in cache for image ID: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, data length: 2084668 bytes
+2025-04-16 20:30:23.328 | 2025-04-16T13:30:23.328Z  INFO 1 --- [compression-service] [enerContainer-1] c.s.c.messaging.ImageMessageListener     : Found and executing callback for image ID: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79
+2025-04-16 20:30:23.328 | 2025-04-16T13:30:23.328Z  INFO 1 --- [compression-service] [enerContainer-1] c.s.c.messaging.ImageMessageListener     : Retrieved image data from cache for image ID: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, data length: 2084668
+2025-04-16 20:30:23.329 | 2025-04-16T13:30:23.328Z  INFO 1 --- [compression-service] [enerContainer-1] c.s.c.service.client.ImageStorageClient  : Image data successfully retrieved for ID: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, size: 2084668 bytes
+2025-04-16 20:30:23.329 | 2025-04-16T13:30:23.329Z  INFO 1 --- [compression-service] [nio-8080-exec-4] c.s.c.service.client.ImageStorageClient  : Successfully fetched image data for ID: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, size: 2084668 bytes
+2025-04-16 20:30:23.329 | 2025-04-16T13:30:23.329Z  INFO 1 --- [compression-service] [nio-8080-exec-4] c.s.c.s.compression.CompressionService   : Retrieved image data for ID: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, size: 2084668 bytes
+2025-04-16 20:30:23.329 | 2025-04-16T13:30:23.329Z  INFO 1 --- [compression-service] [nio-8080-exec-4] c.s.c.service.client.ImageStorageClient  : Getting metadata for image ID: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79
+2025-04-16 20:30:23.329 | 2025-04-16T13:30:23.329Z DEBUG 1 --- [compression-service] [nio-8080-exec-4] c.s.c.messaging.ImageMessageListener     : Registering callback for image ID: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79
+2025-04-16 20:30:23.329 | 2025-04-16T13:30:23.329Z  INFO 1 --- [compression-service] [nio-8080-exec-4] c.s.c.messaging.MessageSender            : Sending message to storage service: f1bdca5a-d468-423c-80f3-b41945521c6e, action: GET_METADATA
+2025-04-16 20:30:23.330 | 2025-04-16T13:30:23.330Z DEBUG 1 --- [compression-service] [nio-8080-exec-4] c.s.c.service.client.ImageStorageClient  : Sent GET_METADATA request for image ID: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79
+2025-04-16 20:30:23.335 | 2025-04-16T13:30:23.335Z DEBUG 1 --- [compression-service] [enerContainer-1] c.s.c.messaging.ImageMessageListener     : Received message with content type: application/json, correlation ID: null, imageId: null, action: null
+2025-04-16 20:30:23.336 | 2025-04-16T13:30:23.336Z  INFO 1 --- [compression-service] [enerContainer-1] c.s.c.messaging.ImageMessageListener     : Received message from storage service: cc8c7357-e18d-4b9b-94fc-cae6e2778c44, action: METADATA
+2025-04-16 20:30:23.336 | 2025-04-16T13:30:23.336Z DEBUG 1 --- [compression-service] [enerContainer-1] c.s.c.messaging.ImageMessageListener     : Processing message with action: METADATA for imageId: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79
+2025-04-16 20:30:23.336 | 2025-04-16T13:30:23.336Z  INFO 1 --- [compression-service] [enerContainer-1] c.s.c.service.client.ImageStorageClient  : Received metadata for image ID: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, compressionLevel: 0
+2025-04-16 20:30:23.336 | 2025-04-16T13:30:23.336Z  INFO 1 --- [compression-service] [nio-8080-exec-4] c.s.c.service.client.ImageStorageClient  : Successfully retrieved metadata for image ID: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79
+2025-04-16 20:30:23.337 | 2025-04-16T13:30:23.336Z  INFO 1 --- [compression-service] [nio-8080-exec-4] c.s.c.s.compression.CompressionService   : Retrieved metadata for image ID: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, metadata present: true
+2025-04-16 20:30:23.337 | 2025-04-16T13:30:23.336Z  INFO 1 --- [compression-service] [nio-8080-exec-4] c.s.c.s.compression.CompressionService   : Converting image to WebP with quality: 65
+2025-04-16 20:30:23.343 | 2025-04-16T13:30:23.343Z  INFO 1 --- [compression-service] [nio-8080-exec-4] c.s.compressionservice.util.webp.CWebp   : Executing WebP command: /app/webp_binaries/cwebp -q 65 -alpha_q 100  -o /tmp/webp_conversion_8308859690872936504/output_image.webp /tmp/webp_conversion_8308859690872936504/input_image.bin
+2025-04-16 20:30:23.962 | 2025-04-16T13:30:23.962Z  INFO 1 --- [compression-service] [nio-8080-exec-4] c.s.c.s.compression.CompressionService   : Saving compressed image data, original size: 2084668, compressed size: 1180266
+2025-04-16 20:30:23.963 | 2025-04-16T13:30:23.963Z DEBUG 1 --- [compression-service] [nio-8080-exec-4] c.s.c.messaging.ImageMessageListener     : Registering callback for image ID: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79
+2025-04-16 20:30:23.963 | 2025-04-16T13:30:23.963Z  INFO 1 --- [compression-service] [nio-8080-exec-4] c.s.c.messaging.MessageSender            : Sending message to storage service: 26b72480-3054-41f9-8ba1-d41a68119f36, action: UPDATE_COMPRESSION
+2025-04-16 20:30:24.108 | 2025-04-16T13:30:24.108Z DEBUG 1 --- [compression-service] [enerContainer-1] c.s.c.messaging.ImageMessageListener     : Received message with content type: application/json, correlation ID: null, imageId: null, action: null
+2025-04-16 20:30:24.108 | 2025-04-16T13:30:24.108Z  INFO 1 --- [compression-service] [enerContainer-1] c.s.c.messaging.ImageMessageListener     : Received message from storage service: e94a42b2-67d6-4528-bb28-a802ff70173a, action: UPDATED
+2025-04-16 20:30:24.108 | 2025-04-16T13:30:24.108Z DEBUG 1 --- [compression-service] [enerContainer-1] c.s.c.messaging.ImageMessageListener     : Processing message with action: UPDATED for imageId: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79
+2025-04-16 20:30:24.108 | 2025-04-16T13:30:24.108Z  INFO 1 --- [compression-service] [enerContainer-1] c.s.c.service.client.ImageStorageClient  : Image successfully updated: id=4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, compressionLevel=35
+2025-04-16 20:30:24.109 | 2025-04-16T13:30:24.109Z  INFO 1 --- [compression-service] [nio-8080-exec-4] c.s.c.s.compression.CompressionService   : Image compressed successfully: id=4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, compressionLevel=35, originalSize=2084668, compressedSize=1180266

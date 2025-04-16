@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.retry.annotation.Retryable;
@@ -17,8 +18,14 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * Эта конфигурация отключена в пользу использования RemoteImageStorageService.
+ * Она оставлена для обратной совместимости и будет загружена только если
+ * свойство minio.direct.connection установлено в true.
+ */
 @Configuration
 @EnableRetry
+@ConditionalOnProperty(name = "minio.direct.connection", havingValue = "true", matchIfMissing = false)
 public class MinioConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(MinioConfig.class);
@@ -40,7 +47,8 @@ public class MinioConfig {
     public MinioClient minioClient() throws MinioException, IOException,
             NoSuchAlgorithmException, InvalidKeyException {
         
-        logger.info("Initializing MinIO client with endpoint: {}", endpoint);
+        logger.info("Инициализация прямого подключения к MinIO endpoint: {}", endpoint);
+        logger.warn("Прямое подключение к MinIO не рекомендуется. Используйте RemoteImageStorageService.");
         
         MinioClient minioClient = MinioClient.builder()
                 .endpoint(endpoint)

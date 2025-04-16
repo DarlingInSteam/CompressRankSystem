@@ -53,6 +53,28 @@ const formatFileSize = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
+// Функция для сохранения originalSize в localStorage
+const saveOriginalSizeToStorage = (imageId: string, size: number) => {
+  try {
+    const storedSizes = JSON.parse(localStorage.getItem('originalImageSizes') || '{}');
+    storedSizes[imageId] = size;
+    localStorage.setItem('originalImageSizes', JSON.stringify(storedSizes));
+  } catch (error) {
+    console.error('Ошибка при сохранении размера в localStorage:', error);
+  }
+};
+
+// Функция для получения originalSize из localStorage
+const getOriginalSizeFromStorage = (imageId: string): number | null => {
+  try {
+    const storedSizes = JSON.parse(localStorage.getItem('originalImageSizes') || '{}');
+    return storedSizes[imageId] || null;
+  } catch (error) {
+    console.error('Ошибка при чтении размера из localStorage:', error);
+    return null;
+  }
+};
+
 const ImageDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -95,22 +117,46 @@ const ImageDetailPage: React.FC = () => {
     try {
       const imageData = await ImageService.getImageMetadata(imageId);
       setImage(imageData);
+      console.log('Загружены метаданные изображения:', imageData);
 
       // Получаем статистику для изображения
       try {
-        const statistics = await ImageService.getImageStatistics(imageId);
+        const statistics = await ImageService.getImageStatisticById(imageId);
         setImageStatistics(statistics);
+        console.log('Загружена статистика изображения:', statistics);
       } catch (err) {
         console.warn('Could not fetch image statistics:', err);
         // Продолжаем загрузку даже если статистика недоступна
       }
 
-      if (imageData.compressionLevel > 0) {
-        try {
-          const originalSizeData = await ImageService.getOriginalImageSize(imageId);
-          setOriginalSize(originalSizeData);
-        } catch (err) {
-          console.warn('Could not fetch original size:', err);
+      // Получаем оригинальный размер, независимо от того, сжато изображение или нет
+      // Это гарантирует, что у нас всегда будут данные для расчета статистики
+      try {
+        // Запрос оригинального размера с сервера
+        const originalSizeData = await ImageService.getOriginalImageSize(imageId);
+        console.log('Получен оригинальный размер с сервера:', originalSizeData);
+        setOriginalSize(originalSizeData);
+        // Обновляем значение в localStorage
+        saveOriginalSizeToStorage(imageId, originalSizeData);
+      } catch (err) {
+        console.warn('Не удалось получить оригинальный размер с сервера:', err);
+        
+        // Пробуем получить из localStorage
+        const cachedSize = getOriginalSizeFromStorage(imageId);
+        if (cachedSize) {
+          console.log(`Используем кэшированный оригинальный размер для ${imageId}: ${cachedSize}`);
+          setOriginalSize(cachedSize);
+        } else if (imageData.compressionLevel === 0) {
+          // Если изображение не сжато, то текущий размер = оригинальный
+          console.log(`Изображение не сжато, используем текущий размер как оригинальный: ${imageData.size}`);
+          setOriginalSize(imageData.size);
+          saveOriginalSizeToStorage(imageId, imageData.size);
+        } else {
+          // Если изображение сжато и нет данных в localStorage, используем приблизительный расчет
+          const estimatedOriginalSize = Math.round(imageData.size / (1 - imageData.compressionLevel / 100));
+          console.log(`Используем оценочный оригинальный размер: ${estimatedOriginalSize}`);
+          setOriginalSize(estimatedOriginalSize);
+          saveOriginalSizeToStorage(imageId, estimatedOriginalSize);
         }
       }
     } catch (error) {
@@ -129,7 +175,9 @@ const ImageDetailPage: React.FC = () => {
 
     try {
       if (image && image.compressionLevel === 0) {
+        // Перед сжатием сохраняем оригинальный размер
         setOriginalSize(image.size);
+        saveOriginalSizeToStorage(id, image.size);
       }
       
       const compressedImage = await ImageService.compressImage(id, compressionLevel);
@@ -153,6 +201,12 @@ const ImageDetailPage: React.FC = () => {
     try {
       const restoredImage = await ImageService.restoreImage(id);
       setImage(restoredImage);
+      
+      // Очищаем originalSize после восстановления, так как изображение вернулось к оригинальному состоянию
+      if (id) {
+        setOriginalSize(restoredImage.size);
+        saveOriginalSizeToStorage(id, restoredImage.size);
+      }
 
       showSnackbar('Изображение успешно восстановлено до оригинала!', 'success');
     } catch (error) {
@@ -434,7 +488,7 @@ const ImageDetailPage: React.FC = () => {
                 </Box>
                 <Box sx={{ p: 3 }}>
                   <Grid container spacing={2} sx={{ mb: 3 }}>
-                    <Grid xs={12} sm={6} md={3}>
+                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                       <Box sx={{ 
                         p: 2, 
                         borderRadius: '12px', 
@@ -448,7 +502,7 @@ const ImageDetailPage: React.FC = () => {
                         </Typography>
                       </Box>
                     </Grid>
-                    <Grid xs={12} sm={6} md={2}>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
                       <Box sx={{ 
                         p: 2, 
                         borderRadius: '12px', 
@@ -462,7 +516,7 @@ const ImageDetailPage: React.FC = () => {
                         </Typography>
                       </Box>
                     </Grid>
-                    <Grid xs={12} sm={6} md={2}>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
                       <Box sx={{ 
                         p: 2, 
                         borderRadius: '12px', 
@@ -477,7 +531,7 @@ const ImageDetailPage: React.FC = () => {
                         </Typography>
                       </Box>
                     </Grid>
-                    <Grid xs={12} sm={6} md={2}>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
                       <Box sx={{ 
                         p: 2, 
                         borderRadius: '12px', 
@@ -492,7 +546,7 @@ const ImageDetailPage: React.FC = () => {
                         </Typography>
                       </Box>
                     </Grid>
-                    <Grid xs={12} sm={6} md={3}>
+                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                       <Box sx={{ 
                         p: 2, 
                         borderRadius: '12px', 

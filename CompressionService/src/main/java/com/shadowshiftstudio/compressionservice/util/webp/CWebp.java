@@ -23,6 +23,8 @@ public class CWebp {
 
     private static final Logger logger = Logger.getLogger(CWebp.class.getName());
     private static final String WEBP_BINARY_PATH = "webp_binaries";
+    // Пути к бинарным файлам в Docker контейнере
+    private static final String DOCKER_WEBP_PATH = "/app/webp_binaries";
     private static String cwebpPath = null;
     private static boolean webpBinaryInitialized = false;
 
@@ -64,7 +66,49 @@ public class CWebp {
         }
 
         try {
-            // First check if cwebp is available in PATH
+            // Проверяем, установлен ли путь через системное свойство от WebpInitializer
+            String configuredPath = System.getProperty("webp.binary.path");
+            if (configuredPath != null && !configuredPath.trim().isEmpty()) {
+                Path path = Paths.get(configuredPath);
+                if (Files.exists(path) && Files.isExecutable(path)) {
+                    cwebpPath = configuredPath;
+                    webpBinaryInitialized = true;
+                    logger.info("Successfully initialized WebP binary at: " + cwebpPath);
+                    return;
+                } else {
+                    logger.warning("Configured WebP binary path is invalid: " + configuredPath);
+                }
+            }
+
+            // Попытка найти бинарный файл в контейнере Docker
+            Path[] possibleDockerPaths = {
+                Paths.get(DOCKER_WEBP_PATH, "cwebp"),
+                Paths.get("/webp_binaries/cwebp"),
+                Paths.get("/usr/local/bin/cwebp"),
+                Paths.get("/usr/bin/cwebp")
+            };
+            
+            for (Path path : possibleDockerPaths) {
+                if (Files.exists(path) && Files.isExecutable(path)) {
+                    cwebpPath = path.toString();
+                    webpBinaryInitialized = true;
+                    logger.info("Found WebP binary in container at: " + cwebpPath);
+                    return;
+                }
+            }
+
+            // Если не нашли в контейнере, пробуем скачать и установить в DOCKER_WEBP_PATH
+            Path dockerWebpDir = Paths.get(DOCKER_WEBP_PATH);
+            if (!Files.exists(dockerWebpDir)) {
+                try {
+                    Files.createDirectories(dockerWebpDir);
+                    logger.info("Created directory for WebP binaries at: " + dockerWebpDir);
+                } catch (Exception e) {
+                    logger.warning("Failed to create directory at " + dockerWebpDir + ": " + e.getMessage());
+                }
+            }
+
+            // Если предыдущие методы не сработали, ищем в PATH
             boolean isAvailable = checkCWebpInPath();
             if (isAvailable) {
                 cwebpPath = "cwebp";
@@ -73,6 +117,7 @@ public class CWebp {
                 return;
             }
 
+            // Если не нашли нигде, создаем свою копию
             // If not available in PATH, check or create binary directory
             Path webpDir = Paths.get(System.getProperty("user.dir"), WEBP_BINARY_PATH);
             if (!Files.exists(webpDir)) {
