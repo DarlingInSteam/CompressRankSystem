@@ -26,13 +26,10 @@ public class Image {
         this.lastAccessed = LocalDateTime.now();
         this.accessCount = 0;
         
-        // Format: {id}_{originalFilename}
-        // Replace spaces with underscores for safer object storage
         this.objectName = id + "_" + originalFilename.replace(" ", "_");
     }
     
     public Image() {
-        // Default constructor for JSON serialization
     }
 
     public String getId() {

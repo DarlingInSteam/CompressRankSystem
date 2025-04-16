@@ -38,7 +38,6 @@ public class CompressionService {
             throw new IllegalArgumentException("Compression level must be between 0 and 100");
         }
         
-        // Get image data and metadata from storage service
         byte[] imageData = null;
         Image imageMetadata = null;
         
@@ -69,23 +68,19 @@ public class CompressionService {
             throw new IOException("Image metadata not found with id: " + imageId);
         }
 
-        // If requested compression level is 0, and current compression level is also 0, do nothing
         if (compressionLevel == 0 && imageMetadata.getCompressionLevel() == 0) {
             logger.info("No compression needed, image is already uncompressed");
             return imageMetadata;
         }
         
-        // If requested compression level is 0, restore original image instead of compressing
         if (compressionLevel == 0) {
             logger.info("Restoring original image instead of compressing");
             return restoreImage(imageId);
         }
 
-        // Configure WebP conversion options
         WebpOptions options = new WebpOptions();
         options.withQuality(mapCompressionLevelToQuality(compressionLevel));
         
-        // Convert image to WebP with specified compression
         logger.info("Converting image to WebP with quality: {}", mapCompressionLevelToQuality(compressionLevel));
         byte[] compressedData = webpService.convertToWebp(imageData, options);
         
@@ -94,8 +89,7 @@ public class CompressionService {
             throw new IOException("WebP conversion failed");
         }
         
-        // Save compressed data directly to original image
-        logger.info("Saving compressed image data, original size: {}, compressed size: {}", 
+        logger.info("Saving compressed image data, original size: {}, compressed size: {}",
             imageData.length, compressedData.length);
         Image updatedImage = imageStorageClient.updateImageCompression(imageId, compressedData, compressionLevel);
         
@@ -120,13 +114,11 @@ public class CompressionService {
             throw new IOException("Image not found with id: " + imageId);
         }
         
-        // If image is already not compressed, just return its metadata
         if (imageMetadata.getCompressionLevel() == 0) {
             logger.info("Image is already in original state, no restore needed");
             return imageMetadata;
         }
         
-        // Get original data from backup
         byte[] originalData = imageStorageClient.getOriginalImageBackup(imageId);
         
         if (originalData == null) {
@@ -137,14 +129,10 @@ public class CompressionService {
         logger.info("Retrieved original backup data for image ID: {}, size: {} bytes", 
             imageId, originalData.length);
         
-        // Update current image, setting compression level to 0 (no compression)
         return imageStorageClient.updateImageCompression(imageId, originalData, 0);
     }
     
     private int mapCompressionLevelToQuality(int compressionLevel) {
-        // Invert compression level for WebP quality
-        // Compression level 0 = WebP quality 100
-        // Compression level 100 = WebP quality 0
         return Math.max(0, Math.min(100, 100 - compressionLevel));
     }
     
@@ -157,7 +145,6 @@ public class CompressionService {
     public long getOriginalSize(String imageId) throws Exception {
         logger.info("Getting original size for image ID: {}", imageId);
         
-        // Получаем метаданные изображения
         Image imageMetadata = imageStorageClient.getImageMetadata(imageId);
         
         if (imageMetadata == null) {
@@ -165,19 +152,16 @@ public class CompressionService {
             throw new IllegalArgumentException("Image not found with id: " + imageId);
         }
         
-        // Если изображение не сжато, его текущий размер и есть оригинальный
         if (imageMetadata.getCompressionLevel() == 0) {
             logger.info("Image is not compressed, returning current size: {}", imageMetadata.getSize());
             return imageMetadata.getSize();
         }
         
-        // Если изображение сжато, получаем оригинальное изображение из бэкапа
         try {
             byte[] originalData = imageStorageClient.getOriginalImageBackup(imageId);
             
             if (originalData == null) {
                 logger.error("Original image backup not found for ID: {}", imageId);
-                // Если бэкап не найден, возвращаем оценочный размер на основе текущего размера и уровня сжатия
                 long estimatedSize = Math.round(imageMetadata.getSize() / (1 - imageMetadata.getCompressionLevel() / 100.0));
                 logger.info("Using estimated original size: {}", estimatedSize);
                 return estimatedSize;

@@ -42,23 +42,19 @@ public class MessageSender {
         logger.info("Sending message to compression service: {}, action: {}", 
                 message.getMessageId(), message.getAction());
         
-        // For messages containing image data, set special headers
         if (message instanceof CompressionMessage) {
             CompressionMessage compMsg = (CompressionMessage) message;
             if (compMsg.getImageData() != null && compMsg.getImageData().length > 0) {
                 logger.debug("Sending image data with length: {} bytes", compMsg.getImageData().length);
                 
-                // Set null to prevent serialization issues - we'll handle binary data separately
                 byte[] imageData = compMsg.getImageData();
                 compMsg.setImageData(null);
                 
-                // Use the binary-specialized method instead
                 sendBinaryToCompression(compMsg, imageData);
                 return;
             }
         }
         
-        // For regular messages, use standard send
         rabbitTemplate.convertAndSend(
                 RabbitMQConfig.IMAGE_EXCHANGE, 
                 RabbitMQConfig.COMPRESSION_KEY, 
@@ -75,13 +71,11 @@ public class MessageSender {
         logger.info("Sending message with {} images to compression service: {}, action: {}", 
                 imagesMap.size(), message.getMessageId(), message.getAction());
         
-        // Add metadata about the number of images
         if (message.getMetadata() == null) {
             message.setMetadata(new java.util.HashMap<>());
         }
         message.addMetadata("imagesCount", imagesMap.size());
         
-        // Add main metadata for each image
         int i = 0;
         for (Map.Entry<String, Image> entry : imagesMap.entrySet()) {
             Image img = entry.getValue();
@@ -91,7 +85,6 @@ public class MessageSender {
             message.addMetadata("image_" + i + "_size", img.getSize());
             i++;
             
-            // Limit the number of metadata to prevent overly large messages
             if (i >= 100) break;
         }
         
@@ -121,10 +114,6 @@ public class MessageSender {
                 message.getMessageId(), message.getAction(), imageData.length, correlationId);
         
         try {
-            // Simplify the process and make it more reliable - send only one message with binary data
-            // CompressionService is timing out waiting for responses, so we'll use a direct approach
-            
-            // Add all important metadata as headers to ensure they're available immediately
             MessageProperties binaryProps = MessagePropertiesBuilder.newInstance()
                     .setContentType("application/octet-stream")
                     .setCorrelationId(correlationId)
@@ -135,7 +124,6 @@ public class MessageSender {
                     .setHeader("compressionLevel", message.getCompressionLevel())
                     .build();
             
-            // Add other metadata as headers if available
             if (message.getMetadata() != null) {
                 for (Map.Entry<String, Object> entry : message.getMetadata().entrySet()) {
                     if (entry.getValue() != null) {

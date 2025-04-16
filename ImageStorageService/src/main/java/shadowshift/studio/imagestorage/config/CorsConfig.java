@@ -17,22 +17,17 @@ public class CorsConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         
-        // Разрешаем все возможные источники запросов
         config.setAllowedOriginPatterns(Collections.singletonList("*"));
         
-        // Разрешаем конкретные хосты, если нужно более строгое ограничение
-        config.addAllowedOrigin("http://localhost:3000"); // Frontend в режиме разработки
-        config.addAllowedOrigin("http://localhost"); // Frontend в Docker
-        config.addAllowedOrigin("http://localhost:80"); // Frontend в Docker на явном порту
-        config.addAllowedOrigin("http://admin-panel"); // Docker service name
+        config.addAllowedOrigin("http://localhost:3000");
+        config.addAllowedOrigin("http://localhost");
+        config.addAllowedOrigin("http://localhost:80");
+        config.addAllowedOrigin("http://admin-panel");
         
-        // Разрешаем учетные данные (cookies, заголовки аутентификации)
         config.setAllowCredentials(true);
         
-        // Разрешаем все методы HTTP
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         
-        // Разрешаем все заголовки
         config.setAllowedHeaders(Arrays.asList(
                 "Origin", 
                 "Content-Type", 
@@ -44,16 +39,13 @@ public class CorsConfig {
                 "X-Requested-With"
         ));
         
-        // Устанавливаем время кэширования предварительных запросов CORS
         config.setMaxAge(3600L);
         
-        // Определение заголовков, которые клиент может использовать в фактическом запросе
         config.setExposedHeaders(Arrays.asList(
                 "Authorization", 
                 "Content-Disposition"
         ));
         
-        // Применяем эту конфигурацию ко всем путям
         source.registerCorsConfiguration("/**", config);
         
         return new CorsFilter(source);

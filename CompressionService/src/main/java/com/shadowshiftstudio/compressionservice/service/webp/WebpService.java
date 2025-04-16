@@ -42,12 +42,10 @@ public class WebpService {
         }
         
         try {
-            // Создаем опции для WebP конвертации
             WebpOptions options = new WebpOptions()
                 .withQuality(quality)
                 .withExact(true);
                 
-            // Конвертируем изображение напрямую через WebpConverter
             return WebpConverter.imageToWebpByte(imageData, options);
         } catch (CWebpException e) {
             logger.error("Failed to convert image to WebP: {}", e.getMessage(), e);
@@ -68,7 +66,6 @@ public class WebpService {
         }
         
         try {
-            // Конвертируем изображение через WebpConverter с заданными опциями
             return WebpConverter.imageToWebpByte(imageData, options);
         } catch (CWebpException e) {
             logger.error("Failed to convert image to WebP with custom options: {}", e.getMessage(), e);

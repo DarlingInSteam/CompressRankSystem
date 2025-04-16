@@ -30,26 +30,21 @@ public class WebImageProcessor {
             return false;
         }
         
-        // Check for common image signatures
-        // JPEG
         if (imageData[0] == (byte)0xFF && imageData[1] == (byte)0xD8) {
             return true;
         }
         
-        // PNG
-        if (imageData[0] == (byte)0x89 && imageData[1] == (byte)0x50 && 
+        if (imageData[0] == (byte)0x89 && imageData[1] == (byte)0x50 &&
             imageData[2] == (byte)0x4E && imageData[3] == (byte)0x47) {
             return true;
         }
         
-        // GIF
-        if (imageData[0] == (byte)0x47 && imageData[1] == (byte)0x49 && 
+        if (imageData[0] == (byte)0x47 && imageData[1] == (byte)0x49 &&
             imageData[2] == (byte)0x46 && imageData[3] == (byte)0x38) {
             return true;
         }
         
-        // WebP
-        if (imageData[8] == (byte)0x57 && imageData[9] == (byte)0x45 && 
+        if (imageData[8] == (byte)0x57 && imageData[9] == (byte)0x45 &&
             imageData[10] == (byte)0x42 && imageData[11] == (byte)0x50) {
             return true;
         }
@@ -68,61 +63,49 @@ public class WebImageProcessor {
             return null;
         }
         
-        // First check if cwebp executable exists and is executable
         String cwebpExecutable = getCwebpExecutablePath();
         File cwebpFile = new File(cwebpExecutable);
         
         if (!cwebpFile.exists()) {
             logger.error("WebP converter executable not found at: {}", cwebpExecutable);
-            // Return the original image data as fallback
             return imageData;
         }
         
         if (!cwebpFile.canExecute()) {
             logger.error("WebP converter executable found but is not executable: {}", cwebpExecutable);
             try {
-                // Attempt to make it executable
                 cwebpFile.setExecutable(true);
                 logger.info("Successfully made WebP converter executable: {}", cwebpExecutable);
             } catch (SecurityException e) {
                 logger.error("Failed to make WebP converter executable: {}", e.getMessage());
-                // Return the original image data as fallback
                 return imageData;
             }
         }
         
         try {
-            // Create temporary files for input and output
             File inputFile = File.createTempFile("image_input_", ".bin");
             File outputFile = File.createTempFile("image_output_", ".webp");
             
-            // Write input data to temp file
             Files.write(inputFile.toPath(), imageData);
             
-            // Build command for converting to WebP
             String[] command = {
                 cwebpExecutable,
-                "-quiet",           // Less output
-                "-q", "90",         // Quality 90
+                "-quiet",
+                "-q", "90",
                 inputFile.getAbsolutePath(),
                 "-o", outputFile.getAbsolutePath()
             };
             
-            // Log the exact command being executed
             logger.info("Executing WebP conversion command: {}", String.join(" ", command));
             
-            // Execute conversion command
             ProcessBuilder processBuilder = new ProcessBuilder(command);
             Process process = processBuilder.start();
             
-            // Wait for process to complete
             int exitCode = process.waitFor();
             
             if (exitCode == 0) {
-                // Read output file into byte array
                 byte[] webpData = Files.readAllBytes(outputFile.toPath());
                 
-                // Cleanup temp files
                 inputFile.delete();
                 outputFile.delete();
                 
@@ -131,7 +114,6 @@ public class WebImageProcessor {
             } else {
                 logger.error("WebP conversion failed with exit code: {}", exitCode);
                 
-                // Capture error output for logging
                 try (BufferedReader reader = new BufferedReader(
                         new InputStreamReader(process.getErrorStream()))) {
                     String line;
@@ -142,17 +124,14 @@ public class WebImageProcessor {
                     logger.error("WebP conversion error: {}", error.toString());
                 }
                 
-                // Cleanup temp files
                 inputFile.delete();
                 outputFile.delete();
                 
-                // Return the original image data as fallback
                 logger.info("Returning original image as fallback (no conversion)");
                 return imageData;
             }
         } catch (IOException | InterruptedException e) {
             logger.error("Error converting image to WebP: {}", e.getMessage(), e);
-            // Return the original image data as fallback
             return imageData;
         }
     }
@@ -172,7 +151,6 @@ public class WebImageProcessor {
         } else if (osName.contains("mac")) {
             return binaryPath.resolve("cwebp_mac").toString();
         } else {
-            // Linux and other unix-like systems
             return binaryPath.resolve("cwebp").toString();
         }
     }

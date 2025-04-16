@@ -46,13 +46,11 @@ public class ImageMessageListener {
             logger.debug("Received message with content type: {}, correlation ID: {}", 
                     contentType, correlationId);
             
-            // Special handling for binary messages if needed
             if ("application/octet-stream".equals(contentType)) {
                 logger.warn("Received binary message directly to storage queue - not expected");
                 return;
             }
             
-            // Convert message to our expected message type
             Object convertedMessage;
             try {
                 convertedMessage = messageConverter.fromMessage(amqpMessage);
@@ -75,7 +73,6 @@ public class ImageMessageListener {
         } catch (Exception e) {
             logger.error("Error processing message", e);
             
-            // Try to extract imageId from message headers if possible
             MessageProperties props = amqpMessage.getMessageProperties();
             if (props != null && props.getHeaders() != null && props.getHeaders().containsKey("imageId")) {
                 String imageId = props.getHeaders().get("imageId").toString();
@@ -119,7 +116,6 @@ public class ImageMessageListener {
         } catch (Exception e) {
             logger.error("Error processing message: {}", message.getMessageId(), e);
             
-            // Send error response
             ImageMessage response = new ImageMessage();
             response.setImageId(message.getImageId());
             response.setAction("ERROR");
@@ -139,16 +135,13 @@ public class ImageMessageListener {
                 response.setImageData(imageData);
                 response.setCompressionLevel(metadata.getCompressionLevel());
                 
-                // Добавляем важную информацию в метаданные
                 response.addMetadata("contentType", metadata.getContentType());
                 response.addMetadata("size", imageData.length);
                 response.addMetadata("originalFilename", metadata.getOriginalFilename());
                 
-                // Explicitly confirming image data is set
-                logger.debug("Preparing to send image data: ID={}, size={}, compressionLevel={}, imageData null={}", 
+                logger.debug("Preparing to send image data: ID={}, size={}, compressionLevel={}, imageData null={}",
                     imageId, imageData.length, metadata.getCompressionLevel(), (response.getImageData() == null));
                 
-                // Send using direct custom binary message for large data
                 messageSender.sendBinaryToCompression(response, imageData);
                 logger.info("Sent image data response for image ID: {}, data size: {} bytes", 
                     imageId, imageData.length);
@@ -174,7 +167,6 @@ public class ImageMessageListener {
                 response.setImageData(originalData);
                 response.setCompressionLevel(0);
                 
-                // Добавляем размер данных в метаданные
                 response.addMetadata("imageDataLength", originalData.length);
                 
                 logger.debug("Sending original image data: ID={}, size={}", imageId, originalData.length);
@@ -201,7 +193,6 @@ public class ImageMessageListener {
             response.setImageId(imageId);
             response.setAction("METADATA");
             
-            // Добавляем все метаданные изображения в сообщение
             response.addMetadata("originalFilename", metadata.getOriginalFilename());
             response.addMetadata("contentType", metadata.getContentType());
             response.addMetadata("size", metadata.getSize());
@@ -226,12 +217,10 @@ public class ImageMessageListener {
         try {
             Map<String, Image> allImages = imageStorageService.getAllImageMetadata();
             
-            // Create response
             ImageMessage response = new ImageMessage();
             response.setImageId(requestId);
             response.setAction("ALL_METADATA");
             
-            // Send response with metadata
             messageSender.sendToCompression(response, allImages);
             logger.info("Sent metadata for {} images to compression service", allImages.size());
             
@@ -284,7 +273,6 @@ public class ImageMessageListener {
                 response.setImageId(imageId);
                 response.setAction("UPDATED");
                 
-                // Добавляем обновленные метаданные в ответ
                 response.addMetadata("originalFilename", updatedImage.getOriginalFilename());
                 response.addMetadata("contentType", updatedImage.getContentType());
                 response.addMetadata("size", updatedImage.getSize());

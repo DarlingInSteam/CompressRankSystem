@@ -115,7 +115,6 @@ public class ImageController {
         try {
             Map<String, Image> images = imageStorageService.getAllImageMetadata();
             
-            // Логируем количество найденных изображений
             System.out.println("Found " + images.size() + " images in storage");
             
             return ResponseEntity.ok(images);
@@ -123,7 +122,6 @@ public class ImageController {
             e.printStackTrace();
             System.err.println("Error retrieving all images: " + e.getMessage());
             
-            // Возвращаем подробную информацию об ошибке для отладки
             return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Error retrieving images: " + e.getMessage());

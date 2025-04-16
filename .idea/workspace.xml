@@ -5,11 +5,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0ec3192d-774f-49c4-adbc-f36601cea625" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/admin-panel/src/pages/detail/ImageDetailPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin-panel/src/pages/detail/ImageDetailPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/compression_service_logs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/compression_service_logs.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/compression-db.mv.db" beforeDir="false" afterPath="$PROJECT_DIR$/data/compression-db.mv.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/storage-db.mv.db" beforeDir="false" afterPath="$PROJECT_DIR$/data/storage-db.mv.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/image_storage_service_log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/image_storage_service_log.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/CorsConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/CorsConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/DockerComposeRunner.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/DockerComposeRunner.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/JacksonConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/JacksonConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/MinioConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/MinioConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/RabbitMQConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/RabbitMQConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/RemoteStorageConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/RemoteStorageConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/WebpInitializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/WebpInitializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/controller/CompressionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/controller/CompressionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/controller/ImageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/controller/ImageController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/controller/WebController.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/controller/WebController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/dto/message/CompressionMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/dto/message/CompressionMessage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/mapper/ImageMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/mapper/ImageMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/messaging/ImageMessageListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/messaging/ImageMessageListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/client/ImageStorageClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/client/ImageStorageClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/compression/CompressionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/compression/CompressionService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/image/MinioImageStorageService.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/image/MinioImageStorageService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/webp/WebpService.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/webp/WebpService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/resources/application-docker.properties" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/resources/application-docker.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,34 +83,34 @@
     <option name="showLibraryContents" value="true" />
     <option name="showMembers" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Gradle.Build CompressionService.executor": "Run",
-    "HTTP Request.generated-requests | #1.executor": "Run",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "Spring Boot.CompressionServiceApplication.executor": "Run",
-    "git-widget-placeholder": "compression-service",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/rombk/Downloads/github-copilot-intellij-1.5.41.9865-241-nightly.zip",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Gradle.Build CompressionService.executor&quot;: &quot;Run&quot;,
+    &quot;HTTP Request.generated-requests | #1.executor&quot;: &quot;Run&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;Spring Boot.CompressionServiceApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;compression-service&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/rombk/Downloads/github-copilot-intellij-1.5.41.9865-241-nightly.zip&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\project\CompressRankSystem\RankService\src\main\java\com\shadowshiftstudio\rankservice" />
@@ -156,7 +171,7 @@
       <workItem from="1744750609622" duration="2317000" />
       <workItem from="1744755722738" duration="2197000" />
       <workItem from="1744806290905" duration="850000" />
-      <workItem from="1744807730944" duration="2411000" />
+      <workItem from="1744807730944" duration="3804000" />
     </task>
     <servers />
   </component>

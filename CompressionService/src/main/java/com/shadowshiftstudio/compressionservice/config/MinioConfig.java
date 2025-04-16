@@ -18,11 +18,6 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-/**
- * Эта конфигурация отключена в пользу использования RemoteImageStorageService.
- * Она оставлена для обратной совместимости и будет загружена только если
- * свойство minio.direct.connection установлено в true.
- */
 @Configuration
 @EnableRetry
 @ConditionalOnProperty(name = "minio.direct.connection", havingValue = "true", matchIfMissing = false)
@@ -56,7 +51,6 @@ public class MinioConfig {
                 .build();
         
         try {
-            // Проверяем существование корзины, если нет - создаем
             boolean bucketExists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
             if (!bucketExists) {
                 logger.info("Creating bucket: {}", bucketName);

@@ -24,7 +24,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         body.put("path", request.getDescription(false));
         
-        // Логируем подробности ошибки
         System.err.println("Global error handler caught: " + ex.getClass().getName() + ": " + ex.getMessage());
         ex.printStackTrace();
         
