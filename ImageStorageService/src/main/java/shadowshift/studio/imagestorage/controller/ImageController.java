@@ -18,7 +18,11 @@ import shadowshift.studio.imagestorage.model.Image;
 import shadowshift.studio.imagestorage.service.ImageStorageService;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/images")
@@ -26,6 +30,7 @@ import java.util.Map;
 public class ImageController {
 
     private final ImageStorageService imageStorageService;
+    private static final Logger logger = LoggerFactory.getLogger(ImageController.class);
 
     @Autowired
     public ImageController(ImageStorageService imageStorageService) {
@@ -113,18 +118,20 @@ public class ImageController {
     @GetMapping
     public ResponseEntity<?> getAllImages() {
         try {
+            long startTime = System.currentTimeMillis();
+            
             Map<String, Image> images = imageStorageService.getAllImageMetadata();
             
-            System.out.println("Found " + images.size() + " images in storage");
+            long duration = System.currentTimeMillis() - startTime;
+            logger.info("GET /api/images returned {} images in {}ms", images.size(), duration);
             
+            // Return empty map instead of error message if no images found
             return ResponseEntity.ok(images);
         } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Error retrieving all images: " + e.getMessage());
+            logger.error("Error retrieving all images: {}", e.getMessage(), e);
             
-            return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error retrieving images: " + e.getMessage());
+            // Return empty map instead of error message to prevent client issues
+            return ResponseEntity.ok(new HashMap<>());
         }
     }
 

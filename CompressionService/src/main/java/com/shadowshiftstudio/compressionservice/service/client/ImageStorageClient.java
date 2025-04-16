@@ -295,15 +295,40 @@ public class ImageStorageClient {
      * @return Map of all images with their IDs as keys
      */
     public Map<String, Image> getAllImages() {
+        logger.info("Retrieving metadata for all images");
         CompletableFuture<Map<String, Image>> future = new CompletableFuture<>();
+        long startTime = System.currentTimeMillis();
 
         String requestId = "all_images_" + System.currentTimeMillis();
         messageListener.registerCallback(requestId, message -> {
             if ("ALL_METADATA".equals(message.getAction())) {
                 Map<String, Image> images = messageListener.getAllImagesData(requestId);
-                future.complete(images);
+                if (images != null) {
+                    logger.info("Received metadata for {} images from storage service", images.size());
+                    future.complete(images);
+                } else {
+                    logger.warn("Received null images data from storage service");
+                    future.complete(new HashMap<>());
+                }
             } else if ("ERROR".equals(message.getAction())) {
+                logger.error("Error response from storage service when retrieving all images");
                 future.complete(new HashMap<>());
+            } else {
+                logger.warn("Unexpected response action: {} when retrieving all images", message.getAction());
+                future.complete(new HashMap<>());
+            }
+        });
+
+        // Set a timeout to prevent hanging if the storage service doesn't respond
+        CompletableFuture.runAsync(() -> {
+            try {
+                Thread.sleep(DEFAULT_TIMEOUT_SECONDS * 1000);
+                if (!future.isDone()) {
+                    logger.error("Request to get all images timed out after {} seconds", DEFAULT_TIMEOUT_SECONDS);
+                    future.complete(new HashMap<>());
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         });
 
@@ -311,11 +336,15 @@ public class ImageStorageClient {
         message.setImageId(requestId);
         message.setAction("GET_ALL_METADATA");
         messageSender.sendToStorage(message);
+        logger.debug("Sent GET_ALL_METADATA request with ID: {}", requestId);
 
         try {
-            return future.get(DEFAULT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            Map<String, Image> result = future.get(DEFAULT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            long duration = System.currentTimeMillis() - startTime;
+            logger.info("Retrieved metadata for {} images in {}ms", result.size(), duration);
+            return result;
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            logger.error("Failed to get all images metadata", e);
+            logger.error("Failed to get all images metadata: {}", e.getMessage(), e);
             return new HashMap<>();
         }
     }

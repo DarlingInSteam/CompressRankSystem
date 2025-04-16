@@ -5,6 +5,7 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
+    hostname: rabbitmq
     ports:
       - "5672:5672"   # AMQP protocol port
       - "15672:15672" # Management UI port
@@ -13,8 +14,27 @@ services:
       - RABBITMQ_DEFAULT_PASS=guest
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - compress-rank-network
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # Redis для RequestRateLimiter в API Gateway
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - compress-rank-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -32,66 +52,124 @@ services:
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"
+    networks:
+      - compress-rank-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 5s
       timeout: 5s
       retries: 3
 
-  # Storage Service
-  image-storage-service:
+  # API Gateway - новый центральный компонент для маршрутизации запросов
+  api-gateway:
+    build:
+      context: ./ApiGatewayCompressionRankSystem
+    container_name: compress-rank-api-gateway
+    ports:
+      - "8082:8082"
+    environment:
+      - IMAGE_STORAGE_SERVICE_URL=http://image-storage:8081
+      - COMPRESSION_SERVICE_URL=http://compression-service:8080
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      image-storage:
+        condition: service_started
+      compression-service:
+        condition: service_started
+    networks:
+      - compress-rank-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # Сервис хранения изображений
+  image-storage:
     build:
       context: ./ImageStorageService
-      dockerfile: Dockerfile
-    container_name: image-storage-service
+    container_name: compress-rank-image-storage
     ports:
-      - "8081:8081"
+      - "8091:8081"  # Изменен порт хоста с 8081 на 8091
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_RABBITMQ_HOST=rabbitmq
-      - MINIO_ENDPOINT=http://minio:9000
-      - WEBP_BINARY_PATH=/app/webp_binaries
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
+      - SPRING_H2_CONSOLE_ENABLED=true
+      - SPRING_H2_CONSOLE_SETTINGS_WEB_ALLOW_OTHERS=true
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - compress-rank-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # Сервис сжатия изображений
+  compression-service:
+    build:
+      context: ./CompressionService
+    container_name: compress-rank-compression-service
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
+      - IMAGE_STORAGE_URL=http://image-storage:8081
     volumes:
       - ./data:/app/data
       - ./webp_binaries:/app/webp_binaries
     depends_on:
       rabbitmq:
         condition: service_healthy
-      minio:
-        condition: service_healthy
+      image-storage:
+        condition: service_started
+    networks:
+      - compress-rank-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
-  # Compression Service
-  compression-service:
-    build:
-      context: ./CompressionService
-      dockerfile: Dockerfile
-    container_name: compression-service
-    ports:
-      - "8080:8080"
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_RABBITMQ_HOST=rabbitmq
-      - STORAGE_SERVICE_URL=http://image-storage-service:8081
-      - WEBP_BINARY_PATH=/app/webp_binaries
-    volumes:
-      - ./data:/app/data
-      - ./webp_binaries:/app/webp_binaries
-    depends_on:
-      - image-storage-service
-
-  # Frontend
+  # Административная панель
   admin-panel:
     build:
       context: ./admin-panel
-      dockerfile: Dockerfile
-    container_name: admin-panel
+    container_name: compress-rank-admin-panel
     ports:
       - "3000:80"
     environment:
-      - REACT_APP_API_URL=http://localhost:8080 # For browser access from host machine
+      # Теперь админ-панель обращается к API Gateway вместо прямого доступа к сервисам
+      - REACT_APP_API_URL=http://api-gateway:8082
     depends_on:
-      - compression-service
+      - api-gateway
+    networks:
+      - compress-rank-network
+
+networks:
+  compress-rank-network:
+    driver: bridge
 
 volumes:
   rabbitmq_data:
   minio_data:
+  redis_data:

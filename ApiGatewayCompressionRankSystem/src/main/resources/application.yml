@@ -1,0 +1,127 @@
+server:
+  port: 8082
+  error:
+    include-message: always
+    include-binding-errors: always
+
+spring:
+  application:
+    name: api-gateway-service
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      database: 0
+  cloud:
+    gateway:
+      # Removing duplicate CORS configuration since it's handled in SecurityConfig.java
+      routes:
+        # Маршруты для сервиса хранения изображений (ImageStorageService)
+        - id: image-storage-api
+          uri: ${IMAGE_STORAGE_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/images/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@ipKeyResolver}"
+                redis-rate-limiter.replenishRate: 50
+                redis-rate-limiter.burstCapacity: 100
+            - name: Retry
+              args:
+                retries: 3
+                statuses: BAD_GATEWAY,GATEWAY_TIMEOUT,SERVICE_UNAVAILABLE
+                methods: GET,POST
+                backoff:
+                  firstBackoff: 50ms
+                  maxBackoff: 500ms
+                  factor: 2
+                  basedOnPreviousValue: false
+            - name: CircuitBreaker
+              args:
+                name: imageStorageCircuitBreaker
+                fallbackUri: forward:/fallback/image-storage
+                
+        # Маршруты для сервиса сжатия (CompressionService)
+        - id: compression-api
+          uri: ${COMPRESSION_SERVICE_URL:http://localhost:8080}
+          predicates:
+            - Path=/api/compression/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@ipKeyResolver}"
+                redis-rate-limiter.replenishRate: 30
+                redis-rate-limiter.burstCapacity: 60
+            - name: Retry
+              args:
+                retries: 3
+                statuses: BAD_GATEWAY,GATEWAY_TIMEOUT,SERVICE_UNAVAILABLE
+                methods: GET,POST
+                backoff:
+                  firstBackoff: 50ms
+                  maxBackoff: 500ms
+                  factor: 2
+                  basedOnPreviousValue: false
+            - name: CircuitBreaker
+              args:
+                name: compressionCircuitBreaker
+                fallbackUri: forward:/fallback/compression
+
+        # Swagger UI маршрут для документации API
+        - id: openapi
+          uri: ${GATEWAY_URL:http://localhost:8082}
+          predicates:
+            - Path=/v3/api-docs/**,/swagger-ui/**,/swagger-ui.html,/webjars/**
+          filters:
+            - RewritePath=/(?<segment>.*), /$\{segment}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,gateway,env
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+    ratelimiters:
+      enabled: true
+
+# Документация API
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  version: '@project.version@'
+
+# Настройки для дебага и мониторинга
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.http.server.reactive: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    reactor.netty: DEBUG
+    shadowshift.studio: DEBUG
+
+# Настройки безопасности и метрик
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        ringBufferSizeInClosedState: 10
+        ringBufferSizeInHalfOpenState: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10000
+        permittedNumberOfCallsInHalfOpenState: 5
+    instances:
+      imageStorageCircuitBreaker:
+        baseConfig: default
+      compressionCircuitBreaker:
+        baseConfig: default
