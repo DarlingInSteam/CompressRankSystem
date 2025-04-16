@@ -5,25 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0ec3192d-774f-49c4-adbc-f36601cea625" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/RabbitMQConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/RabbitMQConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/WebpInitializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/WebpInitializer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/dto/message/ImageMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/dto/message/ImageMessage.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/messaging/ImageMessageListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/messaging/ImageMessageListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/client/ImageStorageClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/client/ImageStorageClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/compression/CompressionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/compression/CompressionService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/util/webp/CWebp.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/util/webp/CWebp.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ImageStorageService/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/ImageStorageService/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ImageStorageService/src/main/java/shadowshift/studio/imagestorage/config/CorsConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/ImageStorageService/src/main/java/shadowshift/studio/imagestorage/config/CorsConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ImageStorageService/src/main/java/shadowshift/studio/imagestorage/config/RabbitMQConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/ImageStorageService/src/main/java/shadowshift/studio/imagestorage/config/RabbitMQConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ImageStorageService/src/main/java/shadowshift/studio/imagestorage/controller/ImageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/ImageStorageService/src/main/java/shadowshift/studio/imagestorage/controller/ImageController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ImageStorageService/src/main/java/shadowshift/studio/imagestorage/dto/message/CompressionMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/ImageStorageService/src/main/java/shadowshift/studio/imagestorage/dto/message/CompressionMessage.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ImageStorageService/src/main/java/shadowshift/studio/imagestorage/dto/message/ImageMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/ImageStorageService/src/main/java/shadowshift/studio/imagestorage/dto/message/ImageMessage.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ImageStorageService/src/main/java/shadowshift/studio/imagestorage/messaging/ImageMessageListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/ImageStorageService/src/main/java/shadowshift/studio/imagestorage/messaging/ImageMessageListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ImageStorageService/src/main/java/shadowshift/studio/imagestorage/messaging/MessageSender.java" beforeDir="false" afterPath="$PROJECT_DIR$/ImageStorageService/src/main/java/shadowshift/studio/imagestorage/messaging/MessageSender.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin-panel/src/pages/detail/ImageDetailPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin-panel/src/pages/detail/ImageDetailPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/compression_service_logs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/compression_service_logs.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/compression-db.mv.db" beforeDir="false" afterPath="$PROJECT_DIR$/data/compression-db.mv.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/storage-db.mv.db" beforeDir="false" afterPath="$PROJECT_DIR$/data/storage-db.mv.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/image_storage_service_log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/image_storage_service_log.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -92,6 +78,7 @@
     "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "Spring Boot.CompressionServiceApplication.executor": "Run",
     "git-widget-placeholder": "compression-service",
     "ignore.virus.scanning.warn.message": "true",
@@ -169,7 +156,7 @@
       <workItem from="1744750609622" duration="2317000" />
       <workItem from="1744755722738" duration="2197000" />
       <workItem from="1744806290905" duration="850000" />
-      <workItem from="1744807730944" duration="1593000" />
+      <workItem from="1744807730944" duration="2411000" />
     </task>
     <servers />
   </component>

@@ -147,4 +147,47 @@ public class CompressionService {
         // Compression level 100 = WebP quality 0
         return Math.max(0, Math.min(100, 100 - compressionLevel));
     }
+    
+    /**
+     * Получает оригинальный размер изображения до сжатия
+     * @param imageId ID изображения
+     * @return оригинальный размер изображения в байтах
+     * @throws Exception если изображение не найдено или произошла ошибка
+     */
+    public long getOriginalSize(String imageId) throws Exception {
+        logger.info("Getting original size for image ID: {}", imageId);
+        
+        // Получаем метаданные изображения
+        Image imageMetadata = imageStorageClient.getImageMetadata(imageId);
+        
+        if (imageMetadata == null) {
+            logger.error("Image metadata not found for ID: {}", imageId);
+            throw new IllegalArgumentException("Image not found with id: " + imageId);
+        }
+        
+        // Если изображение не сжато, его текущий размер и есть оригинальный
+        if (imageMetadata.getCompressionLevel() == 0) {
+            logger.info("Image is not compressed, returning current size: {}", imageMetadata.getSize());
+            return imageMetadata.getSize();
+        }
+        
+        // Если изображение сжато, получаем оригинальное изображение из бэкапа
+        try {
+            byte[] originalData = imageStorageClient.getOriginalImageBackup(imageId);
+            
+            if (originalData == null) {
+                logger.error("Original image backup not found for ID: {}", imageId);
+                // Если бэкап не найден, возвращаем оценочный размер на основе текущего размера и уровня сжатия
+                long estimatedSize = Math.round(imageMetadata.getSize() / (1 - imageMetadata.getCompressionLevel() / 100.0));
+                logger.info("Using estimated original size: {}", estimatedSize);
+                return estimatedSize;
+            }
+            
+            logger.info("Retrieved original data, size: {} bytes", originalData.length);
+            return originalData.length;
+        } catch (Exception e) {
+            logger.error("Error retrieving original size for image ID: {}", imageId, e);
+            throw new Exception("Failed to retrieve original image size: " + e.getMessage(), e);
+        }
+    }
 }

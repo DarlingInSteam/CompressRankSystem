@@ -1,76 +1,136 @@
-2025-04-16 19:17:19.254 | 
-2025-04-16 19:17:19.254 |   .   ____          _            __ _ _
-2025-04-16 19:17:19.254 |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
-2025-04-16 19:17:19.254 | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
-2025-04-16 19:17:19.254 |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
-2025-04-16 19:17:19.254 |   '  |____| .__|_| |_|_| |_\__, | / / / /
-2025-04-16 19:17:19.254 |  =========|_|==============|___/=/_/_/_/
-2025-04-16 19:17:19.254 | 
-2025-04-16 19:17:19.257 |  :: Spring Boot ::                (v3.4.4)
-2025-04-16 19:17:19.257 | 
-2025-04-16 19:17:19.333 | 2025-04-16T12:17:19.331Z  INFO 1 --- [image-storage-service] [           main] s.s.i.ImageStorageServiceApplication     : Starting ImageStorageServiceApplication v0.0.1-SNAPSHOT using Java 21.0.6 with PID 1 (/app.jar started by root in /)
-2025-04-16 19:17:19.334 | 2025-04-16T12:17:19.333Z DEBUG 1 --- [image-storage-service] [           main] s.s.i.ImageStorageServiceApplication     : Running with Spring Boot v3.4.4, Spring v6.2.5
-2025-04-16 19:17:19.335 | 2025-04-16T12:17:19.334Z  INFO 1 --- [image-storage-service] [           main] s.s.i.ImageStorageServiceApplication     : The following 1 profile is active: "docker"
-2025-04-16 19:17:20.588 | 2025-04-16T12:17:20.587Z  INFO 1 --- [image-storage-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-04-16 19:17:20.642 | 2025-04-16T12:17:20.641Z  INFO 1 --- [image-storage-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 43 ms. Found 1 JPA repository interface.
-2025-04-16 19:17:21.548 | 2025-04-16T12:17:21.547Z  INFO 1 --- [image-storage-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
-2025-04-16 19:17:21.563 | 2025-04-16T12:17:21.563Z  INFO 1 --- [image-storage-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-04-16 19:17:21.564 | 2025-04-16T12:17:21.563Z  INFO 1 --- [image-storage-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.39]
-2025-04-16 19:17:21.591 | 2025-04-16T12:17:21.591Z  INFO 1 --- [image-storage-service] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-04-16 19:17:21.592 | 2025-04-16T12:17:21.592Z  INFO 1 --- [image-storage-service] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2214 ms
-2025-04-16 19:17:21.898 | 2025-04-16T12:17:21.897Z  INFO 1 --- [image-storage-service] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2025-04-16 19:17:21.967 | 2025-04-16T12:17:21.967Z  INFO 1 --- [image-storage-service] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.11.Final
-2025-04-16 19:17:22.004 | 2025-04-16T12:17:22.004Z  INFO 1 --- [image-storage-service] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2025-04-16 19:17:22.317 | 2025-04-16T12:17:22.316Z  INFO 1 --- [image-storage-service] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-04-16 19:17:22.348 | 2025-04-16T12:17:22.348Z  INFO 1 --- [image-storage-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-04-16 19:17:22.558 | 2025-04-16T12:17:22.558Z  INFO 1 --- [image-storage-service] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:file:/app/data/storage-db user=SA
-2025-04-16 19:17:22.560 | 2025-04-16T12:17:22.560Z  INFO 1 --- [image-storage-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-04-16 19:17:22.587 | 2025-04-16T12:17:22.587Z  WARN 1 --- [image-storage-service] [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2025-04-16 19:17:22.606 | 2025-04-16T12:17:22.606Z  INFO 1 --- [image-storage-service] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
-2025-04-16 19:17:22.606 | 	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
-2025-04-16 19:17:22.606 | 	Database driver: undefined/unknown
-2025-04-16 19:17:22.606 | 	Database version: 2.3.232
-2025-04-16 19:17:22.606 | 	Autocommit mode: undefined/unknown
-2025-04-16 19:17:22.606 | 	Isolation level: undefined/unknown
-2025-04-16 19:17:22.606 | 	Minimum pool size: undefined/unknown
-2025-04-16 19:17:22.606 | 	Maximum pool size: undefined/unknown
-2025-04-16 19:17:23.488 | 2025-04-16T12:17:23.487Z  INFO 1 --- [image-storage-service] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2025-04-16 19:17:23.527 | 2025-04-16T12:17:23.526Z  INFO 1 --- [image-storage-service] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-04-16 19:17:25.000 | 2025-04-16T12:17:25.000Z  INFO 1 --- [image-storage-service] [           main] s.s.i.service.MinioImageStorageService   : Database already contains 1 image metadata records
-2025-04-16 19:17:25.359 | 2025-04-16T12:17:25.358Z  WARN 1 --- [image-storage-service] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2025-04-16 19:17:26.010 | 2025-04-16T12:17:26.010Z  INFO 1 --- [image-storage-service] [           main] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:file:/app/data/storage-db'
-2025-04-16 19:17:26.038 | 2025-04-16T12:17:26.038Z  INFO 1 --- [image-storage-service] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
-2025-04-16 19:17:26.132 | 2025-04-16T12:17:26.132Z  INFO 1 --- [image-storage-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path '/'
-2025-04-16 19:17:26.136 | 2025-04-16T12:17:26.136Z  INFO 1 --- [image-storage-service] [           main] o.s.a.r.c.CachingConnectionFactory       : Attempting to connect to: [rabbitmq:5672]
-2025-04-16 19:17:26.177 | 2025-04-16T12:17:26.177Z  INFO 1 --- [image-storage-service] [           main] o.s.a.r.c.CachingConnectionFactory       : Created new connection: rabbitConnectionFactory#5c14c284:0/SimpleConnection@5a54d05f [delegate=amqp://guest@172.18.0.2:5672/, localPort=45522]
-2025-04-16 19:17:26.239 | 2025-04-16T12:17:26.239Z  INFO 1 --- [image-storage-service] [           main] s.s.i.ImageStorageServiceApplication     : Started ImageStorageServiceApplication in 7.379 seconds (process running for 8.13)
-2025-04-16 19:17:26.285 | 2025-04-16T12:17:26.284Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Received message with content type: application/json, correlation ID: null
-2025-04-16 19:17:26.285 | 2025-04-16T12:17:26.285Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Processing storage message: 40115354-1c1c-4c7f-b5eb-57870e6023e4, action: GET_IMAGE
-2025-04-16 19:17:26.380 | 2025-04-16T12:17:26.379Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.service.MinioImageStorageService   : Retrieved image: id=9bb94a36-bc09-4cb0-882c-0cab567a5513, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp, accessCount=2
-2025-04-16 19:17:26.426 | 2025-04-16T12:17:26.425Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Preparing to send image data: ID=9bb94a36-bc09-4cb0-882c-0cab567a5513, size=8064044, compressionLevel=0, imageData null=false
-2025-04-16 19:17:26.426 | 2025-04-16T12:17:26.426Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Sending binary image data to compression service: 4dc47789-1293-4eb1-b0bb-2a333eabf875, action: IMAGE_DATA, size: 8064044 bytes, correlationId: aeff4c77-0d11-4291-8c8d-2a15f2c0a805
-2025-04-16 19:17:26.427 | 2025-04-16T12:17:26.427Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Sending single binary message with all metadata in headers for imageId: 9bb94a36-bc09-4cb0-882c-0cab567a5513
-2025-04-16 19:17:26.445 | 2025-04-16T12:17:26.445Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Successfully sent binary message with correlationId: aeff4c77-0d11-4291-8c8d-2a15f2c0a805
-2025-04-16 19:17:26.445 | 2025-04-16T12:17:26.445Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Sent image data response for image ID: 9bb94a36-bc09-4cb0-882c-0cab567a5513, data size: 8064044 bytes
-2025-04-16 19:17:27.544 | 2025-04-16T12:17:27.543Z  INFO 1 --- [image-storage-service] [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2025-04-16 19:17:27.544 | 2025-04-16T12:17:27.544Z  INFO 1 --- [image-storage-service] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2025-04-16 19:17:27.546 | 2025-04-16T12:17:27.545Z  INFO 1 --- [image-storage-service] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
-2025-04-16 19:17:27.599 | Found 1 images in storage
-2025-04-16 19:17:27.640 | 2025-04-16T12:17:27.640Z  WARN 1 --- [image-storage-service] [nio-8081-exec-2] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics
-2025-04-16 19:17:27.692 | 2025-04-16T12:17:27.691Z  INFO 1 --- [image-storage-service] [nio-8081-exec-3] s.s.i.service.MinioImageStorageService   : Retrieved image: id=9bb94a36-bc09-4cb0-882c-0cab567a5513, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp, accessCount=3
-2025-04-16 19:17:36.080 | Found 1 images in storage
-2025-04-16 19:17:36.095 | 2025-04-16T12:17:36.094Z  WARN 1 --- [image-storage-service] [nio-8081-exec-5] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics
-2025-04-16 19:17:36.143 | 2025-04-16T12:17:36.143Z  INFO 1 --- [image-storage-service] [nio-8081-exec-6] s.s.i.service.MinioImageStorageService   : Retrieved image: id=9bb94a36-bc09-4cb0-882c-0cab567a5513, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp, accessCount=4
-2025-04-16 19:17:59.144 | Found 1 images in storage
-2025-04-16 19:17:59.163 | 2025-04-16T12:17:59.163Z  WARN 1 --- [image-storage-service] [nio-8081-exec-8] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics
-2025-04-16 19:17:59.205 | 2025-04-16T12:17:59.204Z  INFO 1 --- [image-storage-service] [nio-8081-exec-9] s.s.i.service.MinioImageStorageService   : Retrieved image: id=9bb94a36-bc09-4cb0-882c-0cab567a5513, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp, accessCount=5
-2025-04-16 19:18:09.200 | 2025-04-16T12:18:09.199Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Received message with content type: application/json, correlation ID: null
-2025-04-16 19:18:09.200 | 2025-04-16T12:18:09.200Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Processing storage message: 21ae3470-84f6-430e-b3ad-cf40e541df2d, action: GET_IMAGE
-2025-04-16 19:18:09.222 | 2025-04-16T12:18:09.222Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.service.MinioImageStorageService   : Retrieved image: id=9bb94a36-bc09-4cb0-882c-0cab567a5513, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp, accessCount=6
-2025-04-16 19:18:09.230 | 2025-04-16T12:18:09.229Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Preparing to send image data: ID=9bb94a36-bc09-4cb0-882c-0cab567a5513, size=8064044, compressionLevel=0, imageData null=false
-2025-04-16 19:18:09.230 | 2025-04-16T12:18:09.230Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Sending binary image data to compression service: b487106d-d45e-4dd3-bebc-71ed6aa461a2, action: IMAGE_DATA, size: 8064044 bytes, correlationId: 1e40e0ea-4475-4570-89e5-36c790b0218e
-2025-04-16 19:18:09.230 | 2025-04-16T12:18:09.230Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Sending single binary message with all metadata in headers for imageId: 9bb94a36-bc09-4cb0-882c-0cab567a5513
-2025-04-16 19:18:09.245 | 2025-04-16T12:18:09.245Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Successfully sent binary message with correlationId: 1e40e0ea-4475-4570-89e5-36c790b0218e
-2025-04-16 19:18:09.245 | 2025-04-16T12:18:09.245Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Sent image data response for image ID: 9bb94a36-bc09-4cb0-882c-0cab567a5513, data size: 8064044 bytes
-2025-04-16 19:18:33.958 | Found 1 images in storage
-2025-04-16 19:18:33.971 | 2025-04-16T12:18:33.970Z  WARN 1 --- [image-storage-service] [nio-8081-exec-3] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics
+2025-04-16 20:29:08.148 | 
+2025-04-16 20:29:08.149 |   .   ____          _            __ _ _
+2025-04-16 20:29:08.149 |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+2025-04-16 20:29:08.149 | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+2025-04-16 20:29:08.149 |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+2025-04-16 20:29:08.149 |   '  |____| .__|_| |_|_| |_\__, | / / / /
+2025-04-16 20:29:08.149 |  =========|_|==============|___/=/_/_/_/
+2025-04-16 20:29:08.149 | 
+2025-04-16 20:29:08.154 |  :: Spring Boot ::                (v3.4.4)
+2025-04-16 20:29:08.154 | 
+2025-04-16 20:29:08.325 | 2025-04-16T13:29:08.322Z  INFO 1 --- [image-storage-service] [           main] s.s.i.ImageStorageServiceApplication     : Starting ImageStorageServiceApplication v0.0.1-SNAPSHOT using Java 21.0.6 with PID 1 (/app.jar started by root in /)
+2025-04-16 20:29:08.325 | 2025-04-16T13:29:08.325Z DEBUG 1 --- [image-storage-service] [           main] s.s.i.ImageStorageServiceApplication     : Running with Spring Boot v3.4.4, Spring v6.2.5
+2025-04-16 20:29:08.326 | 2025-04-16T13:29:08.326Z  INFO 1 --- [image-storage-service] [           main] s.s.i.ImageStorageServiceApplication     : The following 1 profile is active: "docker"
+2025-04-16 20:29:09.887 | 2025-04-16T13:29:09.887Z  INFO 1 --- [image-storage-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-04-16 20:29:09.950 | 2025-04-16T13:29:09.949Z  INFO 1 --- [image-storage-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 50 ms. Found 1 JPA repository interface.
+2025-04-16 20:29:10.886 | 2025-04-16T13:29:10.885Z  INFO 1 --- [image-storage-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
+2025-04-16 20:29:10.900 | 2025-04-16T13:29:10.900Z  INFO 1 --- [image-storage-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-04-16 20:29:10.900 | 2025-04-16T13:29:10.900Z  INFO 1 --- [image-storage-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.39]
+2025-04-16 20:29:10.927 | 2025-04-16T13:29:10.926Z  INFO 1 --- [image-storage-service] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-04-16 20:29:10.928 | 2025-04-16T13:29:10.927Z  INFO 1 --- [image-storage-service] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2545 ms
+2025-04-16 20:29:11.276 | 2025-04-16T13:29:11.275Z  INFO 1 --- [image-storage-service] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-04-16 20:29:11.334 | 2025-04-16T13:29:11.334Z  INFO 1 --- [image-storage-service] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.11.Final
+2025-04-16 20:29:11.367 | 2025-04-16T13:29:11.367Z  INFO 1 --- [image-storage-service] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-04-16 20:29:11.689 | 2025-04-16T13:29:11.689Z  INFO 1 --- [image-storage-service] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-04-16 20:29:11.732 | 2025-04-16T13:29:11.731Z  INFO 1 --- [image-storage-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-04-16 20:29:11.938 | 2025-04-16T13:29:11.937Z  INFO 1 --- [image-storage-service] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:file:/app/data/storage-db user=SA
+2025-04-16 20:29:11.940 | 2025-04-16T13:29:11.939Z  INFO 1 --- [image-storage-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-04-16 20:29:11.965 | 2025-04-16T13:29:11.965Z  WARN 1 --- [image-storage-service] [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-04-16 20:29:11.984 | 2025-04-16T13:29:11.984Z  INFO 1 --- [image-storage-service] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+2025-04-16 20:29:11.984 | 	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+2025-04-16 20:29:11.984 | 	Database driver: undefined/unknown
+2025-04-16 20:29:11.984 | 	Database version: 2.3.232
+2025-04-16 20:29:11.984 | 	Autocommit mode: undefined/unknown
+2025-04-16 20:29:11.984 | 	Isolation level: undefined/unknown
+2025-04-16 20:29:11.984 | 	Minimum pool size: undefined/unknown
+2025-04-16 20:29:11.984 | 	Maximum pool size: undefined/unknown
+2025-04-16 20:29:12.888 | 2025-04-16T13:29:12.887Z  INFO 1 --- [image-storage-service] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-04-16 20:29:12.929 | 2025-04-16T13:29:12.929Z  INFO 1 --- [image-storage-service] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-04-16 20:29:14.348 | 2025-04-16T13:29:14.348Z  INFO 1 --- [image-storage-service] [           main] s.s.i.service.MinioImageStorageService   : Database already contains 1 image metadata records
+2025-04-16 20:29:14.775 | 2025-04-16T13:29:14.775Z  WARN 1 --- [image-storage-service] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-04-16 20:29:15.598 | 2025-04-16T13:29:15.597Z  INFO 1 --- [image-storage-service] [           main] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:file:/app/data/storage-db'
+2025-04-16 20:29:15.625 | 2025-04-16T13:29:15.624Z  INFO 1 --- [image-storage-service] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2025-04-16 20:29:15.724 | 2025-04-16T13:29:15.723Z  INFO 1 --- [image-storage-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path '/'
+2025-04-16 20:29:15.727 | 2025-04-16T13:29:15.727Z  INFO 1 --- [image-storage-service] [           main] o.s.a.r.c.CachingConnectionFactory       : Attempting to connect to: [rabbitmq:5672]
+2025-04-16 20:29:15.778 | 2025-04-16T13:29:15.778Z  INFO 1 --- [image-storage-service] [           main] o.s.a.r.c.CachingConnectionFactory       : Created new connection: rabbitConnectionFactory#2fc2d1f0:0/SimpleConnection@378d38cd [delegate=amqp://guest@172.18.0.2:5672/, localPort=44408]
+2025-04-16 20:29:15.842 | 2025-04-16T13:29:15.842Z  INFO 1 --- [image-storage-service] [           main] s.s.i.ImageStorageServiceApplication     : Started ImageStorageServiceApplication in 8.505 seconds (process running for 9.443)
+2025-04-16 20:29:26.104 | 2025-04-16T13:29:26.104Z  INFO 1 --- [image-storage-service] [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-04-16 20:29:26.104 | 2025-04-16T13:29:26.104Z  INFO 1 --- [image-storage-service] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-04-16 20:29:26.106 | 2025-04-16T13:29:26.105Z  INFO 1 --- [image-storage-service] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2025-04-16 20:29:26.181 | Found 1 images in storage
+2025-04-16 20:29:26.244 | 2025-04-16T13:29:26.243Z  WARN 1 --- [image-storage-service] [nio-8081-exec-2] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics
+2025-04-16 20:29:28.109 | 2025-04-16T13:29:28.108Z  INFO 1 --- [image-storage-service] [nio-8081-exec-4] s.s.i.service.MinioImageStorageService   : Deleted backup for image: id=8fa691c1-bb14-4a54-b8db-a66798c1c499
+2025-04-16 20:29:28.118 | 2025-04-16T13:29:28.118Z  INFO 1 --- [image-storage-service] [nio-8081-exec-4] s.s.i.service.MinioImageStorageService   : Successfully deleted image: id=8fa691c1-bb14-4a54-b8db-a66798c1c499, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp
+2025-04-16 20:29:28.140 | Found 0 images in storage
+2025-04-16 20:29:28.148 | 2025-04-16T13:29:28.147Z  WARN 1 --- [image-storage-service] [nio-8081-exec-6] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics
+2025-04-16 20:29:33.775 | 2025-04-16T13:29:33.774Z  INFO 1 --- [image-storage-service] [nio-8081-exec-8] s.s.i.service.WebImageProcessor          : Executing WebP conversion command: /app/webp_binaries/cwebp -quiet -q 90 /tmp/image_input_3194532964330856745.bin -o /tmp/image_output_3750431876662648314.webp
+2025-04-16 20:29:33.983 | 2025-04-16T13:29:33.982Z ERROR 1 --- [image-storage-service] [nio-8081-exec-8] s.s.i.service.WebImageProcessor          : WebP conversion failed with exit code: 255
+2025-04-16 20:29:33.983 | 2025-04-16T13:29:33.983Z ERROR 1 --- [image-storage-service] [nio-8081-exec-8] s.s.i.service.WebImageProcessor          : WebP conversion error: Error! Cannot encode picture as WebP
+2025-04-16 20:29:33.983 | Error code: 5 (BAD_DIMENSION: Bad picture dimension. Maximum width and height allowed is 16383 pixels.)
+2025-04-16 20:29:33.983 | 
+2025-04-16 20:29:33.985 | 2025-04-16T13:29:33.984Z  INFO 1 --- [image-storage-service] [nio-8081-exec-8] s.s.i.service.WebImageProcessor          : Returning original image as fallback (no conversion)
+2025-04-16 20:29:34.389 | 2025-04-16T13:29:34.389Z  INFO 1 --- [image-storage-service] [nio-8081-exec-8] s.s.i.service.MinioImageStorageService   : Successfully stored WebP image: id=b16097c8-8cc2-4cee-af4c-318d8ef985f8, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp, original format=image/jpeg
+2025-04-16 20:29:35.781 | 2025-04-16T13:29:35.780Z  INFO 1 --- [image-storage-service] [io-8081-exec-10] s.s.i.service.MinioImageStorageService   : Retrieved image: id=b16097c8-8cc2-4cee-af4c-318d8ef985f8, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp, accessCount=1
+2025-04-16 20:29:39.444 | 2025-04-16T13:29:39.444Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Received message with content type: application/json, correlation ID: null
+2025-04-16 20:29:39.444 | 2025-04-16T13:29:39.444Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Processing storage message: 8d5248d1-08b6-4222-801a-fa8796a6bcf4, action: GET_IMAGE
+2025-04-16 20:29:39.470 | 2025-04-16T13:29:39.469Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.service.MinioImageStorageService   : Retrieved image: id=b16097c8-8cc2-4cee-af4c-318d8ef985f8, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp, accessCount=2
+2025-04-16 20:29:39.475 | 2025-04-16T13:29:39.475Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Preparing to send image data: ID=b16097c8-8cc2-4cee-af4c-318d8ef985f8, size=8064044, compressionLevel=0, imageData null=false
+2025-04-16 20:29:39.475 | 2025-04-16T13:29:39.475Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Sending binary image data to compression service: 2bc2f91e-2cea-4977-a0a9-b6fc5c266bef, action: IMAGE_DATA, size: 8064044 bytes, correlationId: 864a93f6-2f50-4dc2-b330-87e9894443ab
+2025-04-16 20:29:39.476 | 2025-04-16T13:29:39.476Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Sending single binary message with all metadata in headers for imageId: b16097c8-8cc2-4cee-af4c-318d8ef985f8
+2025-04-16 20:29:39.506 | 2025-04-16T13:29:39.506Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Successfully sent binary message with correlationId: 864a93f6-2f50-4dc2-b330-87e9894443ab
+2025-04-16 20:29:39.506 | 2025-04-16T13:29:39.506Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Sent image data response for image ID: b16097c8-8cc2-4cee-af4c-318d8ef985f8, data size: 8064044 bytes
+2025-04-16 20:29:39.530 | 2025-04-16T13:29:39.529Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Received message with content type: application/json, correlation ID: null
+2025-04-16 20:29:39.530 | 2025-04-16T13:29:39.530Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Processing storage message: 5caa5b80-bef2-4f39-9915-ad937e27739c, action: GET_METADATA
+2025-04-16 20:29:39.531 | 2025-04-16T13:29:39.531Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Sending metadata for image ID: b16097c8-8cc2-4cee-af4c-318d8ef985f8, compressionLevel: 0
+2025-04-16 20:29:39.531 | 2025-04-16T13:29:39.531Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Sending message to compression service: 3ced1f92-2ca3-4da1-9f46-e6c5c4712dc5, action: METADATA
+2025-04-16 20:30:12.682 | Found 1 images in storage
+2025-04-16 20:30:12.693 | 2025-04-16T13:30:12.692Z  WARN 1 --- [image-storage-service] [nio-8081-exec-2] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics
+2025-04-16 20:30:18.158 | 2025-04-16T13:30:18.158Z  INFO 1 --- [image-storage-service] [nio-8081-exec-3] s.s.i.service.WebImageProcessor          : Executing WebP conversion command: /app/webp_binaries/cwebp -quiet -q 90 /tmp/image_input_7092876730338605570.bin -o /tmp/image_output_18215911978556500128.webp
+2025-04-16 20:30:18.885 | 2025-04-16T13:30:18.884Z  INFO 1 --- [image-storage-service] [nio-8081-exec-3] s.s.i.service.WebImageProcessor          : WebP conversion successful, converted image size: 2084668 bytes
+2025-04-16 20:30:18.959 | 2025-04-16T13:30:18.958Z  INFO 1 --- [image-storage-service] [nio-8081-exec-3] s.s.i.service.MinioImageStorageService   : Successfully stored WebP image: id=4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, name=wallpaperflare.com_wallpaper.webp, original format=image/jpeg
+2025-04-16 20:30:18.970 | Found 2 images in storage
+2025-04-16 20:30:18.981 | 2025-04-16T13:30:18.981Z  WARN 1 --- [image-storage-service] [nio-8081-exec-5] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics
+2025-04-16 20:30:19.033 | 2025-04-16T13:30:19.032Z  INFO 1 --- [image-storage-service] [nio-8081-exec-6] s.s.i.service.MinioImageStorageService   : Retrieved image: id=4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, name=wallpaperflare.com_wallpaper.webp, accessCount=1
+2025-04-16 20:30:23.295 | 2025-04-16T13:30:23.294Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Received message with content type: application/json, correlation ID: null
+2025-04-16 20:30:23.295 | 2025-04-16T13:30:23.295Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Processing storage message: 1a6bb88d-ec97-426b-a198-4ec2f5487634, action: GET_IMAGE
+2025-04-16 20:30:23.315 | 2025-04-16T13:30:23.314Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.service.MinioImageStorageService   : Retrieved image: id=4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, name=wallpaperflare.com_wallpaper.webp, accessCount=2
+2025-04-16 20:30:23.319 | 2025-04-16T13:30:23.318Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Preparing to send image data: ID=4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, size=2084668, compressionLevel=0, imageData null=false
+2025-04-16 20:30:23.319 | 2025-04-16T13:30:23.319Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Sending binary image data to compression service: 5182b0e0-0663-4f5e-92f7-6008a216c828, action: IMAGE_DATA, size: 2084668 bytes, correlationId: 02a4ca60-8f77-4d96-a370-1f7f63f64564
+2025-04-16 20:30:23.319 | 2025-04-16T13:30:23.319Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Sending single binary message with all metadata in headers for imageId: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79
+2025-04-16 20:30:23.321 | 2025-04-16T13:30:23.321Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Successfully sent binary message with correlationId: 02a4ca60-8f77-4d96-a370-1f7f63f64564
+2025-04-16 20:30:23.321 | 2025-04-16T13:30:23.321Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Sent image data response for image ID: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, data size: 2084668 bytes
+2025-04-16 20:30:23.331 | 2025-04-16T13:30:23.331Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Received message with content type: application/json, correlation ID: null
+2025-04-16 20:30:23.332 | 2025-04-16T13:30:23.332Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Processing storage message: f1bdca5a-d468-423c-80f3-b41945521c6e, action: GET_METADATA
+2025-04-16 20:30:23.334 | 2025-04-16T13:30:23.333Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Sending metadata for image ID: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, compressionLevel: 0
+2025-04-16 20:30:23.334 | 2025-04-16T13:30:23.333Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Sending message to compression service: cc8c7357-e18d-4b9b-94fc-cae6e2778c44, action: METADATA
+2025-04-16 20:30:24.018 | 2025-04-16T13:30:24.018Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Received message with content type: application/json, correlation ID: null
+2025-04-16 20:30:24.033 | 2025-04-16T13:30:24.033Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Processing storage message: 26b72480-3054-41f9-8ba1-d41a68119f36, action: UPDATE_COMPRESSION
+2025-04-16 20:30:24.033 | 2025-04-16T13:30:24.033Z DEBUG 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Received image data for compression: ID=4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, size=1180266, compressionLevel=35
+2025-04-16 20:30:24.052 | 2025-04-16T13:30:24.051Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.service.MinioImageStorageService   : Retrieved image: id=4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, name=wallpaperflare.com_wallpaper.webp, accessCount=3
+2025-04-16 20:30:24.104 | 2025-04-16T13:30:24.104Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.service.MinioImageStorageService   : Successfully updated image compression: id=4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, compressionLevel=35, size=1180266
+2025-04-16 20:30:24.106 | 2025-04-16T13:30:24.106Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.ImageMessageListener     : Sending updated metadata for image ID: 4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, compressionLevel: 35
+2025-04-16 20:30:24.106 | 2025-04-16T13:30:24.106Z  INFO 1 --- [image-storage-service] [ntContainer#0-1] s.s.i.messaging.MessageSender            : Sending message to compression service: e94a42b2-67d6-4528-bb28-a802ff70173a, action: UPDATED
+2025-04-16 20:30:46.653 | Found 2 images in storage
+2025-04-16 20:30:46.661 | 2025-04-16T13:30:46.661Z  WARN 1 --- [image-storage-service] [io-8081-exec-10] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics
+2025-04-16 20:30:46.705 | 2025-04-16T13:30:46.704Z  INFO 1 --- [image-storage-service] [nio-8081-exec-1] s.s.i.service.MinioImageStorageService   : Retrieved image: id=b16097c8-8cc2-4cee-af4c-318d8ef985f8, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp, accessCount=3
+2025-04-16 20:30:57.578 | Found 2 images in storage
+2025-04-16 20:30:57.591 | 2025-04-16T13:30:57.590Z  WARN 1 --- [image-storage-service] [nio-8081-exec-5] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics
+2025-04-16 20:30:57.619 | 2025-04-16T13:30:57.618Z  INFO 1 --- [image-storage-service] [nio-8081-exec-6] s.s.i.service.MinioImageStorageService   : Retrieved image: id=4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, name=wallpaperflare.com_wallpaper.webp, accessCount=4
+2025-04-16 20:30:57.639 | 2025-04-16T13:30:57.639Z  INFO 1 --- [image-storage-service] [nio-8081-exec-8] s.s.i.service.MinioImageStorageService   : Retrieved image: id=b16097c8-8cc2-4cee-af4c-318d8ef985f8, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp, accessCount=4
+2025-04-16 20:30:59.925 | Found 2 images in storage
+2025-04-16 20:30:59.942 | 2025-04-16T13:30:59.942Z  WARN 1 --- [image-storage-service] [nio-8081-exec-9] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics
+2025-04-16 20:30:59.969 | 2025-04-16T13:30:59.969Z  INFO 1 --- [image-storage-service] [io-8081-exec-10] s.s.i.service.MinioImageStorageService   : Retrieved image: id=4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, name=wallpaperflare.com_wallpaper.webp, accessCount=5
+2025-04-16 20:30:59.990 | 2025-04-16T13:30:59.989Z  INFO 1 --- [image-storage-service] [nio-8081-exec-1] s.s.i.service.MinioImageStorageService   : Retrieved image: id=b16097c8-8cc2-4cee-af4c-318d8ef985f8, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp, accessCount=5
+2025-04-16 20:31:00.857 | Found 2 images in storage
+2025-04-16 20:31:00.874 | 2025-04-16T13:31:00.873Z  WARN 1 --- [image-storage-service] [nio-8081-exec-3] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics
+2025-04-16 20:31:00.904 | 2025-04-16T13:31:00.904Z  INFO 1 --- [image-storage-service] [nio-8081-exec-4] s.s.i.service.MinioImageStorageService   : Retrieved image: id=4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, name=wallpaperflare.com_wallpaper.webp, accessCount=6
+2025-04-16 20:31:00.913 | 2025-04-16T13:31:00.912Z  INFO 1 --- [image-storage-service] [nio-8081-exec-5] s.s.i.service.MinioImageStorageService   : Retrieved image: id=b16097c8-8cc2-4cee-af4c-318d8ef985f8, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp, accessCount=6
+2025-04-16 20:31:01.286 | Found 2 images in storage
+2025-04-16 20:31:01.304 | 2025-04-16T13:31:01.304Z  WARN 1 --- [image-storage-service] [nio-8081-exec-8] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics
+2025-04-16 20:31:01.329 | 2025-04-16T13:31:01.329Z  INFO 1 --- [image-storage-service] [nio-8081-exec-7] s.s.i.service.MinioImageStorageService   : Retrieved image: id=4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, name=wallpaperflare.com_wallpaper.webp, accessCount=7
+2025-04-16 20:31:01.336 | 2025-04-16T13:31:01.336Z  INFO 1 --- [image-storage-service] [nio-8081-exec-9] s.s.i.service.MinioImageStorageService   : Retrieved image: id=b16097c8-8cc2-4cee-af4c-318d8ef985f8, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp, accessCount=7
+2025-04-16 20:31:01.501 | Found 2 images in storage
+2025-04-16 20:31:01.520 | 2025-04-16T13:31:01.520Z  WARN 1 --- [image-storage-service] [nio-8081-exec-1] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics
+2025-04-16 20:31:01.548 | 2025-04-16T13:31:01.547Z  INFO 1 --- [image-storage-service] [nio-8081-exec-2] s.s.i.service.MinioImageStorageService   : Retrieved image: id=4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, name=wallpaperflare.com_wallpaper.webp, accessCount=8
+2025-04-16 20:31:01.569 | 2025-04-16T13:31:01.569Z  INFO 1 --- [image-storage-service] [nio-8081-exec-3] s.s.i.service.MinioImageStorageService   : Retrieved image: id=b16097c8-8cc2-4cee-af4c-318d8ef985f8, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp, accessCount=8
+2025-04-16 20:31:08.096 | Found 2 images in storage
+2025-04-16 20:31:08.104 | 2025-04-16T13:31:08.103Z  WARN 1 --- [image-storage-service] [nio-8081-exec-8] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics
+2025-04-16 20:31:08.141 | 2025-04-16T13:31:08.140Z  INFO 1 --- [image-storage-service] [nio-8081-exec-7] s.s.i.service.MinioImageStorageService   : Retrieved image: id=b16097c8-8cc2-4cee-af4c-318d8ef985f8, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp, accessCount=9
+2025-04-16 20:31:12.710 | 2025-04-16T13:31:12.710Z  INFO 1 --- [image-storage-service] [nio-8081-exec-2] s.s.i.service.MinioImageStorageService   : Deleted backup for image: id=b16097c8-8cc2-4cee-af4c-318d8ef985f8
+2025-04-16 20:31:12.711 | 2025-04-16T13:31:12.711Z  INFO 1 --- [image-storage-service] [nio-8081-exec-2] s.s.i.service.MinioImageStorageService   : Successfully deleted image: id=b16097c8-8cc2-4cee-af4c-318d8ef985f8, name=1-WCL8yWudwoFcnhLWD25G (1) (1).webp
+2025-04-16 20:31:14.237 | Found 1 images in storage
+2025-04-16 20:31:14.247 | 2025-04-16T13:31:14.247Z  WARN 1 --- [image-storage-service] [nio-8081-exec-4] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics
+2025-04-16 20:31:14.279 | 2025-04-16T13:31:14.278Z  INFO 1 --- [image-storage-service] [nio-8081-exec-5] s.s.i.service.MinioImageStorageService   : Retrieved image: id=4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, name=wallpaperflare.com_wallpaper.webp, accessCount=9
+2025-04-16 20:31:19.131 | Found 1 images in storage
+2025-04-16 20:31:19.151 | 2025-04-16T13:31:19.150Z  WARN 1 --- [image-storage-service] [nio-8081-exec-9] s.s.i.service.MinioImageStorageService   : Image not found: id=statistics
+2025-04-16 20:31:19.194 | 2025-04-16T13:31:19.194Z  INFO 1 --- [image-storage-service] [io-8081-exec-10] s.s.i.service.MinioImageStorageService   : Retrieved image: id=4c98d0ac-d52b-4958-b733-3b9aaaf6bb79, name=wallpaperflare.com_wallpaper.webp, accessCount=10
