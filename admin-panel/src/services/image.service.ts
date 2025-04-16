@@ -1,11 +1,16 @@
-import { apiClient, apiClientCompressionService } from './api.config';
+import { apiClient, apiClientCompressionService, apiClientMultipart } from './api.config';
 import { ImageDTO, ImageStatistics, SortType, DateFilterType, SizeFilterType } from '../types/api.types';
 
 const ImageService = {
   // Получение списка всех изображений
   getAllImages: async (): Promise<Record<string, ImageDTO>> => {
-    const response = await apiClient.get<Record<string, ImageDTO>>('/api/images');
-    return response.data;
+    try {
+      const response = await apiClient.get<Record<string, ImageDTO>>('/api/images');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching all images:', error);
+      throw error;
+    }
   },
 
   // Получение метаданных изображения по ID
@@ -25,8 +30,14 @@ const ImageService = {
   
   // Получение статистики по изображениям
   getImageStatistics: async (): Promise<Record<string, ImageStatistics>> => {
-    const response = await apiClient.get('/api/images/statistics');
-    return response.data.statistics;
+    try {
+      const response = await apiClient.get('/api/images/statistics');
+      return response.data.statistics || {};
+    } catch (error) {
+      console.error('Error fetching image statistics:', error);
+      // Возвращаем пустой объект вместо ошибки для более стабильной работы UI
+      return {}; 
+    }
   },
   
   // Синоним для getImageStatistics для обеспечения обратной совместимости
@@ -36,8 +47,20 @@ const ImageService = {
 
   // Получение статистики по конкретному изображению
   getImageStatisticById: async (imageId: string): Promise<ImageStatistics> => {
-    const response = await apiClient.get(`/api/images/${imageId}/statistics`);
-    return response.data;
+    try {
+      const response = await apiClient.get(`/api/images/${imageId}/statistics`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching statistics for image ${imageId}:`, error);
+      // Возвращаем пустую статистику вместо ошибки, включая все обязательные поля
+      return {
+        id: `stats-fallback-${imageId}`, 
+        imageId: imageId,
+        viewCount: 0, 
+        downloadCount: 0, 
+        popularityScore: 0
+      };
+    }
   },
   
   // Получение отфильтрованных или отсортированных изображений
@@ -61,7 +84,8 @@ const ImageService = {
     const formData = new FormData();
     formData.append('file', file);
     
-    const response = await apiClient.post<ImageDTO>('/api/images', formData, {
+    // Используем специальный экземпляр для multipart/form-data запросов
+    const response = await apiClientMultipart.post<ImageDTO>('/api/images', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -71,8 +95,13 @@ const ImageService = {
 
   // Удаление изображения
   deleteImage: async (id: string): Promise<boolean> => {
-    const response = await apiClient.delete(`/api/images/${id}`);
-    return response.status === 204; // 204 No Content означает успешное удаление
+    try {
+      const response = await apiClient.delete(`/api/images/${id}`);
+      return response.status === 204; // 204 No Content означает успешное удаление
+    } catch (error) {
+      console.error(`Error deleting image ${id}:`, error);
+      throw error;
+    }
   },
 
   // Сжатие изображения

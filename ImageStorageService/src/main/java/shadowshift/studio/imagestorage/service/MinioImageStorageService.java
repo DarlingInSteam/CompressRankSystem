@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -376,10 +377,32 @@ public class MinioImageStorageService implements ImageStorageService {
 
     @Override
     public Map<String, Image> getAllImageMetadata() {
-        List<ImageEntity> entities = imageRepository.findAll();
-        return entities.stream()
-                .map(imageMapper::toModel)
-                .collect(Collectors.toMap(Image::getId, image -> image));
+        try {
+            logger.info("Getting metadata for all images");
+            long startTime = System.currentTimeMillis();
+            
+            List<ImageEntity> entities = imageRepository.findAll();
+            logger.info("Retrieved {} image entities from database", entities.size());
+            
+            Map<String, Image> result = new HashMap<>();
+            for (ImageEntity entity : entities) {
+                try {
+                    Image image = imageMapper.toModel(entity);
+                    result.put(entity.getId(), image);
+                } catch (Exception e) {
+                    logger.error("Error mapping entity to image model: {}", entity.getId(), e);
+                    // Continue processing other images even if one fails
+                }
+            }
+            
+            long duration = System.currentTimeMillis() - startTime;
+            logger.info("getAllImageMetadata completed in {}ms with {} results", duration, result.size());
+            return result;
+        } catch (Exception e) {
+            logger.error("Error in getAllImageMetadata", e);
+            // Return empty map instead of throwing an exception
+            return new HashMap<>();
+        }
     }
 
     @Override

@@ -4,28 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0ec3192d-774f-49c4-adbc-f36601cea625" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/CorsConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/CorsConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/DockerComposeRunner.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/DockerComposeRunner.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/JacksonConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/JacksonConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/MinioConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/MinioConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/RabbitMQConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/RabbitMQConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/RemoteStorageConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/RemoteStorageConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/WebpInitializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/config/WebpInitializer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/controller/CompressionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/controller/CompressionController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/controller/ImageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/controller/ImageController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/controller/WebController.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/controller/WebController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/dto/message/CompressionMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/dto/message/CompressionMessage.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/mapper/ImageMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/mapper/ImageMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/messaging/ImageMessageListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/messaging/ImageMessageListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/client/ImageStorageClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/client/ImageStorageClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/compression/CompressionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/compression/CompressionService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/image/MinioImageStorageService.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/image/MinioImageStorageService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/webp/WebpService.java" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/java/com/shadowshiftstudio/compressionservice/service/webp/WebpService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/resources/application-docker.properties" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/resources/application-docker.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CompressionService/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/CompressionService/src/main/resources/application.properties" afterDir="false" />
-    </list>
+    <list default="true" id="0ec3192d-774f-49c4-adbc-f36601cea625" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -171,7 +150,7 @@
       <workItem from="1744750609622" duration="2317000" />
       <workItem from="1744755722738" duration="2197000" />
       <workItem from="1744806290905" duration="850000" />
-      <workItem from="1744807730944" duration="3804000" />
+      <workItem from="1744807730944" duration="4416000" />
     </task>
     <servers />
   </component>
