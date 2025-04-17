@@ -23,10 +23,13 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-amqp")
-    implementation("com.h2database:h2")
+    implementation("org.postgresql:postgresql") // PostgreSQL вместо H2
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("io.swagger.core.v3:swagger-annotations:2.2.20")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0")
+    
+    // Оставляем H2 для тестирования
+    testImplementation("com.h2database:h2")
     
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     
