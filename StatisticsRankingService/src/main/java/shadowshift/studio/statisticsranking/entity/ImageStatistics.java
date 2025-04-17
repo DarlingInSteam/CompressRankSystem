@@ -1,11 +1,11 @@
-package com.shadowshiftstudio.compressionservice.entity;
+package shadowshift.studio.statisticsranking.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "image_statistics")
-public class ImageStatisticsEntity {
+public class ImageStatistics {
 
     @Id
     private String imageId;
@@ -22,10 +22,10 @@ public class ImageStatisticsEntity {
     @Column
     private LocalDateTime lastDownloadedAt;
 
-    public ImageStatisticsEntity() {
+    public ImageStatistics() {
     }
 
-    public ImageStatisticsEntity(String imageId) {
+    public ImageStatistics(String imageId) {
         this.imageId = imageId;
         this.viewCount = 0;
         this.downloadCount = 0;

@@ -1,7 +1,9 @@
-package com.shadowshiftstudio.compressionservice.service.image;
+package shadowshift.studio.statisticsranking.service;
 
-import com.shadowshiftstudio.compressionservice.entity.ImageStatisticsEntity;
-import com.shadowshiftstudio.compressionservice.repository.ImageStatisticsRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import shadowshift.studio.statisticsranking.entity.ImageStatistics;
+import shadowshift.studio.statisticsranking.repository.ImageStatisticsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +12,7 @@ import java.util.List;
 
 @Service
 public class ImageStatisticsService {
+    private static final Logger logger = LoggerFactory.getLogger(ImageStatisticsService.class);
 
     private final ImageStatisticsRepository statisticsRepository;
 
@@ -20,24 +23,26 @@ public class ImageStatisticsService {
 
     @Transactional
     public void incrementViewCount(String imageId) {
-        ImageStatisticsEntity stats = findOrCreateStatistics(imageId);
+        ImageStatistics stats = findOrCreateStatistics(imageId);
         stats.incrementViewCount();
+        logger.info("Incremented view count to " + stats.getViewCount() + " for image ID: " + imageId);
         statisticsRepository.save(stats);
     }
 
     @Transactional
     public void incrementDownloadCount(String imageId) {
-        ImageStatisticsEntity stats = findOrCreateStatistics(imageId);
+        ImageStatistics stats = findOrCreateStatistics(imageId);
         stats.incrementDownloadCount();
+        logger.info("Incremented download count to " + stats.getDownloadCount() + " for image ID: " + imageId);
         statisticsRepository.save(stats);
     }
 
-    private ImageStatisticsEntity findOrCreateStatistics(String imageId) {
+    private ImageStatistics findOrCreateStatistics(String imageId) {
         return statisticsRepository.findById(imageId)
-                .orElse(new ImageStatisticsEntity(imageId));
+                .orElse(new ImageStatistics(imageId));
     }
 
-    public List<ImageStatisticsEntity> getMostPopularImages() {
+    public List<ImageStatistics> getMostPopularImages() {
         return statisticsRepository.findMostPopular();
     }
     
@@ -45,7 +50,7 @@ public class ImageStatisticsService {
      * Получает список изображений, отсортированных по количеству просмотров
      * @return список изображений, отсортированных по просмотрам в убывающем порядке
      */
-    public List<ImageStatisticsEntity> getMostViewedImages() {
+    public List<ImageStatistics> getMostViewedImages() {
         return statisticsRepository.findMostViewed();
     }
     
@@ -53,31 +58,25 @@ public class ImageStatisticsService {
      * Получает список изображений, отсортированных по количеству скачиваний
      * @return список изображений, отсортированных по скачиваниям в убывающем порядке
      */
-    public List<ImageStatisticsEntity> getMostDownloadedImages() {
+    public List<ImageStatistics> getMostDownloadedImages() {
         return statisticsRepository.findMostDownloaded();
     }
     
-    public ImageStatisticsEntity getStatisticsForImage(String imageId) {
-        return statisticsRepository.findById(imageId)
-                .orElse(new ImageStatisticsEntity(imageId));
-    }
-    
     /**
-     * Получает статистику для указанного изображения.
-     * Синоним для метода getStatisticsForImage для обеспечения обратной совместимости.
-     * 
+     * Получает статистику для указанного изображения
      * @param imageId идентификатор изображения
      * @return объект статистики или новый объект с нулевыми счетчиками, если статистика не найдена
      */
-    public ImageStatisticsEntity getImageStatistics(String imageId) {
-        return getStatisticsForImage(imageId);
+    public ImageStatistics getImageStatistics(String imageId) {
+        return statisticsRepository.findById(imageId)
+                .orElse(new ImageStatistics(imageId));
     }
     
     /**
      * Получает статистику для всех изображений
      * @return список объектов статистики для всех изображений
      */
-    public List<ImageStatisticsEntity> getAllImageStatistics() {
+    public List<ImageStatistics> getAllImageStatistics() {
         return statisticsRepository.findAll();
     }
 }
