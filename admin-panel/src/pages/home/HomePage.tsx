@@ -392,6 +392,7 @@ const HomePage: React.FC = () => {
       }
       
       result = result.filter(([_, image]) => {
+        if (!image.uploadedAt) return false;
         const uploadDate = new Date(image.uploadedAt);
         return uploadDate >= compareDate;
       });
@@ -431,7 +432,10 @@ const HomePage: React.FC = () => {
       
       switch(sortType) {
         case 'uploadedAt':
-          return new Date(img2.uploadedAt).getTime() - new Date(img1.uploadedAt).getTime();
+          // Проверка на наличие даты, чтобы избежать ошибки при преобразовании undefined
+          const date1 = img1.uploadedAt ? new Date(img1.uploadedAt).getTime() : 0;
+          const date2 = img2.uploadedAt ? new Date(img2.uploadedAt).getTime() : 0;
+          return date2 - date1;
         case 'views':
           return (stat2.viewCount || 0) - (stat1.viewCount || 0);
         case 'downloads':
@@ -487,7 +491,7 @@ const HomePage: React.FC = () => {
             spacing={3} 
             sx={{ mb: 4, width: '100%', mx: 0 }}
           >
-            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+            <Grid component={"div"} container spacing={12} sx={{ sm: 6, lg: 3 }}>
               <StatCard
                 title="Всего изображений"
                 value={stats.totalImages}
@@ -496,7 +500,7 @@ const HomePage: React.FC = () => {
                 color="primary.main"
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+            <Grid component={"div"} container spacing={12} sx={{ sm: 6, lg: 3 }}>
               <StatCard
                 title="Сжатых изображений"
                 value={`${stats.compressedImages} / ${stats.totalImages}`}
@@ -505,7 +509,7 @@ const HomePage: React.FC = () => {
                 color="success.main"
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+            <Grid component={"div"} container spacing={12} sx={{ sm: 6, lg: 3 }}>
               <StatCard
                 title="Общий объем"
                 value={formatFileSize(stats.totalSize)}
@@ -514,7 +518,7 @@ const HomePage: React.FC = () => {
                 color="info.main"
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+            <Grid component={"div"} container spacing={12} sx={{ sm: 6, lg: 3 }}>
               <StatCard
                 title="Экономия места"
                 value={formatFileSize(stats.spaceSaved)}
@@ -974,7 +978,7 @@ const HomePage: React.FC = () => {
                           }} 
                         />
                         <Box component="span">
-                          {new Date(image.uploadedAt).toLocaleDateString()}
+                          {image.uploadedAt ? new Date(image.uploadedAt).toLocaleDateString() : '-'}
                         </Box>
                       </Box>
                       
@@ -1039,7 +1043,7 @@ const HomePage: React.FC = () => {
                         <Chip 
                           size="small" 
                           icon={<VisibilityIcon sx={{ fontSize: '1rem !important' }} />}
-                          label={image.accessCount}
+                          label={image.accessCount || 0}
                           variant="outlined"
                           title="Количество просмотров"
                           sx={{ 
@@ -1050,7 +1054,7 @@ const HomePage: React.FC = () => {
                         <Chip 
                           size="small" 
                           icon={<CloudDownloadIcon sx={{ fontSize: '1rem !important' }} />}
-                          label={image.accessCount > 0 ? Math.floor(image.accessCount * 0.4) : 0}
+                          label={(image.accessCount || 0) > 0 ? Math.floor((image.accessCount || 0) * 0.4) : 0}
                           variant="outlined"
                           title="Количество загрузок"
                           sx={{ 

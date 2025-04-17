@@ -11,8 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import shadowshift.studio.imagestorage.entity.ImageEntity;
+import shadowshift.studio.imagestorage.exception.FileSizeLimitException;
+import shadowshift.studio.imagestorage.exception.UserQuotaExceededException;
 import shadowshift.studio.imagestorage.mapper.ImageMapper;
 import shadowshift.studio.imagestorage.model.Image;
+import shadowshift.studio.imagestorage.model.UserInfo;
 import shadowshift.studio.imagestorage.repository.ImageRepository;
 
 import java.io.ByteArrayInputStream;
@@ -37,6 +40,7 @@ public class MinioImageStorageService implements ImageStorageService {
     private final ImageRepository imageRepository;
     private final ImageMapper imageMapper;
     private final WebImageProcessor imageProcessor;
+    private final SystemSettingsValidator settingsValidator;
 
     @Value("${minio.bucket:images}")
     private String bucketName;
@@ -46,11 +50,13 @@ public class MinioImageStorageService implements ImageStorageService {
 
     @Autowired
     public MinioImageStorageService(MinioClient minioClient, ImageRepository imageRepository,
-                                   ImageMapper imageMapper, WebImageProcessor imageProcessor) {
+                                   ImageMapper imageMapper, WebImageProcessor imageProcessor,
+                                   SystemSettingsValidator settingsValidator) {
         this.minioClient = minioClient;
         this.imageRepository = imageRepository;
         this.imageMapper = imageMapper;
         this.imageProcessor = imageProcessor;
+        this.settingsValidator = settingsValidator;
     }
 
     @PostConstruct
@@ -160,8 +166,23 @@ public class MinioImageStorageService implements ImageStorageService {
 
     @Override
     @Transactional
-    public Image storeImage(MultipartFile file) throws IOException {
+    public Image storeImage(MultipartFile file, UserInfo userInfo) throws IOException {
         try {
+            // Проверка размера файла согласно настройкам
+            settingsValidator.validateFileSize(file);
+            
+            // Проверка квоты пользователя
+            if (userInfo != null) {
+                String username = userInfo.getUsername();
+                String userRole = userInfo.getRole();
+                
+                // Получить количество изображений пользователя
+                long userImagesCount = imageRepository.countByUserId(username);
+                
+                // Проверка квоты
+                settingsValidator.validateUserQuota(username, userRole, userImagesCount);
+            }
+            
             byte[] imageData = file.getBytes();
 
             if (!imageProcessor.isSupportedFormat(imageData)) {
@@ -175,6 +196,11 @@ public class MinioImageStorageService implements ImageStorageService {
 
             String originalFilename = getFileNameWithoutExtension(file.getOriginalFilename()) + ".webp";
             Image image = new Image(originalFilename, WEBP_CONTENT_TYPE, webpData.length);
+            
+            // Установка ID пользователя для изображения
+            if (userInfo != null) {
+                image.setUserId(userInfo.getUsername());
+            }
 
             try (ByteArrayInputStream inputStream = new ByteArrayInputStream(webpData)) {
                 minioClient.putObject(
@@ -204,6 +230,9 @@ public class MinioImageStorageService implements ImageStorageService {
                     image.getId(), image.getOriginalFilename(), file.getContentType());
             return image;
 
+        } catch (FileSizeLimitException | UserQuotaExceededException e) {
+            logger.warn("Failed to store image: {}", e.getMessage());
+            throw new IOException(e.getMessage(), e);
         } catch (Exception e) {
             logger.error("Failed to store image as WebP", e);
             throw new IOException("Failed to store image as WebP: " + e.getMessage(), e);

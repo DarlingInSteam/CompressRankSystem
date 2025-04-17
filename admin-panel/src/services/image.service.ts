@@ -55,9 +55,10 @@ const ImageService = {
       // Возвращаем пустую статистику вместо ошибки, включая все обязательные поля
       return {
         id: `stats-fallback-${imageId}`, 
-        imageId: imageId,
-        viewCount: 0, 
+        views: 0,
+        downloads: 0,
         downloadCount: 0, 
+        viewCount: 0, 
         popularityScore: 0
       };
     }

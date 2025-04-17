@@ -1,36 +1,48 @@
-// Интерфейсы для работы с API
+import { UserRole } from "../contexts/AuthContext";
 
-// Интерфейс для изображения
+// Типы сортировки, фильтрации и поиска
+export type SortType = 'uploadedAt' | 'views' | 'downloads' | 'popularity' | 'size_asc' | 'size_desc' | 'accessCount';
+
+export type DateFilterType = '' | 'today' | 'week' | 'month' | 'year';
+
+export type SizeFilterType = '' | 'small' | 'medium' | 'large' | 'xlarge';
+
+// Типы для работы с изображениями
 export interface ImageDTO {
   id: string;
   originalFilename: string;
   contentType: string;
   size: number;
-  objectName: string;
   compressionLevel: number;
-  originalImageId: string | null;
-  uploadedAt: string;
-  lastAccessed: string | null;
-  accessCount: number;
+  objectName: string;
+  originalImageId?: string;
+  uploadedAt?: string;
+  lastAccessed?: string;
+  accessCount?: number;
+  userId?: string;
 }
 
-// Интерфейс для статистики изображения
 export interface ImageStatistics {
+  views: number;
+  downloads: number;
+  lastViewed?: string;
+  lastDownloaded?: string;
+  downloadCount: number; // Изменено: больше не optional
+  viewCount?: number;
+  popularityScore?: number;
+  id?: string; // Добавлено для совместимости
+}
+
+// Типы для системных настроек
+export interface SystemSettingsDTO {
+  settingKey: string;
+  settingValue: string;
+  description: string;
+  settingGroup: string;
+}
+
+export interface CategoryDTO {
   id: string;
-  imageId: string;
-  viewCount: number;
-  downloadCount: number;
-  popularityScore: number;
+  name: string;
+  description?: string;
 }
-
-// Интерфейсы для обработки запросов
-export interface ApiError {
-  status: number;
-  message: string;
-  timestamp: string;
-  path?: string;
-}
-
-export type SortType = 'uploadedAt' | 'views' | 'downloads' | 'popularity' | 'size_asc' | 'size_desc';
-export type DateFilterType = '' | 'today' | 'week' | 'month' | 'year';
-export type SizeFilterType = '' | 'small' | 'medium' | 'large' | 'xlarge';

@@ -16,6 +16,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth, UserRole } from '../../contexts/AuthContext';
 import UserManagement from '../../components/admin/UserManagement';
+import SystemSettings from '../../components/admin/SystemSettings';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -108,15 +109,7 @@ const AdminPage: React.FC = () => {
         </TabPanel>
         
         <TabPanel value={tabValue} index={1}>
-          <Box p={2}>
-            <Typography variant="h6" gutterBottom>
-              Настройки системы
-            </Typography>
-            <Divider sx={{ mb: 3 }} />
-            <Typography color="text.secondary">
-              Данный раздел находится в разработке. Здесь будут размещены настройки для управления системой.
-            </Typography>
-          </Box>
+          <SystemSettings />
         </TabPanel>
       </Paper>
     </Container>

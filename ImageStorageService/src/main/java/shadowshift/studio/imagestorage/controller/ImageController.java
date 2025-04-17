@@ -14,7 +14,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import shadowshift.studio.imagestorage.exception.FileSizeLimitException;
+import shadowshift.studio.imagestorage.exception.UserQuotaExceededException;
+import shadowshift.studio.imagestorage.messaging.StatisticsEventSender;
 import shadowshift.studio.imagestorage.model.Image;
+import shadowshift.studio.imagestorage.model.UserInfo;
 import shadowshift.studio.imagestorage.service.ImageStorageService;
 
 import java.io.IOException;
@@ -26,33 +30,59 @@ import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/images")
-@Tag(name = "Image Storage", description = "API for managing images in storage")
+@Tag(name = "Image Storage", description = "API для управления изображениями в хранилище")
 public class ImageController {
 
     private final ImageStorageService imageStorageService;
+    private final StatisticsEventSender statisticsEventSender;
     private static final Logger logger = LoggerFactory.getLogger(ImageController.class);
 
     @Autowired
-    public ImageController(ImageStorageService imageStorageService) {
+    public ImageController(ImageStorageService imageStorageService, StatisticsEventSender statisticsEventSender) {
         this.imageStorageService = imageStorageService;
+        this.statisticsEventSender = statisticsEventSender;
     }
 
-    @Operation(summary = "Upload an image", description = "Uploads a new image to storage")
+    @Operation(summary = "Загрузить изображение", description = "Загружает новое изображение в хранилище")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Image uploaded successfully",
+            @ApiResponse(responseCode = "201", description = "Изображение успешно загружено",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = Image.class))),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "400", description = "Некорректный запрос - превышены лимиты по размеру файла или квоте пользователя"),
+            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Image> uploadImage(
-            @Parameter(description = "Image file to upload", required = true)
-            @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> uploadImage(
+            @Parameter(description = "Файл изображения для загрузки", required = true)
+            @RequestParam("file") MultipartFile file,
+            @RequestHeader(value = "X-User-Name", required = false) String username,
+            @RequestHeader(value = "X-User-Role", required = false) String userRole) {
         try {
-            Image image = imageStorageService.storeImage(file);
+            // Создаем объект UserInfo из заголовков запроса
+            UserInfo userInfo = null;
+            if (username != null && userRole != null) {
+                userInfo = new UserInfo(username, userRole);
+                logger.info("User {} with role {} is uploading a file: {} ({})", username, userRole, file.getOriginalFilename(), file.getSize());
+            } else {
+                logger.info("Anonymous upload of file: {} ({})", file.getOriginalFilename(), file.getSize());
+            }
+            
+            Image image = imageStorageService.storeImage(file, userInfo);
             return ResponseEntity.status(HttpStatus.CREATED).body(image);
+        } catch (FileSizeLimitException e) {
+            logger.warn("File size limit exceeded: {}", e.getMessage());
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Ограничение размера файла: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        } catch (UserQuotaExceededException e) {
+            logger.warn("User quota exceeded: {}", e.getMessage());
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Превышена пользовательская квота: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            logger.error("Error uploading image", e);
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Внутренняя ошибка сервера: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
@@ -79,6 +109,16 @@ public class ImageController {
                 return ResponseEntity.notFound().build();
             }
 
+            // Send statistics event for view
+            statisticsEventSender.sendViewEvent(id);
+            logger.debug("Sent view event for image: {}", id);
+
+            // If downloading, send statistics event for download
+            if (download) {
+                statisticsEventSender.sendDownloadEvent(id);
+                logger.debug("Sent download event for image: {}", id);
+            }
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.parseMediaType(metadata.getContentType()));
             
@@ -88,7 +128,7 @@ public class ImageController {
 
             return ResponseEntity.ok().headers(headers).body(imageData);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error retrieving image: {}", id, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -129,7 +169,6 @@ public class ImageController {
             return ResponseEntity.ok(images);
         } catch (Exception e) {
             logger.error("Error retrieving all images: {}", e.getMessage(), e);
-            
             // Return empty map instead of error message to prevent client issues
             return ResponseEntity.ok(new HashMap<>());
         }

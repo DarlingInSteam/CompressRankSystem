@@ -26,6 +26,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import ImageService from '../../services/image.service';
 import { ImageDTO } from '../../types/api.types';
+import QuotaInfo from '../../components/upload/QuotaInfo';
 
 interface UploadItem {
   id: string;
@@ -43,6 +44,7 @@ const UploadPage: React.FC = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+  const [refreshTrigger, setRefreshTrigger] = useState(0); // Триггер для обновления информации о квотах
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
@@ -137,14 +139,26 @@ const UploadPage: React.FC = () => {
       );
       
       showSnackbar('Изображение успешно загружено', 'success');
+      
+      // Обновление информации о квотах после успешной загрузки
+      setRefreshTrigger(prev => prev + 1);
     } catch (error: any) {
+      let errorMessage = 'Ошибка загрузки файла';
+      
+      // Обработка специфических ошибок от API
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       setUploadItems(prev => 
         prev.map(i => i.id === item.id ? { 
-          ...i, status: 'error', error: error.message || 'Ошибка загрузки файла' 
+          ...i, status: 'error', error: errorMessage
         } : i)
       );
       
-      showSnackbar('Ошибка при загрузке изображения', 'error');
+      showSnackbar(errorMessage, 'error');
     }
   };
 
@@ -167,6 +181,9 @@ const UploadPage: React.FC = () => {
       <Typography variant="h4" gutterBottom>
         Загрузка изображений
       </Typography>
+      
+      {/* Компонент с информацией о лимитах и квотах */}
+      <QuotaInfo refreshTrigger={refreshTrigger} />
 
       <Paper
         sx={{
