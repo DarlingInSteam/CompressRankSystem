@@ -13,13 +13,31 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json'
   },
-  // Запрещаем автоматическую установку заголовков для CORS
-  // т.к. они должны устанавливаться на стороне сервера
-  withCredentials: false
+  // Включаем отправку куки при кросс-доменных запросах
+  withCredentials: true
 });
 
 // Функция обработки ошибок - выносим в отдельную функцию для переиспользования
 const errorHandler = (error: any) => {
+  // Обработка ошибок аутентификации
+  if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+    // В случае истечения срока действия токена, перенаправляем на страницу входа
+    if (error.response.status === 401) {
+      console.warn('Authentication token expired or invalid');
+      localStorage.removeItem('token');
+      
+      // Добавляем небольшую задержку, чтобы избежать конфликтов при редиректе
+      setTimeout(() => {
+        window.location.href = '/login?expired=true';
+      }, 100);
+    }
+    
+    // Если доступ запрещен, но токен действителен (403)
+    if (error.response.status === 403) {
+      console.error('Access denied to resource:', error.config?.url || 'unknown');
+    }
+  }
+  
   // Более детальная обработка CORS ошибок
   if (error.message && error.message.includes('CORS')) {
     console.error('CORS Error detected:', error.message);
@@ -37,8 +55,6 @@ const errorHandler = (error: any) => {
     
     if (status === 500) {
       console.error(`Серверная ошибка (${path}):`, error.response.data);
-    } else if (status === 403) {
-      console.error(`Ошибка доступа (${path}):`, error.response.data);
     } else if (status === 503) {
       console.error(`Сервис временно недоступен (${path}):`, error.response.data);
     }
@@ -46,6 +62,18 @@ const errorHandler = (error: any) => {
   
   return Promise.reject(error);
 };
+
+// Перехватчик запросов для добавления токена аутентификации
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // Перехватчик ответов для обработки ошибок
 apiClient.interceptors.response.use(
@@ -56,8 +84,20 @@ apiClient.interceptors.response.use(
 // Создаем экземпляр для обработки multipart/form-data запросов (загрузка файлов)
 const apiClientMultipart = axios.create({
   baseURL: 'http://localhost:8082',
-  withCredentials: false
+  withCredentials: true
 });
+
+// Добавляем тот же перехватчик для multipart запросов
+apiClientMultipart.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // Используем тот же перехватчик ошибок, но без обращения к internal handlers
 apiClientMultipart.interceptors.response.use(

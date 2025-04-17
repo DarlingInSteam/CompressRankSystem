@@ -4,11 +4,18 @@ import { CssBaseline, Box, ThemeProvider, createTheme, PaletteMode } from '@mui/
 
 // Компоненты
 import Navigation from './components/Navigation';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // Страницы
 import HomePage from './pages/home/HomePage';
 import UploadPage from './pages/upload/UploadPage';
 import ImageDetailPage from './pages/detail/ImageDetailPage';
+import LoginPage from './pages/login/LoginPage';
+import ProfilePage from './pages/profile/ProfilePage';
+import AdminPage from './pages/admin/AdminPage';
+
+// Контекст авторизации
+import { AuthProvider, UserRole } from './contexts/AuthContext';
 
 // Создание контекста для темы
 export const ColorModeContext = createContext({
@@ -111,33 +118,114 @@ const App: React.FC = () => {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Router>
-          <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-            <Navigation />
-            <Box component="main" sx={{ flexGrow: 1, py: 3 }}>
-              <Routes>
-                {/* Основные маршруты */}
-                <Route path="/" element={<HomePage />} />
-                <Route path="/upload" element={<UploadPage />} />
-                <Route path="/images/:id/view" element={<ImageDetailPage />} />
-                
-                {/* Заглушки для страниц, которые будут добавлены позже */}
-                <Route path="/analytics" element={<div>Страница аналитики будет добавлена позже</div>} />
-                <Route path="/settings" element={<div>Страница настроек будет добавлена позже</div>} />
-                <Route path="/profile" element={<div>Страница профиля будет добавлена позже</div>} />
-                <Route path="/activities" element={<div>Страница активностей будет добавлена позже</div>} />
-                <Route path="/compress" element={<div>Страница сжатия будет добавлена позже</div>} />
-                <Route path="/cleanup" element={<div>Страница очистки хранилища будет добавлена позже</div>} />
-                <Route path="/storage" element={<div>Страница статистики хранилища будет добавлена позже</div>} />
-                <Route path="/backup" element={<div>Страница резервного копирования будет добавлена позже</div>} />
-                <Route path="/notifications" element={<div>Страница уведомлений будет добавлена позже</div>} />
-                
-                {/* Редирект на главную для неизвестных маршрутов */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
+        <AuthProvider>
+          <Router>
+            <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+              <Navigation />
+              <Box component="main" sx={{ flexGrow: 1, py: 3 }}>
+                <Routes>
+                  {/* Публичные маршруты */}
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  
+                  {/* Защищенные маршруты (требуют авторизацию) */}
+                  <Route 
+                    path="/upload" 
+                    element={
+                      <ProtectedRoute>
+                        <UploadPage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/images/:id/view" 
+                    element={
+                      <ProtectedRoute>
+                        <ImageDetailPage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/profile" 
+                    element={
+                      <ProtectedRoute>
+                        <ProfilePage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  
+                  {/* Маршруты, требующие специфичных ролей */}
+                  <Route 
+                    path="/admin/*" 
+                    element={
+                      <ProtectedRoute requiredRoles={[UserRole.ADMIN]}>
+                        <AdminPage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  
+                  {/* Остальные маршруты (будут добавлены позже) */}
+                  <Route path="/analytics" element={
+                    <ProtectedRoute>
+                      <div>Страница аналитики будет добавлена позже</div>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/settings" element={
+                    <ProtectedRoute>
+                      <div>Страница настроек будет добавлена позже</div>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/activities" element={
+                    <ProtectedRoute>
+                      <div>Страница активностей будет добавлена позже</div>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/compress" element={
+                    <ProtectedRoute>
+                      <div>Страница сжатия будет добавлена позже</div>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/compress/scheduler" element={
+                    <ProtectedRoute>
+                      <div>Страница планировщика сжатия будет добавлена позже</div>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/cleanup" element={
+                    <ProtectedRoute>
+                      <div>Страница очистки хранилища будет добавлена позже</div>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/storage" element={
+                    <ProtectedRoute>
+                      <div>Страница статистики хранилища будет добавлена позже</div>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/backup" element={
+                    <ProtectedRoute>
+                      <div>Страница резервного копирования будет добавлена позже</div>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/notifications" element={
+                    <ProtectedRoute>
+                      <div>Страница уведомлений будет добавлена позже</div>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/help" element={
+                    <div>Справочная информация будет добавлена позже</div>
+                  } />
+                  <Route path="/categories" element={
+                    <ProtectedRoute>
+                      <div>Страница категорий изображений будет добавлена позже</div>
+                    </ProtectedRoute>
+                  } />
+                  
+                  {/* Редирект на главную для неизвестных маршрутов */}
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </Box>
             </Box>
-          </Box>
-        </Router>
+          </Router>
+        </AuthProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>
   );

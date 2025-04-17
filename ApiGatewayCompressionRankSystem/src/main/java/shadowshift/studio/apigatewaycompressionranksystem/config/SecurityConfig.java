@@ -2,13 +2,18 @@ package shadowshift.studio.apigatewaycompressionranksystem.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
-import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+import org.springframework.web.server.WebFilter;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.web.cors.reactive.CorsWebFilter;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,14 +37,20 @@ public class SecurityConfig {
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                // Делаем CORS конфигурацию основной для всего приложения
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeExchange(auth -> {
+                    // Разрешаем OPTIONS запросы для всех URL (нужно для preflight CORS)
+                    auth.pathMatchers(HttpMethod.OPTIONS, "/**").permitAll();
+                    
                     // Открытый доступ к API документации
                     auth.pathMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/webjars/**").permitAll();
                     // Открытый доступ к эндпоинтам для мониторинга здоровья и метрик
                     auth.pathMatchers("/actuator/health/**", "/actuator/info").permitAll();
                     // Открытый доступ к fallback эндпоинтам
                     auth.pathMatchers("/fallback/**").permitAll();
+                    // Явное разрешение для эндпоинтов аутентификации
+                    auth.pathMatchers("/api/auth/**").permitAll();
                     // Открытый доступ к API эндпоинтам для данного проекта
                     // В реальном продакшене следует настроить аутентификацию
                     auth.pathMatchers("/api/**").permitAll();
@@ -50,61 +61,60 @@ public class SecurityConfig {
     }
 
     /**
-     * Создаем корс-фильтр, который будет использовать объект CorsConfiguration
-     * сгенерированный методом corsConfigurationSource
+     * Основной источник CORS конфигурации для всего приложения.
+     * Использует аннотацию @Primary для переопределения других бинов.
      */
     @Bean
-    public CorsWebFilter corsWebFilter() {
-        return new CorsWebFilter(corsConfigurationSource());
-    }
-
-    /**
-     * Настраивает источник конфигурации CORS для API Gateway.
-     * Определяет разрешенные источники, методы и заголовки.
-     * 
-     * Исправлено: настроены конкретные разрешенные источники и предотвращение
-     * дублирования заголовков CORS
-     *
-     * @return источник конфигурации CORS
-     */
-    @Bean
+    @Primary
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         
-        // Используем Collections.singletonList вместо Arrays.asList
-        // чтобы гарантировать только один допустимый источник
+        // Разрешаем запросы только с frontend приложения
         config.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
-        
-        // Разрешить использование учетных данных (cookies и др.)
         config.setAllowCredentials(true);
         
-        // Разрешенные методы HTTP
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        // Разрешаем все необходимые HTTP методы
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
         
-        // Разрешенные заголовки
+        // Разрешаем все необходимые заголовки
         config.setAllowedHeaders(Arrays.asList(
                 "Origin", 
-                "Content-Type", 
+                "Content-Type",
                 "Accept", 
                 "Authorization",
                 "Access-Control-Request-Method",
                 "Access-Control-Request-Headers",
-                "X-Requested-With"
+                "X-Requested-With",
+                "X-Auth-Token",
+                "Cache-Control",
+                "Pragma"
         ));
         
-        // Срок действия предварительных запросов (preflight)
+        // Увеличиваем время кеширования результатов предварительной проверки CORS
         config.setMaxAge(3600L);
         
-        // Заголовки, которые могут быть прочитаны клиентом
+        // Указываем какие заголовки могут быть открыты для фронтенда
         config.setExposedHeaders(Arrays.asList(
                 "Authorization", 
-                "Content-Disposition"
+                "Content-Disposition",
+                "Access-Control-Allow-Origin",
+                "Access-Control-Allow-Credentials"
         ));
         
-        // Применение конфигурации ко всем путям
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
+        source.registerCorsConfiguration("/**", config); // Применяем ко всем путям
         
         return source;
+    }
+    
+    /**
+     * Высокоприоритетный веб-фильтр для обеспечения правильной обработки CORS.
+     * Применяется раньше всех других фильтров, чтобы гарантировать
+     * добавление заголовков CORS до проверки безопасности.
+     */
+    @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE)
+    public WebFilter corsFilter() {
+        return new CorsWebFilter(corsConfigurationSource());
     }
 }

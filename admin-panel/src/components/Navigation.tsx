@@ -47,17 +47,24 @@ import {
   Logout as LogoutIcon,
   BarChart as BarChartIcon,
   PhotoLibrary as GalleryIcon,
-  Insights as StatsIcon
+  Insights as StatsIcon,
+  AdminPanelSettings as AdminIcon,
+  ManageAccounts as UserManagementIcon
 } from '@mui/icons-material';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ColorModeContext } from '../App';
+import { useAuth, UserRole } from '../contexts/AuthContext';
 
 const Navigation: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
   const colorMode = useContext(ColorModeContext);
+  
+  // Auth context for user information
+  const { user, logout, isAuthenticated } = useAuth();
   
   // Состояния для управления меню
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
@@ -126,6 +133,17 @@ const Navigation: React.FC = () => {
     }
   ];
 
+  // Добавляем пункт администрирования только для администраторов
+  if (user?.role === UserRole.ADMIN) {
+    menuItems.push({
+      text: 'Администрирование',
+      icon: <AdminIcon />,
+      submenu: [
+        { text: 'Пользователи', icon: <UserManagementIcon />, path: '/admin' }
+      ]
+    });
+  }
+
   // Пример уведомлений для демонстрации
   const notifications = [
     { id: 1, text: 'Загружено новое изображение', time: '5 мин назад' },
@@ -162,6 +180,13 @@ const Navigation: React.FC = () => {
     setExpandedSubmenu(expandedSubmenu === submenuName ? null : submenuName);
   };
 
+  // Функция выхода из системы
+  const handleLogout = () => {
+    handleCloseUserMenu();
+    logout();
+    navigate('/login');
+  };
+
   // Проверка активного маршрута для подсветки меню
   const isActive = (path: string) => {
     if (path === '/' && location.pathname === '/') return true;
@@ -173,6 +198,36 @@ const Navigation: React.FC = () => {
   const hasActiveSubmenu = (submenuItems: any[]) => {
     return submenuItems.some(item => isActive(item.path));
   };
+
+  // Функция получения инициалов пользователя
+  const getUserInitials = () => {
+    if (!user) return 'GU';
+    
+    if (user.firstName && user.lastName) {
+      return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
+    }
+    
+    // Проверяем, что username существует перед вызовом substring
+    return user.username ? user.username.substring(0, 2).toUpperCase() : 'U';
+  };
+
+  // Функция получения информации о роли пользователя
+  const getUserRoleInfo = () => {
+    if (!user) return { label: 'Гость', color: 'default' as const };
+    
+    switch (user.role) {
+      case UserRole.ADMIN:
+        return { label: 'Администратор', color: 'error' as const };
+      case UserRole.MODERATOR:
+        return { label: 'Модератор', color: 'primary' as const };
+      case UserRole.READER:
+        return { label: 'Читатель', color: 'success' as const };
+      default:
+        return { label: 'Пользователь', color: 'default' as const };
+    }
+  };
+
+  const roleInfo = getUserRoleInfo();
 
   return (
     <AppBar 
@@ -706,8 +761,8 @@ const Navigation: React.FC = () => {
               gap: { xs: 0.5, sm: 1 }
             }}
           >
-            {/* Кнопка загрузки */}
-            {!isMobile && (
+            {/* Кнопка загрузки для авторизованных пользователей */}
+            {!isMobile && isAuthenticated && (
               <Button
                 variant="contained"
                 component={Link}
@@ -736,39 +791,43 @@ const Navigation: React.FC = () => {
               </Button>
             )}
             
-            {/* Уведомления */}
-            <Tooltip title="Уведомления">
-              <IconButton 
-                onClick={handleOpenNotificationsMenu} 
-                size="large"
-                sx={{ 
-                  color: scrolled && theme.palette.mode === 'light' ? 'text.primary' : 'inherit',
-                  background: Boolean(anchorElNotifications) ? alpha(theme.palette.primary.main, 0.15) : 'transparent',
-                  transition: 'all 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    background: alpha(theme.palette.primary.main, 0.25)
-                  }
-                }}
-              >
-                <Badge 
-                  badgeContent={notifications.length} 
-                  color="error"
-                  sx={{
-                    '& .MuiBadge-badge': {
-                      animation: notifications.length > 0 ? 'pulse 1.5s infinite' : 'none',
-                      '@keyframes pulse': {
-                        '0%': { boxShadow: '0 0 0 0 rgba(211, 47, 47, 0.4)' },
-                        '70%': { boxShadow: '0 0 0 6px rgba(211, 47, 47, 0)' },
-                        '100%': { boxShadow: '0 0 0 0 rgba(211, 47, 47, 0)' }
-                      }
+            {/* Уведомления только для авторизованных пользователей */}
+            {isAuthenticated && (
+              <Tooltip title="Уведомления">
+                <IconButton 
+                  onClick={handleOpenNotificationsMenu} 
+                  size="large"
+                  sx={{ 
+                    color: scrolled && theme.palette.mode === 'light' ? 'text.primary' : 'inherit',
+                    background: Boolean(anchorElNotifications) ? alpha(theme.palette.primary.main, 0.15) : 'transparent',
+                    transition: 'all 0.2s',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      background: alpha(theme.palette.primary.main, 0.25)
                     }
                   }}
                 >
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
-            </Tooltip>
+                  <Badge 
+                    badgeContent={notifications.length} 
+                    color="error"
+                    sx={{
+                      '& .MuiBadge-badge': {
+                        animation: notifications.length > 0 ? 'pulse 1.5s infinite' : 'none',
+                        '@keyframes pulse': {
+                          '0%': { boxShadow: '0 0 0 0 rgba(211, 47, 47, 0.4)' },
+                          '70%': { boxShadow: '0 0 0 6px rgba(211, 47, 47, 0)' },
+                          '100%': { boxShadow: '0 0 0 0 rgba(211, 47, 47, 0)' }
+                        }
+                      }
+                    }}
+                  >
+                    <NotificationsIcon />
+                  </Badge>
+                </IconButton>
+              </Tooltip>
+            )}
+
+            {/* Меню уведомлений */}
             <Menu
               sx={{ mt: '45px' }}
               id="menu-notifications"
@@ -900,187 +959,256 @@ const Navigation: React.FC = () => {
               </IconButton>
             </Tooltip>
 
-            {/* Меню пользователя */}
-            <Tooltip title="Настройки профиля">
-              <IconButton 
-                onClick={handleOpenUserMenu} 
-                sx={{ 
-                  p: 0.3,
-                  border: '2px solid',
-                  borderColor: 'transparent',
-                  ml: 0.5,
-                  transition: 'all 0.2s',
+            {/* Меню пользователя - показываем только для авторизованных */}
+            {isAuthenticated ? (
+              <>
+                <Tooltip title="Настройки профиля">
+                  <IconButton 
+                    onClick={handleOpenUserMenu} 
+                    sx={{ 
+                      p: 0.3,
+                      border: '2px solid',
+                      borderColor: 'transparent',
+                      ml: 0.5,
+                      transition: 'all 0.2s',
+                      '&:hover': {
+                        borderColor: theme.palette.primary.main,
+                        transform: 'scale(1.05)'
+                      }
+                    }}
+                  >
+                    <Avatar 
+                      alt={user?.username || "User"} 
+                      src="/static/images/avatar/avatar.jpg" 
+                      sx={{ 
+                        width: 36, 
+                        height: 36,
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                        bgcolor: 'primary.main'  // Default color if no image
+                      }}
+                    >
+                      {getUserInitials()}
+                    </Avatar>
+                  </IconButton>
+                </Tooltip>
+                <Menu
+                  sx={{ mt: '45px' }}
+                  id="menu-appbar"
+                  anchorEl={anchorElUser}
+                  anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  open={Boolean(anchorElUser)}
+                  onClose={handleCloseUserMenu}
+                  PaperProps={{
+                    elevation: 3,
+                    sx: {
+                      overflow: 'visible',
+                      backdropFilter: 'blur(10px)',
+                      backgroundColor: theme.palette.mode === 'light' 
+                        ? 'rgba(255, 255, 255, 0.9)'
+                        : 'rgba(33, 33, 33, 0.9)',
+                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                      borderRadius: 2,
+                      minWidth: 220,
+                      border: '1px solid',
+                      borderColor: theme.palette.mode === 'light' 
+                        ? 'rgba(240, 240, 240, 0.9)' 
+                        : 'rgba(76, 76, 76, 0.3)',
+                      '&:before': {
+                        content: '""',
+                        display: 'block',
+                        position: 'absolute',
+                        top: -6,
+                        right: 14,
+                        width: 12,
+                        height: 12,
+                        bgcolor: 'background.paper',
+                        transform: 'rotate(45deg)',
+                        zIndex: 0,
+                        borderTop: '1px solid',
+                        borderLeft: '1px solid',
+                        borderColor: theme.palette.mode === 'light' 
+                          ? 'rgba(240, 240, 240, 0.9)' 
+                          : 'rgba(76, 76, 76, 0.3)',
+                      }
+                    }
+                  }}
+                >
+                  <Box sx={{ px: 2, py: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                      <Avatar 
+                        alt={user?.username || "User"} 
+                        src="/static/images/avatar/avatar.jpg"
+                        sx={{ 
+                          width: 50, 
+                          height: 50,
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                          bgcolor: 'primary.main'  // Default color if no image
+                        }}
+                      >
+                        {getUserInitials()}
+                      </Avatar>
+                      <Box sx={{ ml: 2 }}>
+                        <Typography variant="subtitle1" fontWeight="bold">
+                          {user?.firstName && user?.lastName 
+                            ? `${user.firstName} ${user.lastName}` 
+                            : user?.username}
+                        </Typography>
+                        <Chip 
+                          label={roleInfo.label} 
+                          size="small" 
+                          color={roleInfo.color}
+                          sx={{ mt: 0.5 }}
+                        />
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Divider />
+                  <List sx={{ py: 1 }}>
+                    <ListItemButton 
+                      component={Link} 
+                      to="/profile" 
+                      onClick={handleCloseUserMenu}
+                      sx={{
+                        borderRadius: 1,
+                        mx: 1,
+                        mb: 0.5,
+                        transition: 'all 0.2s',
+                        '&:hover': {
+                          bgcolor: alpha(theme.palette.primary.main, 0.1),
+                          transform: 'translateX(5px)'
+                        }
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 36 }}>
+                        <PersonIcon fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText primary="Профиль" />
+                    </ListItemButton>
+                    
+                    {user?.role === UserRole.ADMIN && (
+                      <ListItemButton 
+                        component={Link} 
+                        to="/admin" 
+                        onClick={handleCloseUserMenu}
+                        sx={{
+                          borderRadius: 1,
+                          mx: 1,
+                          mb: 0.5,
+                          transition: 'all 0.2s',
+                          '&:hover': {
+                            bgcolor: alpha(theme.palette.primary.main, 0.1),
+                            transform: 'translateX(5px)'
+                          }
+                        }}
+                      >
+                        <ListItemIcon sx={{ minWidth: 36 }}>
+                          <AdminIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText primary="Администрирование" />
+                      </ListItemButton>
+                    )}
+                    
+                    <ListItemButton 
+                      component={Link} 
+                      to="/settings" 
+                      onClick={handleCloseUserMenu}
+                      sx={{
+                        borderRadius: 1,
+                        mx: 1,
+                        mb: 0.5,
+                        transition: 'all 0.2s',
+                        '&:hover': {
+                          bgcolor: alpha(theme.palette.primary.main, 0.1),
+                          transform: 'translateX(5px)'
+                        }
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 36 }}>
+                        <SettingsIcon fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText primary="Настройки" />
+                    </ListItemButton>
+                    
+                    <ListItemButton 
+                      component={Link} 
+                      to="/help" 
+                      onClick={handleCloseUserMenu}
+                      sx={{
+                        borderRadius: 1,
+                        mx: 1,
+                        mb: 0.5,
+                        transition: 'all 0.2s',
+                        '&:hover': {
+                          bgcolor: alpha(theme.palette.primary.main, 0.1),
+                          transform: 'translateX(5px)'
+                        }
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 36 }}>
+                        <HelpIcon fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText primary="Справка" />
+                    </ListItemButton>
+                  </List>
+                  <Divider />
+                  <List sx={{ py: 1 }}>
+                    <ListItemButton 
+                      onClick={handleLogout}
+                      sx={{
+                        borderRadius: 1,
+                        mx: 1,
+                        color: theme.palette.error.main,
+                        transition: 'all 0.2s',
+                        '&:hover': {
+                          bgcolor: alpha(theme.palette.error.main, 0.1),
+                          transform: 'translateX(5px)'
+                        }
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 36, color: 'inherit' }}>
+                        <LogoutIcon fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText primary="Выход" />
+                    </ListItemButton>
+                  </List>
+                </Menu>
+              </>
+            ) : (
+              // Кнопка входа для неавторизованных пользователей
+              <Button
+                variant="contained"
+                component={Link}
+                to="/login"
+                sx={{
+                  borderRadius: '12px',
+                  textTransform: 'none',
+                  fontWeight: 'medium',
+                  px: 3,
+                  py: 1,
+                  ml: 1,
+                  background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
+                  boxShadow: theme.palette.mode === 'light' 
+                    ? '0 4px 12px rgba(25, 118, 210, 0.3)'
+                    : '0 4px 12px rgba(25, 118, 210, 0.5)',
+                  transition: 'all 0.3s ease',
                   '&:hover': {
-                    borderColor: theme.palette.primary.main,
-                    transform: 'scale(1.05)'
+                    background: 'linear-gradient(45deg, #1565c0, #1976d2)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 6px 16px rgba(25, 118, 210, 0.45)'
                   }
                 }}
               >
-                <Avatar 
-                  alt="Admin" 
-                  src="/static/images/avatar/avatar.jpg" 
-                  sx={{ 
-                    width: 36, 
-                    height: 36,
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
-                  }} 
-                />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: '45px' }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-              PaperProps={{
-                elevation: 3,
-                sx: {
-                  overflow: 'visible',
-                  backdropFilter: 'blur(10px)',
-                  backgroundColor: theme.palette.mode === 'light' 
-                    ? 'rgba(255, 255, 255, 0.9)'
-                    : 'rgba(33, 33, 33, 0.9)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                  borderRadius: 2,
-                  minWidth: 220,
-                  border: '1px solid',
-                  borderColor: theme.palette.mode === 'light' 
-                    ? 'rgba(240, 240, 240, 0.9)' 
-                    : 'rgba(76, 76, 76, 0.3)',
-                  '&:before': {
-                    content: '""',
-                    display: 'block',
-                    position: 'absolute',
-                    top: -6,
-                    right: 14,
-                    width: 12,
-                    height: 12,
-                    bgcolor: 'background.paper',
-                    transform: 'rotate(45deg)',
-                    zIndex: 0,
-                    borderTop: '1px solid',
-                    borderLeft: '1px solid',
-                    borderColor: theme.palette.mode === 'light' 
-                      ? 'rgba(240, 240, 240, 0.9)' 
-                      : 'rgba(76, 76, 76, 0.3)',
-                  }
-                }
-              }}
-            >
-              <Box sx={{ px: 2, py: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Avatar 
-                    alt="Admin" 
-                    src="/static/images/avatar/avatar.jpg"
-                    sx={{ 
-                      width: 50, 
-                      height: 50,
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-                    }}
-                  />
-                  <Box sx={{ ml: 2 }}>
-                    <Typography variant="subtitle1" fontWeight="bold">Админ</Typography>
-                    <Typography variant="body2" color="text.secondary">admin@example.com</Typography>
-                  </Box>
-                </Box>
-              </Box>
-              <Divider />
-              <List sx={{ py: 1 }}>
-                <ListItemButton 
-                  component={Link} 
-                  to="/profile" 
-                  onClick={handleCloseUserMenu}
-                  sx={{
-                    borderRadius: 1,
-                    mx: 1,
-                    mb: 0.5,
-                    transition: 'all 0.2s',
-                    '&:hover': {
-                      bgcolor: alpha(theme.palette.primary.main, 0.1),
-                      transform: 'translateX(5px)'
-                    }
-                  }}
-                >
-                  <ListItemIcon sx={{ minWidth: 36 }}>
-                    <PersonIcon fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText primary="Профиль" />
-                </ListItemButton>
-                
-                <ListItemButton 
-                  component={Link} 
-                  to="/settings" 
-                  onClick={handleCloseUserMenu}
-                  sx={{
-                    borderRadius: 1,
-                    mx: 1,
-                    mb: 0.5,
-                    transition: 'all 0.2s',
-                    '&:hover': {
-                      bgcolor: alpha(theme.palette.primary.main, 0.1),
-                      transform: 'translateX(5px)'
-                    }
-                  }}
-                >
-                  <ListItemIcon sx={{ minWidth: 36 }}>
-                    <SettingsIcon fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText primary="Настройки" />
-                </ListItemButton>
-                
-                <ListItemButton 
-                  component={Link} 
-                  to="/help" 
-                  onClick={handleCloseUserMenu}
-                  sx={{
-                    borderRadius: 1,
-                    mx: 1,
-                    mb: 0.5,
-                    transition: 'all 0.2s',
-                    '&:hover': {
-                      bgcolor: alpha(theme.palette.primary.main, 0.1),
-                      transform: 'translateX(5px)'
-                    }
-                  }}
-                >
-                  <ListItemIcon sx={{ minWidth: 36 }}>
-                    <HelpIcon fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText primary="Справка" />
-                </ListItemButton>
-              </List>
-              <Divider />
-              <List sx={{ py: 1 }}>
-                <ListItemButton 
-                  onClick={handleCloseUserMenu}
-                  sx={{
-                    borderRadius: 1,
-                    mx: 1,
-                    color: theme.palette.error.main,
-                    transition: 'all 0.2s',
-                    '&:hover': {
-                      bgcolor: alpha(theme.palette.error.main, 0.1),
-                      transform: 'translateX(5px)'
-                    }
-                  }}
-                >
-                  <ListItemIcon sx={{ minWidth: 36, color: 'inherit' }}>
-                    <LogoutIcon fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText primary="Выход" />
-                </ListItemButton>
-              </List>
-            </Menu>
+                Войти
+              </Button>
+            )}
           </Box>
         </Toolbar>
       </Container>

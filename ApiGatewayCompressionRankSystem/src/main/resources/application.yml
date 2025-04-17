@@ -14,7 +14,48 @@ spring:
       database: 0
   cloud:
     gateway:
+      # Global CORS configuration for all routes
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:3000"
+            allowedMethods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+            - PATCH
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600
       routes:
+        # Маршруты для сервиса аутентификации (AuthService)
+        - id: auth-api
+          uri: ${AUTH_SERVICE_URL:http://localhost:8085}
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@ipKeyResolver}"
+                redis-rate-limiter.replenishRate: 50
+                redis-rate-limiter.burstCapacity: 100
+            - name: Retry
+              args:
+                retries: 3
+                statuses: BAD_GATEWAY,GATEWAY_TIMEOUT,SERVICE_UNAVAILABLE
+                methods: GET,POST,PUT,DELETE
+                backoff:
+                  firstBackoff: 50ms
+                  maxBackoff: 500ms
+                  factor: 2
+                  basedOnPreviousValue: false
+            - name: CircuitBreaker
+              args:
+                name: authCircuitBreaker
+                fallbackUri: forward:/fallback/auth
+
         # Маршруты для сервиса хранения изображений (ImageStorageService)
         - id: image-storage-api
           uri: ${IMAGE_STORAGE_SERVICE_URL:http://localhost:8081}
@@ -169,4 +210,6 @@ resilience4j:
       compressionCircuitBreaker:
         baseConfig: default
       statisticsCircuitBreaker:
+        baseConfig: default
+      authCircuitBreaker:
         baseConfig: default

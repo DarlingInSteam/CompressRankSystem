@@ -1,0 +1,94 @@
+2025-04-17 19:14:07.136 | 
+2025-04-17 19:14:07.136 |   .   ____          _            __ _ _
+2025-04-17 19:14:07.136 |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+2025-04-17 19:14:07.136 | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+2025-04-17 19:14:07.136 |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+2025-04-17 19:14:07.136 |   '  |____| .__|_| |_|_| |_\__, | / / / /
+2025-04-17 19:14:07.136 |  =========|_|==============|___/=/_/_/_/
+2025-04-17 19:14:07.136 | 
+2025-04-17 19:14:07.140 |  :: Spring Boot ::                (v3.4.4)
+2025-04-17 19:14:07.140 | 
+2025-04-17 19:14:07.366 | 2025-04-17T12:14:07.363Z  INFO 1 --- [auth-service] [           main] s.s.authservice.AuthServiceApplication   : Starting AuthServiceApplication v0.0.1-SNAPSHOT using Java 21.0.6 with PID 1 (/app.jar started by root in /)
+2025-04-17 19:14:07.366 | 2025-04-17T12:14:07.366Z DEBUG 1 --- [auth-service] [           main] s.s.authservice.AuthServiceApplication   : Running with Spring Boot v3.4.4, Spring v6.2.5
+2025-04-17 19:14:07.367 | 2025-04-17T12:14:07.367Z  INFO 1 --- [auth-service] [           main] s.s.authservice.AuthServiceApplication   : The following 1 profile is active: "docker"
+2025-04-17 19:14:10.000 | 2025-04-17T12:14:09.988Z  INFO 1 --- [auth-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-04-17 19:14:10.119 | 2025-04-17T12:14:10.119Z  INFO 1 --- [auth-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 106 ms. Found 1 JPA repository interface.
+2025-04-17 19:14:12.219 | 2025-04-17T12:14:12.219Z  INFO 1 --- [auth-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8085 (http)
+2025-04-17 19:14:12.292 | 2025-04-17T12:14:12.292Z  INFO 1 --- [auth-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-04-17 19:14:12.336 | 2025-04-17T12:14:12.336Z  INFO 1 --- [auth-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.39]
+2025-04-17 19:14:12.413 | 2025-04-17T12:14:12.413Z  INFO 1 --- [auth-service] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-04-17 19:14:12.416 | 2025-04-17T12:14:12.416Z  INFO 1 --- [auth-service] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4945 ms
+2025-04-17 19:14:13.160 | 2025-04-17T12:14:13.158Z  INFO 1 --- [auth-service] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-04-17 19:14:13.238 | 2025-04-17T12:14:13.237Z  INFO 1 --- [auth-service] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.11.Final
+2025-04-17 19:14:13.345 | 2025-04-17T12:14:13.345Z  INFO 1 --- [auth-service] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-04-17 19:14:14.249 | 2025-04-17T12:14:14.249Z  INFO 1 --- [auth-service] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-04-17 19:14:14.435 | 2025-04-17T12:14:14.435Z  INFO 1 --- [auth-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-04-17 19:14:14.954 | 2025-04-17T12:14:14.953Z  INFO 1 --- [auth-service] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7ef9c8a5
+2025-04-17 19:14:14.960 | 2025-04-17T12:14:14.959Z  INFO 1 --- [auth-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-04-17 19:14:15.066 | 2025-04-17T12:14:15.065Z  WARN 1 --- [auth-service] [           main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-04-17 19:14:15.121 | 2025-04-17T12:14:15.120Z  INFO 1 --- [auth-service] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+2025-04-17 19:14:15.121 | 	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+2025-04-17 19:14:15.121 | 	Database driver: undefined/unknown
+2025-04-17 19:14:15.121 | 	Database version: 14.17
+2025-04-17 19:14:15.121 | 	Autocommit mode: undefined/unknown
+2025-04-17 19:14:15.121 | 	Isolation level: undefined/unknown
+2025-04-17 19:14:15.121 | 	Minimum pool size: undefined/unknown
+2025-04-17 19:14:15.121 | 	Maximum pool size: undefined/unknown
+2025-04-17 19:14:16.630 | 2025-04-17T12:14:16.629Z  INFO 1 --- [auth-service] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-04-17 19:14:16.739 | Hibernate: 
+2025-04-17 19:14:16.739 |     create table users (
+2025-04-17 19:14:16.739 |         id bigint generated by default as identity,
+2025-04-17 19:14:16.739 |         created_at timestamp(6),
+2025-04-17 19:14:16.739 |         email varchar(255),
+2025-04-17 19:14:16.739 |         first_name varchar(255),
+2025-04-17 19:14:16.739 |         last_name varchar(255),
+2025-04-17 19:14:16.739 |         password varchar(255) not null,
+2025-04-17 19:14:16.739 |         password_changed boolean not null,
+2025-04-17 19:14:16.739 |         role varchar(255) not null check (role in ('ADMIN','MODERATOR','READER')),
+2025-04-17 19:14:16.739 |         updated_at timestamp(6),
+2025-04-17 19:14:16.739 |         username varchar(255) not null,
+2025-04-17 19:14:16.739 |         primary key (id)
+2025-04-17 19:14:16.739 |     )
+2025-04-17 19:14:16.769 | Hibernate: 
+2025-04-17 19:14:16.769 |     alter table if exists users 
+2025-04-17 19:14:16.769 |        drop constraint if exists UK6dotkott2kjsp8vw4d0m25fb7
+2025-04-17 19:14:16.795 | 2025-04-17T12:14:16.795Z  WARN 1 --- [auth-service] [           main] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2025-04-17 19:14:16.795 | 2025-04-17T12:14:16.795Z  WARN 1 --- [auth-service] [           main] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "uk6dotkott2kjsp8vw4d0m25fb7" of relation "users" does not exist, skipping
+2025-04-17 19:14:16.802 | Hibernate: 
+2025-04-17 19:14:16.802 |     alter table if exists users 
+2025-04-17 19:14:16.802 |        add constraint UK6dotkott2kjsp8vw4d0m25fb7 unique (email)
+2025-04-17 19:14:16.834 | Hibernate: 
+2025-04-17 19:14:16.834 |     alter table if exists users 
+2025-04-17 19:14:16.834 |        drop constraint if exists UKr43af9ap4edm43mmtq01oddj6
+2025-04-17 19:14:16.857 | 2025-04-17T12:14:16.856Z  WARN 1 --- [auth-service] [           main] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2025-04-17 19:14:16.857 | 2025-04-17T12:14:16.857Z  WARN 1 --- [auth-service] [           main] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "ukr43af9ap4edm43mmtq01oddj6" of relation "users" does not exist, skipping
+2025-04-17 19:14:16.857 | Hibernate: 
+2025-04-17 19:14:16.857 |     alter table if exists users 
+2025-04-17 19:14:16.857 |        add constraint UKr43af9ap4edm43mmtq01oddj6 unique (username)
+2025-04-17 19:14:16.875 | 2025-04-17T12:14:16.875Z  INFO 1 --- [auth-service] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-04-17 19:14:17.916 | 2025-04-17T12:14:17.916Z DEBUG 1 --- [auth-service] [           main] s.s.a.security.JwtAuthorizationFilter    : Filter 'jwtAuthorizationFilter' configured for use
+2025-04-17 19:14:18.177 | 2025-04-17T12:14:18.177Z  INFO 1 --- [auth-service] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2025-04-17 19:14:18.483 | 2025-04-17T12:14:18.472Z  WARN 1 --- [auth-service] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-04-17 19:14:19.861 | 2025-04-17T12:14:19.861Z  INFO 1 --- [auth-service] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 3 endpoints beneath base path '/actuator'
+2025-04-17 19:14:21.298 | 2025-04-17T12:14:21.298Z  INFO 1 --- [auth-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8085 (http) with context path '/'
+2025-04-17 19:14:21.397 | 2025-04-17T12:14:21.394Z  INFO 1 --- [auth-service] [           main] s.s.authservice.AuthServiceApplication   : Started AuthServiceApplication in 14.854 seconds (process running for 15.667)
+2025-04-17 19:14:21.994 | Hibernate: 
+2025-04-17 19:14:21.994 |     select
+2025-04-17 19:14:21.994 |         u1_0.id 
+2025-04-17 19:14:21.994 |     from
+2025-04-17 19:14:21.994 |         users u1_0 
+2025-04-17 19:14:21.994 |     where
+2025-04-17 19:14:21.994 |         u1_0.username=? 
+2025-04-17 19:14:21.994 |     fetch
+2025-04-17 19:14:21.994 |         first ? rows only
+2025-04-17 19:14:22.254 | Hibernate: 
+2025-04-17 19:14:22.254 |     insert 
+2025-04-17 19:14:22.254 |     into
+2025-04-17 19:14:22.254 |         users
+2025-04-17 19:14:22.254 |         (created_at, email, first_name, last_name, password, password_changed, role, updated_at, username) 
+2025-04-17 19:14:22.254 |     values
+2025-04-17 19:14:22.254 |         (?, ?, ?, ?, ?, ?, ?, ?, ?)
+2025-04-17 19:14:22.283 | Default admin user created successfully
+2025-04-17 19:14:26.210 | 2025-04-17T12:14:26.210Z  INFO 1 --- [auth-service] [nio-8085-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-04-17 19:14:26.211 | 2025-04-17T12:14:26.210Z  INFO 1 --- [auth-service] [nio-8085-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-04-17 19:14:26.213 | 2025-04-17T12:14:26.212Z  INFO 1 --- [auth-service] [nio-8085-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms

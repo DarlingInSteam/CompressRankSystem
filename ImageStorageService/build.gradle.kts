@@ -26,7 +26,11 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("com.h2database:h2")
+	implementation("org.postgresql:postgresql") // PostgreSQL вместо H2
+	
+	// Оставляем H2 для тестирования
+	testImplementation("com.h2database:h2")
+	
 	implementation("io.minio:minio:8.5.4")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0")
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
