@@ -1,15 +1,16 @@
 package com.shadowshiftstudio.compressionservice.controller;
 
-import com.shadowshiftstudio.compressionservice.entity.ImageStatisticsEntity;
 import com.shadowshiftstudio.compressionservice.model.Image;
 import com.shadowshiftstudio.compressionservice.service.compression.CompressionService;
-import com.shadowshiftstudio.compressionservice.service.image.ImageStatisticsService;
 import com.shadowshiftstudio.compressionservice.service.ImageStorageService;
+import com.shadowshiftstudio.compressionservice.service.future.StatisticsIntegrationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,18 +23,20 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Controller
 @Tag(name = "Веб-интерфейс", description = "Контроллер для работы с HTML-страницами веб-интерфейса")
 public class WebController {
 
+    private static final Logger logger = LoggerFactory.getLogger(WebController.class);
+    
     private final ImageStorageService imageStorageService;
     private final CompressionService compressionService;
-    private final ImageStatisticsService statisticsService;
+    private final StatisticsIntegrationService statisticsService;
 
     @Autowired
-    public WebController(ImageStorageService imageStorageService, CompressionService compressionService, ImageStatisticsService statisticsService) {
+    public WebController(ImageStorageService imageStorageService, CompressionService compressionService, 
+                        StatisticsIntegrationService statisticsService) {
         this.imageStorageService = imageStorageService;
         this.compressionService = compressionService;
         this.statisticsService = statisticsService;
@@ -49,7 +52,7 @@ public class WebController {
             @Parameter(description = "Поисковый запрос для фильтрации изображений по имени") 
             @RequestParam(required = false) String search,
             
-            @Parameter(description = "Способ сортировки изображений (views, downloads, popularity, size_asc, size_desc)") 
+            @Parameter(description = "Способ сортировки изображений (size_asc, size_desc)") 
             @RequestParam(required = false) String sortBy,
             
             @Parameter(description = "Фильтр по дате загрузки (today, week, month, year)") 
@@ -125,61 +128,7 @@ public class WebController {
         
         Map<String, Image> sortedImagesMap;
         
-        if ("views".equals(sortBy)) {
-            List<ImageStatisticsEntity> mostViewedImages = statisticsService.getMostViewedImages();
-            
-            List<String> orderedIds = mostViewedImages.stream()
-                .map(ImageStatisticsEntity::getImageId)
-                .collect(Collectors.toList());
-            
-            sortedImagesMap = new LinkedHashMap<>();
-            
-            for (String id : orderedIds) {
-                if (filteredImagesMap.containsKey(id)) {
-                    sortedImagesMap.put(id, filteredImagesMap.get(id));
-                    filteredImagesMap.remove(id);
-                }
-            }
-            
-            sortedImagesMap.putAll(filteredImagesMap);
-        }
-        else if ("downloads".equals(sortBy)) {
-            List<ImageStatisticsEntity> mostDownloadedImages = statisticsService.getMostDownloadedImages();
-            
-            List<String> orderedIds = mostDownloadedImages.stream()
-                .map(ImageStatisticsEntity::getImageId)
-                .collect(Collectors.toList());
-            
-            sortedImagesMap = new LinkedHashMap<>();
-            
-            for (String id : orderedIds) {
-                if (filteredImagesMap.containsKey(id)) {
-                    sortedImagesMap.put(id, filteredImagesMap.get(id));
-                    filteredImagesMap.remove(id);
-                }
-            }
-            
-            sortedImagesMap.putAll(filteredImagesMap);
-        }
-        else if ("popularity".equals(sortBy)) {
-            List<ImageStatisticsEntity> popularImages = statisticsService.getMostPopularImages();
-            
-            List<String> orderedIds = popularImages.stream()
-                .map(ImageStatisticsEntity::getImageId)
-                .collect(Collectors.toList());
-            
-            sortedImagesMap = new LinkedHashMap<>();
-            
-            for (String id : orderedIds) {
-                if (filteredImagesMap.containsKey(id)) {
-                    sortedImagesMap.put(id, filteredImagesMap.get(id));
-                    filteredImagesMap.remove(id);
-                }
-            }
-            
-            sortedImagesMap.putAll(filteredImagesMap);
-        }
-        else if ("size_asc".equals(sortBy)) {
+        if ("size_asc".equals(sortBy)) {
             sortedImagesMap = new TreeMap<>(
                 Comparator.<String>comparingLong(id -> {
                     Image img = filteredImagesMap.get(id);
@@ -198,6 +147,7 @@ public class WebController {
             sortedImagesMap.putAll(filteredImagesMap);
         }
         else {
+            // Сортировка по дате загрузки (от новых к старым) по умолчанию
             sortedImagesMap = new TreeMap<>(
                 Comparator.<String>comparingLong(id -> {
                     Image img = filteredImagesMap.get(id);
@@ -208,16 +158,12 @@ public class WebController {
             sortedImagesMap.putAll(filteredImagesMap);
         }
         
-        Map<String, ImageStatisticsEntity> imageStatistics = new HashMap<>();
-        for (String imageId : sortedImagesMap.keySet()) {
-            ImageStatisticsEntity stats = statisticsService.getImageStatistics(imageId);
-            if (stats != null) {
-                imageStatistics.put(imageId, stats);
-            }
-        }
+        // Примечание: статистические сортировки (views, downloads, popularity) 
+        // теперь обрабатываются в микросервисе статистики
+        logger.debug("Отображение главной страницы. Статистические данные теперь доступны через микросервис StatisticsRankingService.");
         
         model.addAttribute("images", sortedImagesMap);
-        model.addAttribute("statistics", imageStatistics);
+        model.addAttribute("statisticsNote", "Статистика доступна через сервис StatisticsRankingService");
         model.addAttribute("search", search);
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("dateFilter", dateFilter);
@@ -276,7 +222,8 @@ public class WebController {
             return "redirect:/";
         }
         
-        statisticsService.incrementViewCount(id);
+        // Примечание: учет просмотров изображений теперь проводится в микросервисе статистики
+        logger.debug("Просмотр изображения {}. Учет статистики просмотров производится в микросервисе StatisticsRankingService.", id);
         
         model.addAttribute("image", image);
         
@@ -291,18 +238,7 @@ public class WebController {
         }
         
         model.addAttribute("compressedVersions", compressedVersions);
-        
-        ImageStatisticsEntity statistics = statisticsService.getImageStatistics(id);
-        model.addAttribute("statistics", statistics);
-        
-        Map<String, ImageStatisticsEntity> compressedStatistics = new HashMap<>();
-        for (String compressedId : compressedVersions.keySet()) {
-            ImageStatisticsEntity stats = statisticsService.getImageStatistics(compressedId);
-            if (stats != null) {
-                compressedStatistics.put(compressedId, stats);
-            }
-        }
-        model.addAttribute("compressedStatistics", compressedStatistics);
+        model.addAttribute("statisticsMessage", statisticsService.getStatisticsStatus());
         
         return "view";
     }

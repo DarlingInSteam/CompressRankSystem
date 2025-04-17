@@ -24,34 +24,10 @@ RUN ./gradlew bootJar --no-daemon -Dorg.gradle.java.home=/opt/java/openjdk
 FROM eclipse-temurin:21-jre
 VOLUME /tmp
 
-# Install WebP tools and its dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    webp \
-    libwebp-dev \
-    libgdiplus \
-    ca-certificates \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Create directory for webp binaries
-RUN mkdir -p /app/webp_binaries && \
-    cp /usr/bin/cwebp /app/webp_binaries/ && \
-    chmod +x /app/webp_binaries/cwebp
-
-# Set environment variable for WebP binary path
-ENV WEBP_BINARY_PATH=/app/webp_binaries/cwebp
-
-# Create data directory
-RUN mkdir -p /app/data
-
 # Copy the built jar file
 COPY --from=build /workspace/app/build/libs/*.jar app.jar
 
-# Create volume for persistent data
-VOLUME /app/data
-
-EXPOSE 8080
+EXPOSE 8083
 
 # Run the application
 ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app.jar"]

@@ -1,9 +1,8 @@
 package com.shadowshiftstudio.compressionservice.controller;
 
-import com.shadowshiftstudio.compressionservice.entity.ImageStatisticsEntity;
 import com.shadowshiftstudio.compressionservice.model.Image;
-import com.shadowshiftstudio.compressionservice.service.image.ImageStatisticsService;
 import com.shadowshiftstudio.compressionservice.service.client.ImageStorageClient;
+import com.shadowshiftstudio.compressionservice.service.future.StatisticsIntegrationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -11,6 +10,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -22,21 +23,22 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/images")
 @Tag(name = "Image Management", description = "API for uploading, retrieving and managing images")
 public class ImageController {
 
+    private static final Logger logger = LoggerFactory.getLogger(ImageController.class);
+
     @Value("${storage.service.url:http://localhost:8081}")
     private String storageServiceUrl;
     
     private final ImageStorageClient imageStorageClient;
-    private final ImageStatisticsService statisticsService;
+    private final StatisticsIntegrationService statisticsService;
 
     @Autowired
-    public ImageController(ImageStorageClient imageStorageClient, ImageStatisticsService statisticsService) {
+    public ImageController(ImageStorageClient imageStorageClient, StatisticsIntegrationService statisticsService) {
         this.imageStorageClient = imageStorageClient;
         this.statisticsService = statisticsService;
     }
@@ -115,11 +117,8 @@ public class ImageController {
                 return ResponseEntity.notFound().build();
             }
 
-            statisticsService.incrementViewCount(id);
-            
-            if (download) {
-                statisticsService.incrementDownloadCount(id);
-            }
+            // Примечание: учет просмотров и скачиваний изображений теперь проводится в микросервисе статистики
+            logger.debug("Запрос изображения {}. Учет статистики просмотров и скачиваний реализован в микросервисе StatisticsRankingService.", id);
             
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.parseMediaType(metadata.getContentType()));
@@ -240,17 +239,9 @@ public class ImageController {
     public ResponseEntity<Map<String, Object>> getAllImageStatistics() {
         try {
             Map<String, Object> response = new HashMap<>();
-            List<ImageStatisticsEntity> allStats = statisticsService.getAllImageStatistics();
+            response.put("message", statisticsService.getStatisticsStatus());
+            response.put("status", "Статистика доступна через микросервис StatisticsRankingService");
             
-            Map<String, Map<String, Integer>> stats = new HashMap<>();
-            for (ImageStatisticsEntity stat : allStats) {
-                Map<String, Integer> imageStat = new HashMap<>();
-                imageStat.put("viewCount", stat.getViewCount());
-                imageStat.put("downloadCount", stat.getDownloadCount());
-                stats.put(stat.getImageId(), imageStat);
-            }
-            
-            response.put("statistics", stats);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             e.printStackTrace();

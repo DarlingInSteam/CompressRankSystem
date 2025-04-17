@@ -14,7 +14,6 @@ spring:
       database: 0
   cloud:
     gateway:
-      # Removing duplicate CORS configuration since it's handled in SecurityConfig.java
       routes:
         # Маршруты для сервиса хранения изображений (ImageStorageService)
         - id: image-storage-api
@@ -67,6 +66,50 @@ spring:
               args:
                 name: compressionCircuitBreaker
                 fallbackUri: forward:/fallback/compression
+                
+        # Маршруты для сервиса статистики (StatisticsRankingService)
+        - id: statistics-api
+          uri: ${STATISTICS_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/statistics/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@ipKeyResolver}"
+                redis-rate-limiter.replenishRate: 50
+                redis-rate-limiter.burstCapacity: 100
+            - name: Retry
+              args:
+                retries: 3
+                statuses: BAD_GATEWAY,GATEWAY_TIMEOUT,SERVICE_UNAVAILABLE
+                methods: GET,POST
+                backoff:
+                  firstBackoff: 50ms
+                  maxBackoff: 500ms
+                  factor: 2
+                  basedOnPreviousValue: false
+            - name: CircuitBreaker
+              args:
+                name: statisticsCircuitBreaker
+                fallbackUri: forward:/fallback/statistics
+        
+        # Совместимость для запросов старого формата к сервису статистики
+        - id: statistics-api-compat
+          uri: ${STATISTICS_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/images/statistics/**
+          filters:
+            - RewritePath=/api/images/statistics/(?<segment>.*), /api/statistics/$\{segment}
+            - RewritePath=/api/images/statistics$, /api/statistics
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@ipKeyResolver}"
+                redis-rate-limiter.replenishRate: 50
+                redis-rate-limiter.burstCapacity: 100
+            - name: CircuitBreaker
+              args:
+                name: statisticsCircuitBreaker
+                fallbackUri: forward:/fallback/statistics
 
         # Swagger UI маршрут для документации API
         - id: openapi
@@ -124,4 +167,6 @@ resilience4j:
       imageStorageCircuitBreaker:
         baseConfig: default
       compressionCircuitBreaker:
+        baseConfig: default
+      statisticsCircuitBreaker:
         baseConfig: default
