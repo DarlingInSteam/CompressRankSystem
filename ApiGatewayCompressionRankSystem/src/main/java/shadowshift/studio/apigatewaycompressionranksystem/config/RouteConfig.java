@@ -34,7 +34,6 @@ public class RouteConfig {
     @Bean
     public RouteLocator additionalRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
-                // Маршрут для объединения данных метрик от обоих сервисов (пример агрегации)
                 .route("aggregated-metrics", r -> r
                         .path("/api/metrics/aggregated")
                         .filters(f -> f
@@ -50,14 +49,12 @@ public class RouteConfig {
                         .uri(imageStorageServiceUrl)
                 )
                 
-                // Маршрут для проверки статуса всех сервисов
                 .route("system-health", r -> r
                         .path("/api/system/health")
                         .filters(f -> f.setResponseHeader("X-Response-Source", "API Gateway"))
                         .uri("forward:/actuator/health")
                 )
                 
-                // Маршрут для обработки загруженных файлов с метаданными
                 .route("upload-with-metadata", r -> r
                         .path("/api/upload/with-metadata")
                         .and()
@@ -70,7 +67,6 @@ public class RouteConfig {
                         .uri(imageStorageServiceUrl)
                 )
                 
-                // Дополнительный маршрут для обработки ошибок
                 .route("fallback-routes", r -> r
                         .path("/fallback/**")
                         .filters(f -> f.setResponseHeader("X-Fallback", "true"))

@@ -92,6 +92,7 @@ services:
     environment:
       - IMAGE_STORAGE_SERVICE_URL=http://image-storage:8081
       - COMPRESSION_SERVICE_URL=http://compression-service:8080
+      - AUTH_SERVICE_URL=http://auth-service:8085
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     depends_on:
@@ -104,6 +105,8 @@ services:
       image-storage:
         condition: service_started
       compression-service:
+        condition: service_started
+      auth-service:
         condition: service_started
     networks:
       - compress-rank-network
@@ -219,6 +222,34 @@ services:
       - compress-rank-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # Сервис аутентификации
+  auth-service:
+    build:
+      context: ./AuthService
+    container_name: compress-rank-auth-service
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/auth_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - compress-rank-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 5
