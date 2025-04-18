@@ -1,6 +1,6 @@
 import React, { useState, useMemo, createContext, useContext, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { CssBaseline, Box, ThemeProvider, createTheme, PaletteMode } from '@mui/material';
+import { CssBaseline, Box, ThemeProvider, createTheme, PaletteMode, GlobalStyles as MuiGlobalStyles } from '@mui/material';
 
 // Компоненты
 import Navigation from './components/Navigation';
@@ -16,6 +16,32 @@ import AdminPage from './pages/admin/AdminPage';
 
 // Контекст авторизации
 import { AuthProvider, UserRole } from './contexts/AuthContext';
+
+// Глобальные стили для изолированной анимации
+import './App.css';
+
+// Создаем глобальные стили для анимации уведомлений с использованием MUI GlobalStyles
+const GlobalStyles = () => (
+  <MuiGlobalStyles
+    styles={`
+      @keyframes pulseNotification {
+        0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4); }
+        70% { box-shadow: 0 0 0 6px rgba(211, 47, 47, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
+      }
+      
+      .notification-badge .MuiBadge-badge {
+        animation: pulseNotification 1.5s infinite;
+      }
+      
+      @keyframes pulseAnimation {
+        0% { opacity: 0.6; transform: translateX(-100%); }
+        50% { opacity: 0.8; transform: translateX(300%); }
+        100% { opacity: 0.6; transform: translateX(1000%); }
+      }
+    `}
+  />
+);
 
 // Создание контекста для темы
 export const ColorModeContext = createContext({
@@ -118,6 +144,8 @@ const App: React.FC = () => {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
+        {/* Добавляем глобальные стили здесь */}
+        <GlobalStyles />
         <AuthProvider>
           <Router>
             <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>

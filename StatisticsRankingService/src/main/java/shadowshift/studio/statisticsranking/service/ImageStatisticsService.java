@@ -77,6 +77,7 @@ public class ImageStatisticsService {
      * @return список объектов статистики для всех изображений
      */
     public List<ImageStatistics> getAllImageStatistics() {
+        logger.info("Getting statistics for all images");
         return statisticsRepository.findAll();
     }
 }

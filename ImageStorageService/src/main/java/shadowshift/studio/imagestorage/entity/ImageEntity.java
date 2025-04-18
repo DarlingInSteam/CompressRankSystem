@@ -36,6 +36,8 @@ public class ImageEntity {
     private LocalDateTime lastAccessed;
     
     private int accessCount;
+    
+    private String userId;
 
     public String getId() {
         return id;
@@ -119,5 +121,13 @@ public class ImageEntity {
     
     public void incrementAccessCount() {
         this.accessCount++;
+    }
+    
+    public String getUserId() {
+        return userId;
+    }
+    
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

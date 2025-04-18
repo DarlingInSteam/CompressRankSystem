@@ -15,6 +15,7 @@ public class Image {
     private LocalDateTime uploadedAt;
     private LocalDateTime lastAccessed;
     private int accessCount;
+    private String userId;
 
     public Image(String originalFilename, String contentType, long size) {
         this.id = UUID.randomUUID().toString();
@@ -114,5 +115,13 @@ public class Image {
 
     public void incrementAccessCount() {
         this.accessCount++;
+    }
+    
+    public String getUserId() {
+        return userId;
+    }
+    
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

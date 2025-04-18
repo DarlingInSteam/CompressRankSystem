@@ -161,6 +161,16 @@ public class UserService {
     }
     
     /**
+     * Get user by username
+     */
+    @Transactional(readOnly = true)
+    public UserDto getUserByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
+        return convertToDto(user);
+    }
+    
+    /**
      * Delete user by ID
      */
     @Transactional

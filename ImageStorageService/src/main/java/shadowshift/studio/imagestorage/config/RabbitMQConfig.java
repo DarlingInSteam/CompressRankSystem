@@ -1,7 +1,9 @@
 package shadowshift.studio.imagestorage.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -70,6 +72,11 @@ public class RabbitMQConfig {
     @Bean
     public MessageConverter jsonMessageConverter(ClassMapper classMapper) {
         ObjectMapper mapper = new ObjectMapper();
+
+        // Register JavaTimeModule to handle Java 8 date/time types
+        mapper.registerModule(new JavaTimeModule());
+        // Disable writing dates as timestamps to properly serialize LocalDateTime
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         mapper.registerSubtypes(new NamedType(shadowshift.studio.imagestorage.dto.message.ImageMessage.class,
                 "com.shadowshiftstudio.compressionservice.dto.message.ImageMessage"));

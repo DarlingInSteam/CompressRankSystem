@@ -37,6 +37,12 @@ public class JwtUtils {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", user.getRole().name());
         
+        // Add username to claims
+        claims.put("username", user.getUsername());
+        
+        // Add userId explicitly for easier access
+        claims.put("userId", String.valueOf(user.getId()));
+        
         // Add user details if available
         if (user.getFirstName() != null) {
             claims.put("firstName", user.getFirstName());

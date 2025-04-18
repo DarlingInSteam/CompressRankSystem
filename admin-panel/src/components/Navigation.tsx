@@ -810,14 +810,11 @@ const Navigation: React.FC = () => {
                   <Badge 
                     badgeContent={notifications.length} 
                     color="error"
+                    className="notification-badge"
                     sx={{
                       '& .MuiBadge-badge': {
-                        animation: notifications.length > 0 ? 'pulse 1.5s infinite' : 'none',
-                        '@keyframes pulse': {
-                          '0%': { boxShadow: '0 0 0 0 rgba(211, 47, 47, 0.4)' },
-                          '70%': { boxShadow: '0 0 0 6px rgba(211, 47, 47, 0)' },
-                          '100%': { boxShadow: '0 0 0 0 rgba(211, 47, 47, 0)' }
-                        }
+                        // Удаляем встроенную анимацию, которая влияет на другие элементы
+                        // Вместо этого используем CSS-класс notification-badge, определенный в ProfilePage
                       }
                     }}
                   >

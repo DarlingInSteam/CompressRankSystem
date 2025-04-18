@@ -39,7 +39,9 @@ import {
   Refresh as RestoreIcon,
   Info as InfoIcon,
   Check as CheckIcon,
-  Share as ShareIcon
+  Share as ShareIcon,
+  Storage as StorageIcon,
+  TrendingUp as TrendingUpIcon
 } from '@mui/icons-material';
 
 import ImageService from '../../services/image.service';
@@ -307,7 +309,7 @@ const ImageDetailPage: React.FC = () => {
               gap: 2
             }}>
               <Typography variant="body1">
-                Загружено: {image && new Date(image.uploadedAt).toLocaleString()}
+                Загружено: {image && image.uploadedAt ? new Date(image.uploadedAt).toLocaleString() : 'Дата не указана'}
               </Typography>
               {image && image.compressionLevel > 0 && (
                 <Chip 
@@ -488,21 +490,7 @@ const ImageDetailPage: React.FC = () => {
                 </Box>
                 <Box sx={{ p: 3 }}>
                   <Grid container spacing={2} sx={{ mb: 3 }}>
-                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                      <Box sx={{ 
-                        p: 2, 
-                        borderRadius: '12px', 
-                        bgcolor: theme => 
-                          alpha(theme.palette.primary.main, theme.palette.mode === 'light' ? 0.05 : 0.15),
-                        height: '100%'
-                      }}>
-                        <Typography variant="body2" color="text.secondary">Размер файла</Typography>
-                        <Typography variant="body1" fontWeight="medium" sx={{ mt: 0.5 }}>
-                          {image && formatFileSize(image.size)}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                    <Grid component={"div"} container spacing={12} sx={{ mb: 6 }}>
                       <Box sx={{ 
                         p: 2, 
                         borderRadius: '12px', 
@@ -510,28 +498,14 @@ const ImageDetailPage: React.FC = () => {
                           alpha(theme.palette.info.main, theme.palette.mode === 'light' ? 0.05 : 0.15),
                         height: '100%'
                       }}>
-                        <Typography variant="body2" color="text.secondary">Тип файла</Typography>
-                        <Typography variant="body1" fontWeight="medium" sx={{ mt: 0.5 }}>
-                          {image && image.contentType.split('/')[1].toUpperCase()}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                      <Box sx={{ 
-                        p: 2, 
-                        borderRadius: '12px', 
-                        bgcolor: theme => 
-                          alpha(theme.palette.secondary.main, theme.palette.mode === 'light' ? 0.05 : 0.15),
-                        height: '100%'
-                      }}>
                         <Typography variant="body2" color="text.secondary">Просмотры</Typography>
                         <Typography variant="body1" fontWeight="medium" sx={{ mt: 0.5, display: 'flex', alignItems: 'center' }}>
                           <VisibilityIcon fontSize="small" sx={{ mr: 0.5, opacity: 0.7 }} />
-                          {image && image.accessCount}
+                          {imageStatistics ? imageStatistics.viewCount : 0}
                         </Typography>
                       </Box>
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                    <Grid component={"div"} container spacing={12} sx={{ mb: 6 }}>
                       <Box sx={{ 
                         p: 2, 
                         borderRadius: '12px', 
@@ -546,7 +520,7 @@ const ImageDetailPage: React.FC = () => {
                         </Typography>
                       </Box>
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Grid component={"div"} container spacing={12} sx={{ mb: 6 }}>
                       <Box sx={{ 
                         p: 2, 
                         borderRadius: '12px', 
@@ -555,16 +529,40 @@ const ImageDetailPage: React.FC = () => {
                         height: '100%'
                       }}>
                         <Typography variant="body2" color="text.secondary">Статус сжатия</Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
-                          {image && (
-                            <Chip 
-                              label={image.compressionLevel > 0 ? `Сжато ${image.compressionLevel}%` : "Оригинал"} 
-                              color={getCompressionColor(image.compressionLevel)}
-                              size="small"
-                              sx={{ fontWeight: 'medium', fontSize: '0.75rem' }}
-                            />
-                          )}
-                        </Box>
+                        <Typography variant="body1" fontWeight="medium" sx={{ mt: 0.5, display: 'flex', alignItems: 'center' }}>
+                          <CompressIcon fontSize="small" sx={{ mr: 0.5, opacity: 0.7 }} />
+                          {image && image.compressionLevel > 0 ? `${image.compressionLevel}%` : 'Оригинал'}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid component={"div"} container spacing={12} sx={{ mb: 6 }}>
+                      <Box sx={{ 
+                        p: 2, 
+                        borderRadius: '12px', 
+                        bgcolor: theme => 
+                          alpha(theme.palette.warning.main, theme.palette.mode === 'light' ? 0.05 : 0.15),
+                        height: '100%'
+                      }}>
+                        <Typography variant="body2" color="text.secondary">Размер файла</Typography>
+                        <Typography variant="body1" fontWeight="medium" sx={{ mt: 0.5, display: 'flex', alignItems: 'center' }}>
+                          <StorageIcon fontSize="small" sx={{ mr: 0.5, opacity: 0.7 }} />
+                          {image && formatFileSize(image.size)}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid component={"div"} container spacing={12} sx={{ mb: 6 }}>
+                      <Box sx={{ 
+                        p: 2, 
+                        borderRadius: '12px', 
+                        bgcolor: theme => 
+                          alpha(theme.palette.secondary.main, theme.palette.mode === 'light' ? 0.05 : 0.15),
+                        height: '100%'
+                      }}>
+                        <Typography variant="body2" color="text.secondary">Популярность</Typography>
+                        <Typography variant="body1" fontWeight="medium" sx={{ mt: 0.5, display: 'flex', alignItems: 'center' }}>
+                          <TrendingUpIcon fontSize="small" sx={{ mr: 0.5, opacity: 0.7 }} />
+                          {imageStatistics && imageStatistics.popularityScore ? Math.round(imageStatistics.popularityScore * 100) / 100 : 0}
+                        </Typography>
                       </Box>
                     </Grid>
                   </Grid>

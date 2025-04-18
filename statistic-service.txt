@@ -1,0 +1,84 @@
+2025-04-19 03:29:21.029 | 
+2025-04-19 03:29:21.031 |   .   ____          _            __ _ _
+2025-04-19 03:29:21.031 |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+2025-04-19 03:29:21.031 | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+2025-04-19 03:29:21.031 |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+2025-04-19 03:29:21.031 |   '  |____| .__|_| |_|_| |_\__, | / / / /
+2025-04-19 03:29:21.031 |  =========|_|==============|___/=/_/_/_/
+2025-04-19 03:29:21.031 | 
+2025-04-19 03:29:21.037 |  :: Spring Boot ::                (v3.4.4)
+2025-04-19 03:29:21.047 | 
+2025-04-19 03:29:21.320 | 2025-04-18T20:29:21.318Z  INFO 1 --- [statistics-ranking-service] [           main] .s.s.StatisticsRankingServiceApplication : Starting StatisticsRankingServiceApplication v0.0.1-SNAPSHOT using Java 21.0.6 with PID 1 (/app.jar started by root in /)
+2025-04-19 03:29:21.321 | 2025-04-18T20:29:21.321Z DEBUG 1 --- [statistics-ranking-service] [           main] .s.s.StatisticsRankingServiceApplication : Running with Spring Boot v3.4.4, Spring v6.2.5
+2025-04-19 03:29:21.323 | 2025-04-18T20:29:21.322Z  INFO 1 --- [statistics-ranking-service] [           main] .s.s.StatisticsRankingServiceApplication : The following 1 profile is active: "docker"
+2025-04-19 03:29:24.500 | 2025-04-18T20:29:24.499Z  INFO 1 --- [statistics-ranking-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-04-19 03:29:24.620 | 2025-04-18T20:29:24.620Z  INFO 1 --- [statistics-ranking-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 91 ms. Found 1 JPA repository interface.
+2025-04-19 03:29:26.333 | 2025-04-18T20:29:26.332Z  INFO 1 --- [statistics-ranking-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8083 (http)
+2025-04-19 03:29:26.365 | 2025-04-18T20:29:26.365Z  INFO 1 --- [statistics-ranking-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-04-19 03:29:26.366 | 2025-04-18T20:29:26.366Z  INFO 1 --- [statistics-ranking-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.39]
+2025-04-19 03:29:26.406 | 2025-04-18T20:29:26.406Z  INFO 1 --- [statistics-ranking-service] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-04-19 03:29:26.411 | 2025-04-18T20:29:26.409Z  INFO 1 --- [statistics-ranking-service] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4901 ms
+2025-04-19 03:29:27.161 | 2025-04-18T20:29:27.160Z  INFO 1 --- [statistics-ranking-service] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-04-19 03:29:27.268 | 2025-04-18T20:29:27.268Z  INFO 1 --- [statistics-ranking-service] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.11.Final
+2025-04-19 03:29:27.325 | 2025-04-18T20:29:27.323Z  INFO 1 --- [statistics-ranking-service] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-04-19 03:29:27.859 | 2025-04-18T20:29:27.858Z  INFO 1 --- [statistics-ranking-service] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-04-19 03:29:27.911 | 2025-04-18T20:29:27.911Z  INFO 1 --- [statistics-ranking-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-04-19 03:29:28.264 | 2025-04-18T20:29:28.262Z  INFO 1 --- [statistics-ranking-service] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@3c62be3c
+2025-04-19 03:29:28.267 | 2025-04-18T20:29:28.266Z  INFO 1 --- [statistics-ranking-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-04-19 03:29:28.366 | 2025-04-18T20:29:28.366Z  WARN 1 --- [statistics-ranking-service] [           main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-04-19 03:29:28.395 | 2025-04-18T20:29:28.395Z  INFO 1 --- [statistics-ranking-service] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+2025-04-19 03:29:28.395 | 	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+2025-04-19 03:29:28.395 | 	Database driver: undefined/unknown
+2025-04-19 03:29:28.395 | 	Database version: 14.17
+2025-04-19 03:29:28.395 | 	Autocommit mode: undefined/unknown
+2025-04-19 03:29:28.395 | 	Isolation level: undefined/unknown
+2025-04-19 03:29:28.395 | 	Minimum pool size: undefined/unknown
+2025-04-19 03:29:28.395 | 	Maximum pool size: undefined/unknown
+2025-04-19 03:29:29.929 | 2025-04-18T20:29:29.928Z  INFO 1 --- [statistics-ranking-service] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-04-19 03:29:30.116 | 2025-04-18T20:29:30.115Z  INFO 1 --- [statistics-ranking-service] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-04-19 03:29:30.889 | 2025-04-18T20:29:30.889Z  INFO 1 --- [statistics-ranking-service] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-04-19 03:29:33.095 | 2025-04-18T20:29:33.095Z  WARN 1 --- [statistics-ranking-service] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-04-19 03:29:34.493 | 2025-04-18T20:29:34.493Z  INFO 1 --- [statistics-ranking-service] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2025-04-19 03:29:34.657 | 2025-04-18T20:29:34.656Z  INFO 1 --- [statistics-ranking-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8083 (http) with context path '/'
+2025-04-19 03:29:34.661 | 2025-04-18T20:29:34.660Z  INFO 1 --- [statistics-ranking-service] [           main] o.s.a.r.c.CachingConnectionFactory       : Attempting to connect to: [rabbitmq:5672]
+2025-04-19 03:29:34.715 | 2025-04-18T20:29:34.715Z  INFO 1 --- [statistics-ranking-service] [           main] o.s.a.r.c.CachingConnectionFactory       : Created new connection: rabbitConnectionFactory#7beb2bc2:0/SimpleConnection@1197cd8 [delegate=amqp://guest@172.18.0.5:5672/, localPort=52024]
+2025-04-19 03:29:34.784 | 2025-04-18T20:29:34.784Z  INFO 1 --- [statistics-ranking-service] [           main] .s.s.StatisticsRankingServiceApplication : Started StatisticsRankingServiceApplication in 14.839 seconds (process running for 16.346)
+2025-04-19 03:29:38.860 | 2025-04-18T20:29:38.860Z  INFO 1 --- [statistics-ranking-service] [nio-8083-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-04-19 03:29:38.860 | 2025-04-18T20:29:38.860Z  INFO 1 --- [statistics-ranking-service] [nio-8083-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-04-19 03:29:38.862 | 2025-04-18T20:29:38.862Z  INFO 1 --- [statistics-ranking-service] [nio-8083-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2025-04-19 03:29:43.056 | 2025-04-18T20:29:43.056Z  INFO 1 --- [statistics-ranking-service] [nio-8083-exec-2] s.s.s.service.ImageStatisticsService     : Getting statistics for all images
+2025-04-19 03:29:43.138 | 2025-04-18T20:29:43.137Z DEBUG 1 --- [statistics-ranking-service] [nio-8083-exec-2] s.s.s.controller.StatisticsController    : Returning statistics for 7 images
+2025-04-19 03:29:43.343 | 2025-04-18T20:29:43.343Z DEBUG 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.m.StatisticsMessageListener        : Received statistics event: VIEW for image ID: 29993301-dac8-414d-b08f-d255fe947185
+2025-04-19 03:29:43.355 | 2025-04-18T20:29:43.355Z  INFO 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.service.ImageStatisticsService     : Incremented view count to 1 for image ID: 29993301-dac8-414d-b08f-d255fe947185
+2025-04-19 03:29:43.388 | 2025-04-18T20:29:43.387Z DEBUG 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.m.StatisticsMessageListener        : Incremented view count for image: 29993301-dac8-414d-b08f-d255fe947185
+2025-04-19 03:29:43.391 | 2025-04-18T20:29:43.390Z DEBUG 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.m.StatisticsMessageListener        : Received statistics event: VIEW for image ID: 12151b3c-9701-4310-befa-7f20a743124e
+2025-04-19 03:29:43.392 | 2025-04-18T20:29:43.392Z  INFO 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.service.ImageStatisticsService     : Incremented view count to 1 for image ID: 12151b3c-9701-4310-befa-7f20a743124e
+2025-04-19 03:29:43.400 | 2025-04-18T20:29:43.400Z DEBUG 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.m.StatisticsMessageListener        : Incremented view count for image: 12151b3c-9701-4310-befa-7f20a743124e
+2025-04-19 03:29:43.401 | 2025-04-18T20:29:43.401Z DEBUG 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.m.StatisticsMessageListener        : Received statistics event: VIEW for image ID: 91c7d149-16c1-4449-9bc9-4c742783daa9
+2025-04-19 03:29:43.403 | 2025-04-18T20:29:43.403Z  INFO 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.service.ImageStatisticsService     : Incremented view count to 1 for image ID: 91c7d149-16c1-4449-9bc9-4c742783daa9
+2025-04-19 03:29:43.409 | 2025-04-18T20:29:43.409Z DEBUG 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.m.StatisticsMessageListener        : Incremented view count for image: 91c7d149-16c1-4449-9bc9-4c742783daa9
+2025-04-19 03:29:43.410 | 2025-04-18T20:29:43.410Z DEBUG 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.m.StatisticsMessageListener        : Received statistics event: VIEW for image ID: 750b1bfb-32ad-4283-bc3c-f2b1c8994b26
+2025-04-19 03:29:43.412 | 2025-04-18T20:29:43.411Z  INFO 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.service.ImageStatisticsService     : Incremented view count to 1 for image ID: 750b1bfb-32ad-4283-bc3c-f2b1c8994b26
+2025-04-19 03:29:43.419 | 2025-04-18T20:29:43.418Z DEBUG 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.m.StatisticsMessageListener        : Incremented view count for image: 750b1bfb-32ad-4283-bc3c-f2b1c8994b26
+2025-04-19 03:29:43.419 | 2025-04-18T20:29:43.419Z DEBUG 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.m.StatisticsMessageListener        : Received statistics event: VIEW for image ID: 926f8d22-e155-4a5e-99df-31adf3342c52
+2025-04-19 03:29:43.420 | 2025-04-18T20:29:43.420Z  INFO 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.service.ImageStatisticsService     : Incremented view count to 1 for image ID: 926f8d22-e155-4a5e-99df-31adf3342c52
+2025-04-19 03:29:43.428 | 2025-04-18T20:29:43.428Z DEBUG 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.m.StatisticsMessageListener        : Incremented view count for image: 926f8d22-e155-4a5e-99df-31adf3342c52
+2025-04-19 03:29:47.421 | 2025-04-18T20:29:47.421Z  INFO 1 --- [statistics-ranking-service] [nio-8083-exec-3] s.s.s.service.ImageStatisticsService     : Getting statistics for all images
+2025-04-19 03:29:47.426 | 2025-04-18T20:29:47.425Z DEBUG 1 --- [statistics-ranking-service] [nio-8083-exec-3] s.s.s.controller.StatisticsController    : Returning statistics for 12 images
+2025-04-19 03:30:37.708 | 2025-04-18T20:30:37.708Z  INFO 1 --- [statistics-ranking-service] [nio-8083-exec-6] s.s.s.service.ImageStatisticsService     : Getting statistics for all images
+2025-04-19 03:30:37.712 | 2025-04-18T20:30:37.712Z DEBUG 1 --- [statistics-ranking-service] [nio-8083-exec-6] s.s.s.controller.StatisticsController    : Returning statistics for 12 images
+2025-04-19 03:30:37.780 | 2025-04-18T20:30:37.779Z DEBUG 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.m.StatisticsMessageListener        : Received statistics event: VIEW for image ID: 003f8bd7-cd01-4ac1-930f-690cdce8fe6c
+2025-04-19 03:30:37.789 | 2025-04-18T20:30:37.789Z  INFO 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.service.ImageStatisticsService     : Incremented view count to 1 for image ID: 003f8bd7-cd01-4ac1-930f-690cdce8fe6c
+2025-04-19 03:30:37.797 | 2025-04-18T20:30:37.797Z DEBUG 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.m.StatisticsMessageListener        : Incremented view count for image: 003f8bd7-cd01-4ac1-930f-690cdce8fe6c
+2025-04-19 03:30:37.798 | 2025-04-18T20:30:37.798Z DEBUG 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.m.StatisticsMessageListener        : Received statistics event: VIEW for image ID: 1c151b7c-cabb-4bdf-8fc4-5441892a2ef6
+2025-04-19 03:30:37.799 | 2025-04-18T20:30:37.799Z  INFO 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.service.ImageStatisticsService     : Incremented view count to 1 for image ID: 1c151b7c-cabb-4bdf-8fc4-5441892a2ef6
+2025-04-19 03:30:37.807 | 2025-04-18T20:30:37.806Z DEBUG 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.m.StatisticsMessageListener        : Incremented view count for image: 1c151b7c-cabb-4bdf-8fc4-5441892a2ef6
+2025-04-19 03:30:37.807 | 2025-04-18T20:30:37.807Z DEBUG 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.m.StatisticsMessageListener        : Received statistics event: VIEW for image ID: 58d1f95b-4ab7-4522-8bf8-4541d87e0eef
+2025-04-19 03:30:37.809 | 2025-04-18T20:30:37.809Z  INFO 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.service.ImageStatisticsService     : Incremented view count to 1 for image ID: 58d1f95b-4ab7-4522-8bf8-4541d87e0eef
+2025-04-19 03:30:37.815 | 2025-04-18T20:30:37.815Z DEBUG 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.m.StatisticsMessageListener        : Incremented view count for image: 58d1f95b-4ab7-4522-8bf8-4541d87e0eef
+2025-04-19 03:30:37.816 | 2025-04-18T20:30:37.816Z DEBUG 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.m.StatisticsMessageListener        : Received statistics event: VIEW for image ID: 767f3ed0-b5d4-422f-8710-1f409e1dfc5e
+2025-04-19 03:30:37.817 | 2025-04-18T20:30:37.817Z  INFO 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.service.ImageStatisticsService     : Incremented view count to 1 for image ID: 767f3ed0-b5d4-422f-8710-1f409e1dfc5e
+2025-04-19 03:30:37.825 | 2025-04-18T20:30:37.824Z DEBUG 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.m.StatisticsMessageListener        : Incremented view count for image: 767f3ed0-b5d4-422f-8710-1f409e1dfc5e
+2025-04-19 03:30:37.825 | 2025-04-18T20:30:37.825Z DEBUG 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.m.StatisticsMessageListener        : Received statistics event: VIEW for image ID: 1bbdcf52-be28-42de-b261-863959808ca3
+2025-04-19 03:30:37.827 | 2025-04-18T20:30:37.827Z  INFO 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.service.ImageStatisticsService     : Incremented view count to 1 for image ID: 1bbdcf52-be28-42de-b261-863959808ca3
+2025-04-19 03:30:37.834 | 2025-04-18T20:30:37.834Z DEBUG 1 --- [statistics-ranking-service] [ntContainer#0-1] s.s.s.m.StatisticsMessageListener        : Incremented view count for image: 1bbdcf52-be28-42de-b261-863959808ca3

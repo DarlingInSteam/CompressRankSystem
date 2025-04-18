@@ -2,6 +2,7 @@ package shadowshift.studio.imagestorage.service;
 
 import org.springframework.web.multipart.MultipartFile;
 import shadowshift.studio.imagestorage.model.Image;
+import shadowshift.studio.imagestorage.model.UserInfo;
 
 import java.io.IOException;
 import java.util.Map;
@@ -12,10 +13,22 @@ public interface ImageStorageService {
      * Saves an image to storage
      * 
      * @param file uploaded file
+     * @param userInfo information about the user uploading the image
      * @return image metadata object
      * @throws IOException if file operation fails
      */
-    Image storeImage(MultipartFile file) throws IOException;
+    Image storeImage(MultipartFile file, String userInfo, String role, String userId) throws IOException;
+
+    /**
+     * Overloaded method for backward compatibility
+     * 
+     * @param file uploaded file
+     * @return image metadata object
+     * @throws IOException if file operation fails
+     */
+    default Image storeImage(MultipartFile file) throws IOException {
+        return storeImage(file, null, null, null);
+    }
 
     /**
      * Saves a compressed image to storage
