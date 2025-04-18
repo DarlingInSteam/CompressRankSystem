@@ -7,6 +7,18 @@ export type DateFilterType = '' | 'today' | 'week' | 'month' | 'year';
 
 export type SizeFilterType = '' | 'small' | 'medium' | 'large' | 'xlarge';
 
+// User quota information from the API
+export interface UserQuota {
+  username: string;
+  userRole: string;
+  imagesUsed: number;
+  imagesQuota: number;
+  diskSpaceUsed: number;
+  diskSpaceQuota: number;
+  imagesQuotaPercentage: number;
+  diskQuotaPercentage: number;
+}
+
 // Типы для работы с изображениями
 export interface ImageDTO {
   id: string;

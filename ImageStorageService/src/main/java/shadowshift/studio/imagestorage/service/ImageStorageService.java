@@ -17,7 +17,7 @@ public interface ImageStorageService {
      * @return image metadata object
      * @throws IOException if file operation fails
      */
-    Image storeImage(MultipartFile file, UserInfo userInfo) throws IOException;
+    Image storeImage(MultipartFile file, String userInfo, String role, String userId) throws IOException;
 
     /**
      * Overloaded method for backward compatibility
@@ -27,7 +27,7 @@ public interface ImageStorageService {
      * @throws IOException if file operation fails
      */
     default Image storeImage(MultipartFile file) throws IOException {
-        return storeImage(file, null);
+        return storeImage(file, null, null, null);
     }
 
     /**

@@ -7,6 +7,7 @@ package shadowshift.studio.imagestorage.model;
 public class UserInfo {
     private String username;
     private String role;
+    private String userId; 
 
     public UserInfo() {
     }
@@ -14,6 +15,12 @@ public class UserInfo {
     public UserInfo(String username, String role) {
         this.username = username;
         this.role = role;
+    }
+
+    public UserInfo(String username, String role, String userId) {
+        this.username = username;
+        this.role = role;
+        this.userId = userId;
     }
 
     public String getUsername() {
@@ -30,5 +37,13 @@ public class UserInfo {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

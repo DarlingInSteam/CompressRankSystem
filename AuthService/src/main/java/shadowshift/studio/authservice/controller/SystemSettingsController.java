@@ -133,4 +133,19 @@ public class SystemSettingsController {
         
         return ResponseEntity.ok(response);
     }
+    
+    /**
+     * Публичный метод для получения квот пользователей (для других сервисов)
+     */
+    @GetMapping("/public/user-quotas")
+    public ResponseEntity<Map<String, String>> getPublicUserQuotas() {
+        List<SystemSettingsDto> quotaSettings = settingsService.getSettingsByGroup("user_quotas");
+        Map<String, String> quotasMap = new HashMap<>();
+        
+        for (SystemSettingsDto setting : quotaSettings) {
+            quotasMap.put(setting.getSettingKey(), setting.getSettingValue());
+        }
+        
+        return ResponseEntity.ok(quotasMap);
+    }
 }

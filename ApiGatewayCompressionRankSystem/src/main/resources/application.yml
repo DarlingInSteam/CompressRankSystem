@@ -110,7 +110,7 @@ spring:
                 
         # Маршруты для сервиса статистики (StatisticsRankingService)
         - id: statistics-api
-          uri: ${STATISTICS_SERVICE_URL:http://localhost:8083}
+          uri: ${STATISTICS_SERVICE_URL:http://statistics-ranking:8083}
           predicates:
             - Path=/api/statistics/**
           filters:
@@ -136,7 +136,7 @@ spring:
         
         # Совместимость для запросов старого формата к сервису статистики
         - id: statistics-api-compat
-          uri: ${STATISTICS_SERVICE_URL:http://localhost:8083}
+          uri: ${STATISTICS_SERVICE_URL:http://statistics-ranking:8083}
           predicates:
             - Path=/api/images/statistics/**
           filters:

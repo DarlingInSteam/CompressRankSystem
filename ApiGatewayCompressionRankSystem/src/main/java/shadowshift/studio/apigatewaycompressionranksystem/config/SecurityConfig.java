@@ -86,6 +86,9 @@ public class SecurityConfig {
                 "Access-Control-Request-Headers",
                 "X-Requested-With",
                 "X-Auth-Token",
+                "X-User-Name",
+                "X-User-Role",
+                "X-User-Id",
                 "Cache-Control",
                 "Pragma"
         ));

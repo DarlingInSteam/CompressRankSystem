@@ -1,5 +1,5 @@
 import { apiClient, apiClientCompressionService, apiClientMultipart } from './api.config';
-import { ImageDTO, ImageStatistics, SortType, DateFilterType, SizeFilterType } from '../types/api.types';
+import { ImageDTO, ImageStatistics, SortType, DateFilterType, SizeFilterType, UserQuota } from '../types/api.types';
 
 const ImageService = {
   // Получение списка всех изображений
@@ -31,12 +31,38 @@ const ImageService = {
   // Получение статистики по изображениям
   getImageStatistics: async (): Promise<Record<string, ImageStatistics>> => {
     try {
-      const response = await apiClient.get('/api/images/statistics');
+      // Исправлено: использовать правильный путь для статистики
+      const response = await apiClient.get('/api/statistics');
       return response.data.statistics || {};
     } catch (error) {
       console.error('Error fetching image statistics:', error);
-      // Возвращаем пустой объект вместо ошибки для более стабильной работы UI
-      return {}; 
+      
+      // Fallback: если эндпоинт статистики недоступен, создаем базовую статистику
+      // из имеющихся данных об изображениях
+      try {
+        const images = await ImageService.getAllImages();
+        const fallbackStats: Record<string, ImageStatistics> = {};
+        
+        Object.entries(images).forEach(([imageId, image]) => {
+          // Только если это не сжатая копия (нет originalImageId)
+          if (!image.originalImageId) {
+            fallbackStats[imageId] = {
+              id: imageId,
+              views: image.accessCount || 0,
+              downloads: 0, // нет данных, ставим 0
+              downloadCount: 0,
+              viewCount: image.accessCount || 0,
+              popularityScore: image.accessCount || 0
+            };
+          }
+        });
+        
+        console.log('Using fallback statistics from images data');
+        return fallbackStats;
+      } catch (fallbackError) {
+        console.error('Fallback statistics method failed:', fallbackError);
+        return {};
+      }
     }
   },
   
@@ -48,19 +74,35 @@ const ImageService = {
   // Получение статистики по конкретному изображению
   getImageStatisticById: async (imageId: string): Promise<ImageStatistics> => {
     try {
-      const response = await apiClient.get(`/api/images/${imageId}/statistics`);
+      // Исправлено: использовать правильный путь для статистики по ID
+      const response = await apiClient.get(`/api/statistics/${imageId}`);
       return response.data;
     } catch (error) {
       console.error(`Error fetching statistics for image ${imageId}:`, error);
-      // Возвращаем пустую статистику вместо ошибки, включая все обязательные поля
-      return {
-        id: `stats-fallback-${imageId}`, 
-        views: 0,
-        downloads: 0,
-        downloadCount: 0, 
-        viewCount: 0, 
-        popularityScore: 0
-      };
+      
+      // Fallback: если эндпоинт статистики недоступен, пробуем получить
+      // базовую информацию из метаданных изображения
+      try {
+        const imageMetadata = await ImageService.getImageMetadata(imageId);
+        return {
+          id: imageId,
+          views: imageMetadata.accessCount || 0,
+          downloads: 0, // нет данных, ставим 0
+          downloadCount: 0,
+          viewCount: imageMetadata.accessCount || 0,
+          popularityScore: imageMetadata.accessCount || 0
+        };
+      } catch (fallbackError) {
+        // Если и это не удалось, возвращаем пустые данные
+        return {
+          id: `stats-fallback-${imageId}`, 
+          views: 0,
+          downloads: 0,
+          downloadCount: 0, 
+          viewCount: 0, 
+          popularityScore: 0
+        };
+      }
     }
   },
   
@@ -80,16 +122,55 @@ const ImageService = {
     return response.data;
   },
   
+  // Извлечение информации о пользователе из JWT токена
+  getUserInfoFromToken: (): { username: string, role: string, userId: string } => {
+    const token = localStorage.getItem('token');
+    let username = '';
+    let role = '';
+    let userId = '';
+    
+    if (token) {
+      try {
+        // Декодируем JWT токен
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const decodedToken = JSON.parse(window.atob(base64));
+        
+        // Извлекаем данные пользователя из токена
+        username = decodedToken.username || '';
+        role = decodedToken.role || '';
+        userId = decodedToken.userId || decodedToken.sub || '';
+        
+        console.log('Extracted user info from token:', { username, role, userId });
+      } catch (e) {
+        console.error('Error extracting user info from token', e);
+      }
+    }
+    
+    return { username, role, userId };
+  },
+  
   // Загрузка нового изображения
   uploadImage: async (file: File): Promise<ImageDTO> => {
     const formData = new FormData();
     formData.append('file', file);
     
+    // Получаем информацию о пользователе из токена
+    const { username, role, userId } = ImageService.getUserInfoFromToken();
+    
+    // Создаем объект с заголовками
+    const headers: Record<string, string> = {
+      'Content-Type': 'multipart/form-data',
+      'X-User-Name': username,
+      'X-User-Role': role,
+      'X-User-Id': userId
+    };
+    
+    console.log('Uploading image with user info headers:', { username, role, userId });
+    
     // Используем специальный экземпляр для multipart/form-data запросов
     const response = await apiClientMultipart.post<ImageDTO>('/api/images', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+      headers: headers,
     });
     return response.data;
   },
@@ -130,6 +211,40 @@ const ImageService = {
     const params = download ? '?download=true' : '';
     // Используем baseURL из конфигурации apiClient для согласованности
     return `${apiClient.defaults.baseURL}/api/images/${id}${params}`;
+  },
+
+  // Получение информации о квоте пользователя
+  getUserQuota: async (): Promise<UserQuota> => {
+    try {
+      // Получаем информацию о пользователе из токена
+      const { username, role, userId } = ImageService.getUserInfoFromToken();
+      
+      // Создаем объект с заголовками
+      const headers: Record<string, string> = {
+        'X-User-Name': username,
+        'X-User-Role': role,
+        'X-User-Id': userId
+      };
+      
+      // Добавляем заголовки в запрос
+      const response = await apiClient.get<UserQuota>('/api/images/quota', { headers });
+      console.log('Quota API response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching user quota information:', error);
+      
+      // Return default quota values if API fails
+      return {
+        username: "unknown",
+        userRole: "unknown",
+        imagesUsed: 0,
+        imagesQuota: 100,
+        diskSpaceUsed: 0,
+        diskSpaceQuota: 1024 * 1024 * 1024, // 1GB
+        imagesQuotaPercentage: 0,
+        diskQuotaPercentage: 0
+      };
+    }
   }
 };
 

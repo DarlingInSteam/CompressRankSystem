@@ -43,6 +43,27 @@ public class UserController {
     }
 
     /**
+     * Get public user info by ID (без требования аутентификации, для межсервисного взаимодействия)
+     */
+    @GetMapping("/public/{id}")
+    public ResponseEntity<Map<String, Object>> getPublicUserInfoById(@PathVariable Long id) {
+        try {
+            UserDto user = userService.getUserById(id);
+            Map<String, Object> userInfo = new HashMap<>();
+            userInfo.put("id", user.getId());
+            userInfo.put("username", user.getUsername());
+            userInfo.put("role", user.getRole());
+            // Не включаем конфиденциальные поля, такие как email, пароль и т.д.
+            
+            return ResponseEntity.ok(userInfo);
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", "Пользователь не найден");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
+    }
+
+    /**
      * Create a new user (admin only)
      */
     @PostMapping

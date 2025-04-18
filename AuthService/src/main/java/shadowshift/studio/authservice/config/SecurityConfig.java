@@ -36,6 +36,12 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints
                 .requestMatchers("/api/auth/login", "/api/auth/register", "/actuator/health", "/actuator/info").permitAll()
+                // Public system settings endpoints for internal service communication
+                .requestMatchers("/api/auth/system/settings/public/**").permitAll()
+                .requestMatchers("/api/auth/system/settings/group/**").permitAll()
+                // Public user endpoints for internal service communication
+                .requestMatchers("/api/auth/users/public/**").permitAll()
+                .requestMatchers("/api/auth/user/info/public").permitAll()
                 // Admin-only endpoints
                 .requestMatchers("/api/auth/users").hasRole("ADMIN")
                 .requestMatchers("/api/auth/users/**").hasRole("ADMIN")

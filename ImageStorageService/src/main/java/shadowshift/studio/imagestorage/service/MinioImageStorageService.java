@@ -29,6 +29,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.management.relation.Role;
+
 @Service
 public class MinioImageStorageService implements ImageStorageService {
 
@@ -166,15 +168,15 @@ public class MinioImageStorageService implements ImageStorageService {
 
     @Override
     @Transactional
-    public Image storeImage(MultipartFile file, UserInfo userInfo) throws IOException {
+    public Image storeImage(MultipartFile file, String userInfo, String role, String userId) throws IOException {
         try {
             // Проверка размера файла согласно настройкам
             settingsValidator.validateFileSize(file);
             
             // Проверка квоты пользователя
             if (userInfo != null) {
-                String username = userInfo.getUsername();
-                String userRole = userInfo.getRole();
+                String username = userInfo;
+                String userRole = role;
                 
                 // Получить количество изображений пользователя
                 long userImagesCount = imageRepository.countByUserId(username);
@@ -198,8 +200,12 @@ public class MinioImageStorageService implements ImageStorageService {
             Image image = new Image(originalFilename, WEBP_CONTENT_TYPE, webpData.length);
             
             // Установка ID пользователя для изображения
-            if (userInfo != null) {
-                image.setUserId(userInfo.getUsername());
+            if (userId != null) {
+                // Предпочитаем использовать userId, если он доступен
+                image.setUserId(userId);
+                logger.info("User ID set for image: {}", userId);
+            } else {
+                logger.info("User info is null, setting user ID to 'anonymous'");
             }
 
             try (ByteArrayInputStream inputStream = new ByteArrayInputStream(webpData)) {
@@ -226,8 +232,8 @@ public class MinioImageStorageService implements ImageStorageService {
             ImageEntity entity = imageMapper.toEntity(image);
             imageRepository.save(entity);
 
-            logger.info("Successfully stored WebP image: id={}, name={}, original format={}",
-                    image.getId(), image.getOriginalFilename(), file.getContentType());
+            logger.info("Successfully stored WebP image: id={}, name={}, original format={}, userId={}",
+                    image.getId(), image.getOriginalFilename(), file.getContentType(), image.getUserId());
             return image;
 
         } catch (FileSizeLimitException | UserQuotaExceededException e) {

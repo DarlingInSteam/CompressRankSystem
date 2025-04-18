@@ -23,6 +23,7 @@ public class ImageMapper {
         model.setUploadedAt(entity.getUploadedAt());
         model.setLastAccessed(entity.getLastAccessed());
         model.setAccessCount(entity.getAccessCount());
+        model.setUserId(entity.getUserId());
         
         return model;
     }
@@ -43,6 +44,7 @@ public class ImageMapper {
         entity.setUploadedAt(model.getUploadedAt());
         entity.setLastAccessed(model.getLastAccessed());
         entity.setAccessCount(model.getAccessCount());
+        entity.setUserId(model.getUserId());
         
         return entity;
     }
