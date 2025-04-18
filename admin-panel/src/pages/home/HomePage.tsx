@@ -70,6 +70,7 @@ const formatFileSize = (bytes: number): string => {
 
 const HomePage: React.FC = () => {
   const [images, setImages] = useState<Record<string, ImageDTO>>({});
+  const [originalSizes, setOriginalSizes] = useState<Record<string, number>>({});
   const [stats, setStats] = useState({
     totalImages: 0,
     compressedImages: 0,
@@ -124,21 +125,34 @@ const HomePage: React.FC = () => {
       // Вычисляем статистику
       const imagesArray = Object.values(imagesData);
       const totalCount = imagesArray.length;
-      const compressedCount = imagesArray.filter(img => img.compressionLevel > 0).length;
+      const compressedImagesArray = imagesArray.filter(img => img.compressionLevel > 0);
+      const compressedCount = compressedImagesArray.length;
       const totalSize = imagesArray.reduce((sum, img) => sum + img.size, 0);
       
-      // Корректная оценка сохраненного места
-      const spaceSaved = imagesArray
-        .filter(img => img.compressionLevel > 0)
-        .reduce((sum, img) => {
-          // Вычисляем оригинальный размер на основе формулы:
-          // current = original * (1 - compressionLevel/100)
-          // original = current / (1 - compressionLevel/100)
-          if (img.compressionLevel <= 0) return sum;
-          
-          const originalSize = img.size / (1 - img.compressionLevel / 100);
-          return sum + (originalSize - img.size);
-        }, 0);
+      // Получаем оригинальные размеры для всех сжатых изображений
+      const compressedImageIds = compressedImagesArray.map(img => img.id);
+      const imageSizes: Record<string, number> = {};
+      let spaceSaved = 0;
+      
+      if (compressedImageIds.length > 0) {
+        try {
+          // Получаем оригинальные размеры для всех сжатых изображений
+          for (const imageId of compressedImageIds) {
+            try {
+              const originalSize = await ImageService.getOriginalImageSize(imageId);
+              imageSizes[imageId] = originalSize;
+              // Вычисляем сохраненное место используя точные данные
+              const image = imagesData[imageId];
+              spaceSaved += originalSize - image.size;
+            } catch (error) {
+              console.warn(`Не удалось получить оригинальный размер для ${imageId}:`, error);
+            }
+          }
+          setOriginalSizes(imageSizes);
+        } catch (error) {
+          console.error('Ошибка при загрузке оригинальных размеров:', error);
+        }
+      }
       
       const compressionEfficiency = totalSize + spaceSaved > 0 
         ? Math.round((spaceSaved / (totalSize + spaceSaved)) * 100) 
@@ -1003,7 +1017,7 @@ const HomePage: React.FC = () => {
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                             <Typography variant="body2" color="text.secondary">Исходный:</Typography>
                             <Typography variant="body2" fontWeight="medium">
-                              {formatFileSize(Math.round(image.size / (1 - image.compressionLevel / 100)))}
+                              {formatFileSize(originalSizes[image.id] || Math.round(image.size / (1 - image.compressionLevel / 100)))}
                             </Typography>
                           </Box>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -1011,7 +1025,7 @@ const HomePage: React.FC = () => {
                               Экономия:
                             </Typography>
                             <Typography variant="body2" color="success.main" fontWeight="medium">
-                              {formatFileSize(Math.round(image.size / (1 - image.compressionLevel / 100)) - image.size)}
+                              {formatFileSize((originalSizes[image.id] || Math.round(image.size / (1 - image.compressionLevel / 100))) - image.size)}
                             </Typography>
                           </Box>
                         </Paper>

@@ -205,6 +205,39 @@ const ImageService = {
     const response = await apiClientCompressionService.get<{originalSize: number}>(`/api/compression/${id}/original-size`);
     return response.data.originalSize;
   },
+  
+  // Получение оригинальных размеров для массива изображений
+  getOriginalImageSizes: async (ids: string[]): Promise<Record<string, number>> => {
+    if (!ids.length) return {};
+    
+    try {
+      // Используем Promise.all для параллельных запросов
+      const requests = ids.map(id => 
+        apiClientCompressionService.get<{originalSize: number}>(`/api/compression/${id}/original-size`)
+          .then(response => ({ id, size: response.data.originalSize }))
+          .catch(error => {
+            console.warn(`Failed to get original size for image ${id}:`, error);
+            // Fallback to estimation if API fails
+            return { id, size: null };
+          })
+      );
+      
+      const results = await Promise.all(requests);
+      
+      // Convert array to object
+      const originalSizes: Record<string, number> = {};
+      results.forEach(result => {
+        if (result.size !== null) {
+          originalSizes[result.id] = result.size;
+        }
+      });
+      
+      return originalSizes;
+    } catch (error) {
+      console.error('Failed to get original image sizes:', error);
+      return {};
+    }
+  },
 
   // Вспомогательный метод для генерации URL изображения
   getImageUrl: (id: string, download: boolean = false): string => {
