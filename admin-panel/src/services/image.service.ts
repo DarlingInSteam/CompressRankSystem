@@ -5,14 +5,75 @@ const ImageService = {
   // Получение списка всех изображений
   getAllImages: async (): Promise<Record<string, ImageDTO>> => {
     try {
-      const response = await apiClient.get<Record<string, ImageDTO>>('/api/images');
-      return response.data;
+      const response = await apiClient.get('/api/images');
+      
+      // Handle both pagination and non-pagination responses
+      if (response.data && typeof response.data === 'object') {
+        if (response.data.images && typeof response.data.images === 'object') {
+          // If it's paginated response, return images object
+          return response.data.images as Record<string, ImageDTO>;
+        } else if (!response.data.images) {
+          // If it's direct map of images
+          return response.data as Record<string, ImageDTO>;
+        }
+      }
+      
+      // Default to empty object if response format is unexpected
+      return {};
     } catch (error) {
       console.error('Error fetching all images:', error);
       throw error;
     }
   },
-
+  
+  // Получение списка изображений с пагинацией
+  getPaginatedImages: async (
+    page: number = 0,
+    size?: number,
+    sort?: SortType,
+    direction: 'asc' | 'desc' = 'desc'
+  ): Promise<{
+    images: Record<string, ImageDTO>;
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+  }> => {
+    try {
+      const params: any = {
+        page,
+        direction
+      };
+      
+      if (size) {
+        params.size = size;
+      }
+      
+      if (sort) {
+        params.sort = sort;
+      }
+      
+      const response = await apiClient.get('/api/images', { params });
+      
+      // If the response doesn't have the pagination format, convert it to the expected format
+      if (!response.data.images && !response.data.page) {
+        const images = response.data;
+        return {
+          images,
+          page: 0,
+          size: Object.keys(images).length,
+          totalElements: Object.keys(images).length,
+          totalPages: 1
+        };
+      }
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching paginated images:', error);
+      throw error;
+    }
+  },
+  
   // Получение метаданных изображения по ID
   getImageMetadata: async (id: string): Promise<ImageDTO> => {
     const response = await apiClient.get<ImageDTO>(`/api/images/${id}/metadata`);
