@@ -19,6 +19,13 @@ import {
   alpha,
   Avatar,
   CircularProgress,
+  Pagination,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  Stack
 } from '@mui/material';
 import {
   Visibility as VisibilityIcon,
@@ -53,6 +60,12 @@ interface ImageGalleryProps {
   onViewImage: (id: string) => void;
   onDeleteImage: (id: string) => void;
   loading?: boolean;
+  // Pagination props
+  currentPage?: number;
+  totalPages?: number;
+  pageSize?: number;
+  onPageChange?: (event: React.ChangeEvent<unknown>, page: number) => void;
+  onPageSizeChange?: (event: SelectChangeEvent<number>) => void;
 }
 
 const ImageGallery: React.FC<ImageGalleryProps> = ({
@@ -64,7 +77,12 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
   onToggleSelection,
   onViewImage,
   onDeleteImage,
-  loading = false
+  loading = false,
+  currentPage = 0,
+  totalPages = 1,
+  pageSize = 20,
+  onPageChange,
+  onPageSizeChange
 }) => {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -841,6 +859,40 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
           </Card>
         ))}
       </Grid>
+
+      {/* Pagination Controls */}
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 3 }}>
+        <Pagination
+          count={totalPages}
+          page={currentPage + 1} 
+          onChange={onPageChange}
+          color="primary"
+          sx={{
+            '& .MuiPaginationItem-root': {
+              borderRadius: '50%',
+              transition: 'transform 0.2s ease',
+              '&:hover': {
+                transform: 'scale(1.1)'
+              }
+            }
+          }}
+        />
+        <FormControl size="small" sx={{ minWidth: 120 }}>
+          <InputLabel id="page-size-select-label">На странице</InputLabel>
+          <Select
+            labelId="page-size-select-label"
+            value={pageSize}
+            onChange={onPageSizeChange}
+            label="На странице"
+          >
+            {[10, 20, 50, 100].map(size => (
+              <MenuItem key={size} value={size}>
+                {size}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Stack>
     </Box>
   );
 };

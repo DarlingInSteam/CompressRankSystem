@@ -23,9 +23,8 @@ import shadowshift.studio.imagestorage.service.ImageStorageService;
 import shadowshift.studio.imagestorage.client.AuthServiceClient;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Collections;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -197,21 +196,101 @@ public class ImageController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping
-    public ResponseEntity<?> getAllImages() {
+    public ResponseEntity<?> getAllImages(
+            @Parameter(description = "Page number (0-based)")
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @Parameter(description = "Page size")
+            @RequestParam(value = "size", defaultValue = "20") int size,
+            @Parameter(description = "Sort field")
+            @RequestParam(value = "sort", required = false) String sort,
+            @Parameter(description = "Sort direction (asc or desc)")
+            @RequestParam(value = "direction", defaultValue = "desc") String direction) {
         try {
             long startTime = System.currentTimeMillis();
             
-            Map<String, Image> images = imageStorageService.getAllImageMetadata();
+            Map<String, Image> allImages = imageStorageService.getAllImageMetadata();
+            
+            // Prepare pagination response
+            Map<String, Object> response = new HashMap<>();
+            
+            // Apply pagination
+            int totalImages = allImages.size();
+            int totalPages = (int) Math.ceil((double) totalImages / size);
+            
+            // Ensure page is within bounds
+            if (page < 0) page = 0;
+            if (page >= totalPages && totalPages > 0) page = totalPages - 1;
+            
+            // Calculate start and end indices for the requested page
+            int startIndex = page * size;
+            int endIndex = Math.min(startIndex + size, totalImages);
+            
+            // Sort the images based on the sort parameter
+            List<Image> imageList = new ArrayList<>(allImages.values());
+            
+            if (sort != null) {
+                switch (sort) {
+                    case "uploadedAt":
+                        imageList.sort(Comparator.comparing(Image::getUploadedAt));
+                        break;
+                    case "size_asc":
+                        imageList.sort(Comparator.comparing(Image::getSize));
+                        break;
+                    case "size_desc":
+                        imageList.sort(Comparator.comparing(Image::getSize).reversed());
+                        break;
+                    case "accessCount":
+                    case "views":
+                        imageList.sort(Comparator.comparing(Image::getAccessCount));
+                        break;
+                    default:
+                        // Default sort by upload date
+                        imageList.sort(Comparator.comparing(Image::getUploadedAt));
+                }
+            } else {
+                // Default sort by upload date
+                imageList.sort(Comparator.comparing(Image::getUploadedAt));
+            }
+            
+            // Apply sort direction
+            if (!"asc".equalsIgnoreCase(direction)) {
+                Collections.reverse(imageList);
+            }
+            
+            // Get the page of images
+            List<Image> pagedImages = imageList.size() > 0 ? 
+                imageList.subList(Math.min(startIndex, imageList.size()), Math.min(endIndex, imageList.size())) : 
+                new ArrayList<>();
+            
+            // Convert to map for response
+            Map<String, Image> pagedImagesMap = new HashMap<>();
+            for (Image image : pagedImages) {
+                pagedImagesMap.put(image.getId(), image);
+            }
+            
+            // Build the response
+            response.put("images", pagedImagesMap);
+            response.put("page", page);
+            response.put("size", size);
+            response.put("totalElements", totalImages);
+            response.put("totalPages", totalPages);
             
             long duration = System.currentTimeMillis() - startTime;
-            logger.info("GET /api/images returned {} images in {}ms", images.size(), duration);
+            logger.info("GET /api/images returned {} images (page {}/{}) in {}ms", 
+                    pagedImages.size(), page + 1, totalPages, duration);
             
-            // Return empty map instead of error message if no images found
-            return ResponseEntity.ok(images);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Error retrieving all images: {}", e.getMessage(), e);
-            // Return empty map instead of error message to prevent client issues
-            return ResponseEntity.ok(new HashMap<>());
+            // Return empty response with error message
+            Map<String, Object> response = new HashMap<>();
+            response.put("images", new HashMap<>());
+            response.put("error", "Error retrieving images: " + e.getMessage());
+            response.put("page", page);
+            response.put("size", size);
+            response.put("totalElements", 0);
+            response.put("totalPages", 0);
+            return ResponseEntity.ok(response);
         }
     }
 
