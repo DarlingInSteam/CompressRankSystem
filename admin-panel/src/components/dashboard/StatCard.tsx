@@ -1,5 +1,13 @@
 import React from 'react';
-import { Box, Paper, Typography, CircularProgress, alpha, useTheme } from '@mui/material';
+import {
+  Paper,
+  Typography,
+  Box,
+  useTheme,
+  alpha
+} from '@mui/material';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
 interface StatCardProps {
   title: string;
@@ -8,136 +16,217 @@ interface StatCardProps {
   change?: {
     value: number;
     isPositive: boolean;
+    suffix?: string;
   };
   color?: string;
-  loading?: boolean;
+  bgGradient?: string;
+  animationDelay?: number;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ 
-  title, 
-  value, 
-  icon, 
-  change, 
-  color = 'primary.main',
-  loading = false 
+const StatCard: React.FC<StatCardProps> = ({
+  title,
+  value,
+  icon,
+  change,
+  color = '#1976d2',
+  bgGradient,
+  animationDelay = 0
 }) => {
   const theme = useTheme();
-  // Правильное получение цвета из темы через path (например 'primary.main')
-  const getColorFromTheme = (colorPath: string): string => {
-    // Если это простой HEX или RGB цвет, возвращаем его как есть
-    if (colorPath.startsWith('#') || colorPath.startsWith('rgb') || colorPath.startsWith('hsl')) {
-      return colorPath;
-    }
-    
-    // Разбиваем путь к цвету в объекте темы
-    const parts = colorPath.split('.');
-    let colorValue: any = theme;
-    
-    // Проходим по пути, получая вложенные значения
-    for (const part of parts) {
-      if (colorValue && colorValue[part] !== undefined) {
-        colorValue = colorValue[part];
-      } else {
-        // Если путь не существует, возвращаем безопасный цвет по умолчанию
-        console.warn(`Color path '${colorPath}' not found in theme`);
-        return theme.palette.primary.main;
-      }
-    }
-    
-    // Возвращаем найденный цвет или безопасный вариант
-    return typeof colorValue === 'string' ? colorValue : theme.palette.primary.main;
-  };
-  
-  // Получаем конкретное значение цвета из темы
-  const resolvedColor = getColorFromTheme(color);
+  const isDark = theme.palette.mode === 'dark';
 
   return (
     <Paper
+      elevation={0}
       sx={{
+        position: 'relative',
+        height: '100%',
+        borderRadius: '16px',
         p: 3,
+        overflow: 'hidden',
+        background: bgGradient || alpha(color, 0.1),
+        backdropFilter: 'blur(10px)',
+        border: '1px solid',
+        borderColor: isDark 
+          ? alpha(color, 0.2)
+          : alpha(color, 0.1),
+        boxShadow: `0 5px 15px ${alpha(color, 0.1)}`,
         display: 'flex',
         flexDirection: 'column',
-        height: '100%',
-        borderRadius: '12px',
-        boxShadow: '0 4px 20px 0 rgba(0,0,0,0.05)',
-        position: 'relative',
-        overflow: 'hidden',
+        justifyContent: 'space-between',
+        animation: `fadeIn 0.5s ease ${animationDelay}s both`,
+        '@keyframes fadeIn': {
+          '0%': {
+            opacity: 0,
+            transform: 'translateY(20px)'
+          },
+          '100%': {
+            opacity: 1,
+            transform: 'translateY(0)'
+          }
+        },
         transition: 'transform 0.3s, box-shadow 0.3s',
         '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: '0 8px 25px 0 rgba(0,0,0,0.1)',
-        },
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '4px',
-          background: resolvedColor,
-          borderTopLeftRadius: '12px',
-          borderTopRightRadius: '12px',
+          transform: 'translateY(-5px) scale(1.02)',
+          boxShadow: `0 10px 25px ${alpha(color, 0.25)}`,
+          '& .icon-container': {
+            transform: 'scale(1.1) rotateY(10deg)',
+          }
         }
       }}
-      elevation={0}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
-        <Typography variant="subtitle2" fontWeight="500" color="text.secondary">
-          {title}
-        </Typography>
-        <Box 
-          sx={{ 
-            color: 'white',
-            backgroundColor: resolvedColor,
-            width: 40,
-            height: 40,
-            borderRadius: '50%',
+      {/* Background decoration elements */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '-20px',
+          right: '-20px',
+          width: '100px',
+          height: '100px',
+          borderRadius: '50%',
+          backgroundColor: alpha(color, 0.05),
+          mixBlendMode: 'multiply', // This will help blend with background
+          filter: 'blur(25px)',
+          zIndex: 0,
+          opacity: 0.6 // Reduced opacity
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: '-30px',
+          left: '-20px',
+          width: '80px',
+          height: '80px',
+          borderRadius: '50%',
+          backgroundColor: alpha(color, 0.1),
+          mixBlendMode: 'multiply', // This will help blend with background
+          filter: 'blur(20px)',
+          zIndex: 0,
+          opacity: 0.6 // Reduced opacity
+        }}
+      />
+
+      <Box sx={{ position: 'relative', zIndex: 1 }}>
+        <Box
+          sx={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: `0 4px 10px ${alpha(resolvedColor, 0.3)}`
+            justifyContent: 'space-between',
+            mb: 2
           }}
         >
-          {icon}
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 500,
+              color: isDark ? theme.palette.text.primary : 'text.secondary',
+              fontSize: '0.95rem',
+              opacity: 0.85,
+              textTransform: 'capitalize'
+            }}
+          >
+            {title}
+          </Typography>
+          <Box
+            className="icon-container"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 48,
+              height: 48,
+              borderRadius: '12px',
+              backgroundColor: alpha(color, isDark ? 0.2 : 0.15),
+              color: color,
+              transition: 'all 0.3s ease',
+              transform: 'perspective(700px)',
+              transformStyle: 'preserve-3d'
+            }}
+          >
+            {icon}
+          </Box>
         </Box>
-      </Box>
 
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50px' }}>
-          <CircularProgress size={30} color="inherit" sx={{ color: resolvedColor }} />
-        </Box>
-      ) : (
-        <Typography 
-          variant="h4" 
-          component="div" 
-          sx={{ 
-            mb: 1, 
-            fontWeight: 'bold',
-            fontSize: { xs: '1.75rem', md: '2rem' }
+        <Typography
+          variant="h4"
+          component="div"
+          sx={{
+            fontWeight: 700,
+            color: isDark ? alpha(color, 0.9) : color,
+            mb: 1.5,
+            fontSize: '1.75rem',
+            textShadow: isDark ? '0 0 15px rgba(255,255,255,0.15)' : 'none'
           }}
         >
           {value}
         </Typography>
-      )}
 
-      {change && !loading && (
-        <Box sx={{ mt: 'auto' }}>
-          <Typography
-            variant="body2"
+        {change && (
+          <Box
             sx={{
-              color: change.isPositive ? 'success.main' : 'error.main',
               display: 'flex',
               alignItems: 'center',
-              fontWeight: 500
+              gap: 0.5,
+              mt: 'auto'
             }}
           >
-            {change.isPositive ? '▲' : '▼'} {Math.abs(change.value)}%
-            <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-              по сравнению с пред. периодом
-            </Typography>
-          </Typography>
-        </Box>
-      )}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                color: change.isPositive ? 'success.main' : 'error.main',
+                fontSize: '0.875rem'
+              }}
+            >
+              {change.isPositive ? (
+                <TrendingUpIcon fontSize="small" />
+              ) : (
+                <TrendingDownIcon fontSize="small" />
+              )}
+              <Typography
+                variant="body2"
+                component="span"
+                sx={{
+                  ml: 0.5,
+                  fontWeight: 600
+                }}
+              >
+                {change.value}{change.suffix || ''}
+              </Typography>
+            </Box>
+            {change.isPositive && (
+              <Typography
+                variant="body2"
+                color="text.secondary"
+              >
+                Рост
+              </Typography>
+            )}
+          </Box>
+        )}
+      </Box>
+
+      {/* Animated subtle glow */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '80%',
+          height: '40%',
+          backgroundColor: alpha(color, 0.05),
+          borderRadius: '50%',
+          filter: 'blur(30px)',
+          animation: 'pulse 3s infinite alternate',
+          '@keyframes pulse': {
+            '0%': { opacity: 0.3 },
+            '100%': { opacity: 0.7 }
+          },
+          zIndex: 0
+        }}
+      />
     </Paper>
   );
 };

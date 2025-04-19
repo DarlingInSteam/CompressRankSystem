@@ -307,14 +307,15 @@ const ProfilePage: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [userQuota, setUserQuota] = useState<UserQuota | null>(null);
   
-  // Моковые данные для пользовательской статистики (в реальности должны загружаться с сервера)
+  // Статистика пользователя с частичными моковыми данными 
+  // (будет дополнена реальными данными из API)
   const [userStats, setUserStats] = useState<UserStats>({
-    totalUploads: 127,
-    totalCompressions: 98,
-    totalDownloads: 312,
-    totalViews: 945,
+    totalUploads: 0,
+    totalCompressions: 0,
+    totalDownloads: 0,
+    totalViews: 0,
     diskSpaceUsed: 0, // Will be updated from real data
-    compressionSaved: 1024 * 1024 * 350, // 350 МБ
+    compressionSaved: 0, // Will be updated if available
     lastActivityDate: new Date().toISOString()
   });
   
@@ -375,11 +376,15 @@ const ProfilePage: React.FC = () => {
       if (user) {
         try {
           setLoading(true);
-          const resetRequired = await authService.checkPasswordReset();
-          setPasswordResetRequired(resetRequired);
-        } catch (err) {
-          console.error('Error checking password reset status:', err);
-          setError('Не удалось проверить необходимость смены пароля');
+          // Оборачиваем в try-catch, чтобы предотвратить ошибку в UI
+          try {
+            const resetRequired = await authService.checkPasswordReset();
+            setPasswordResetRequired(resetRequired);
+          } catch (err) {
+            console.error('Error checking password reset status:', err);
+            // Здесь не устанавливаем общую ошибку, чтобы не показывать сообщение
+            // пользователю, так как это не критическая функция
+          }
         } finally {
           setLoading(false);
         }
@@ -393,11 +398,65 @@ const ProfilePage: React.FC = () => {
         const quota = await ImageService.getUserQuota();
         setUserQuota(quota);
         
-        // Update user stats with real disk space usage
-        setUserStats(prevStats => ({
-          ...prevStats,
-          diskSpaceUsed: quota.diskSpaceUsed
-        }));
+        // Get all images to calculate compression savings accurately
+        try {
+          const imagesData = await ImageService.getAllImages();
+          
+          // Get IDs of compressed images
+          const compressedImageIds = Object.values(imagesData)
+            .filter(img => img.compressionLevel > 0)
+            .map(img => img.id);
+            
+          if (compressedImageIds.length > 0) {
+            // Get original sizes for all compressed images
+            const originalSizes = await ImageService.getOriginalImageSizes(compressedImageIds);
+            
+            // Calculate real compression savings
+            let actualSpaceSaved = 0;
+            compressedImageIds.forEach(id => {
+              const img = imagesData[id];
+              if (originalSizes[id]) {
+                // If we have the actual original size, use it
+                actualSpaceSaved += originalSizes[id] - img.size;
+              } else {
+                // Fallback to estimation if needed
+                const estimatedOriginalSize = img.size / (1 - img.compressionLevel / 100);
+                actualSpaceSaved += estimatedOriginalSize - img.size;
+              }
+            });
+            
+            // Update user stats with real data
+            setUserStats(prevStats => ({
+              ...prevStats,
+              totalUploads: quota.imagesUsed, // Set uploads to match actual image count
+              totalCompressions: compressedImageIds.length, // Update compression count
+              diskSpaceUsed: quota.diskSpaceUsed,
+              compressionSaved: actualSpaceSaved,
+            }));
+            
+            console.log('Actual space saved by compression:', formatFileSize(actualSpaceSaved));
+          } else {
+            // No compressed images, set saved space to 0
+            setUserStats(prevStats => ({
+              ...prevStats,
+              totalUploads: quota.imagesUsed,
+              totalCompressions: 0,
+              diskSpaceUsed: quota.diskSpaceUsed,
+              compressionSaved: 0,
+            }));
+          }
+        } catch (imgErr) {
+          console.error('Error fetching images for compression stats:', imgErr);
+          
+          // Fallback to estimation if image fetch fails
+          const compressionEstimate = quota.diskSpaceUsed * 0.3;
+          setUserStats(prevStats => ({
+            ...prevStats,
+            totalUploads: quota.imagesUsed,
+            diskSpaceUsed: quota.diskSpaceUsed,
+            compressionSaved: compressionEstimate,
+          }));
+        }
       } catch (err) {
         console.error('Error fetching quota information:', err);
         setError('Не удалось загрузить информацию о квоте');
@@ -510,7 +569,7 @@ const ProfilePage: React.FC = () => {
             </Typography>
             <Chip 
               size="small" 
-              label={`-${Math.round((userStats.compressionSaved / (diskSpaceUsed + userStats.compressionSaved)) * 100)}%`} 
+              label={`-${Math.round((userStats.compressionSaved / (diskSpaceUsed + userStats.compressionSaved || 1)) * 100)}%`} 
               color="success"
               sx={{ height: 20, fontSize: '0.75rem', borderRadius: '6px' }}
             />
@@ -727,7 +786,7 @@ const ProfilePage: React.FC = () => {
               <Grid size={{ xs: 6, sm: 3 }}>
                 <StatCard 
                   title="Загрузки" 
-                  value={userStats.totalUploads}
+                  value={userQuota?.imagesUsed || userStats.totalUploads}
                   icon={<ImageIcon />}
                   color={theme.palette.primary.main}
                 />
