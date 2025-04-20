@@ -8,12 +8,7 @@ import {
   Backdrop,
   CircularProgress,
   useTheme,
-  SelectChangeEvent,
-  Pagination,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem
+  SelectChangeEvent
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
@@ -27,7 +22,6 @@ import DeleteConfirmDialog from '../../components/gallery/DeleteConfirmDialog';
 
 // Import services and types
 import ImageService from '../../services/image.service';
-import { systemService } from '../../services/system.service';
 import { ImageDTO, ImageStatistics, SortType, DateFilterType, SizeFilterType } from '../../types/api.types';
 
 const HomePage: React.FC = () => {
@@ -45,12 +39,6 @@ const HomePage: React.FC = () => {
     compressionEfficiency: 0
   });
   const [imageStatistics, setImageStatistics] = useState<Record<string, ImageStatistics>>({});
-  
-  // Pagination state
-  const [pageSize, setPageSize] = useState<number>(20);
-  const [currentPage, setCurrentPage] = useState<number>(0);
-  const [totalElements, setTotalElements] = useState<number>(0);
-  const [totalPages, setTotalPages] = useState<number>(1);
   
   // UI state
   const [loading, setLoading] = useState<boolean>(true);
@@ -78,37 +66,14 @@ const HomePage: React.FC = () => {
   const [dateFilter, setDateFilter] = useState<DateFilterType>('');
   const [sizeFilter, setSizeFilter] = useState<SizeFilterType>('');
   const [compressionFilter, setCompressionFilter] = useState<string>('all');
-  
-  // Get page size from system settings
-  useEffect(() => {
-    const fetchPageSize = async () => {
-      try {
-        const settings = await systemService.getAllSettings();
-        const pageSizeSetting = settings.find(s => s.settingKey === 'admin_images_per_page');
-        if (pageSizeSetting && pageSizeSetting.settingValue) {
-          setPageSize(parseInt(pageSizeSetting.settingValue, 10));
-        }
-      } catch (err) {
-        console.error('Failed to fetch page size setting:', err);
-        // Use default page size (20) if we can't fetch the setting
-      }
-    };
-    fetchPageSize();
-  }, []);
 
   // Data fetching - Using useCallback to optimize
   const fetchData = useCallback(async () => {
     setLoading(true);
-    // Очищаем текущие изображения для предотвращения смешивания данных между страницами
-    setImages({});
-    
     try {
-      // Get paginated images
-      const response = await ImageService.getPaginatedImages(currentPage, pageSize, sortType);
-      const imagesData = response.images;
+      // Get all images
+      const imagesData = await ImageService.getAllImages();
       setImages(imagesData);
-      setTotalElements(response.totalElements);
-      setTotalPages(response.totalPages);
       
       // Get image statistics
       try {
@@ -120,7 +85,7 @@ const HomePage: React.FC = () => {
       
       // Calculate dashboard stats
       const imagesArray = Object.values(imagesData);
-      const totalCount = response.totalElements;
+      const totalCount = imagesArray.length;
       const compressedImagesArray = imagesArray.filter(img => img.compressionLevel > 0);
       const compressedCount = compressedImagesArray.length;
       const totalSize = imagesArray.reduce((sum, img) => sum + img.size, 0);
@@ -168,25 +133,12 @@ const HomePage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, pageSize, sortType]);
+  }, []);
   
   // Initial load
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-  
-  // Handle page change
-  const handlePageChange = (event: React.ChangeEvent<unknown>, newPage: number) => {
-    // Convert from 1-based (UI) to 0-based (API)
-    setCurrentPage(newPage - 1);
-  };
-  
-  // Handle page size change
-  const handlePageSizeChange = (event: SelectChangeEvent<number>) => {
-    const newSize = Number(event.target.value);
-    setPageSize(newSize);
-    setCurrentPage(0); // Reset to first page when changing page size
-  };
 
   // Handlers for image actions
   const handleViewImage = (id: string) => {
@@ -578,11 +530,6 @@ const HomePage: React.FC = () => {
         onViewImage={handleViewImage}
         onDeleteImage={(id) => handleOpenDeleteConfirm(id)}
         loading={loading}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        pageSize={pageSize}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
       />
       
       {/* Upload Modal */}

@@ -13,6 +13,12 @@ import ImageDetailPage from './pages/detail/ImageDetailPage';
 import LoginPage from './pages/login/LoginPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import AdminPage from './pages/admin/AdminPage';
+import MangaGalleryPage from './pages/manga/MangaGalleryPage';
+import MangaDetailPage from './pages/manga/MangaDetailPage';
+import MangaCreatePage from './pages/manga/MangaCreatePage';
+import VolumeCreatePage from './pages/manga/VolumeCreatePage';
+import ChapterCreatePage from './pages/manga/ChapterCreatePage';
+import PageUploadPage from './pages/manga/PageUploadPage';
 
 // Контекст авторизации
 import { AuthProvider, UserRole } from './contexts/AuthContext';
@@ -178,6 +184,57 @@ const App: React.FC = () => {
                     element={
                       <ProtectedRoute>
                         <ProfilePage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  
+                  {/* Маршруты для манги */}
+                  <Route 
+                    path="/manga" 
+                    element={
+                      <ProtectedRoute>
+                        <MangaGalleryPage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/manga/create" 
+                    element={
+                      <ProtectedRoute>
+                        <MangaCreatePage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/manga/:id" 
+                    element={
+                      <ProtectedRoute>
+                        <MangaDetailPage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  {/* Новые маршруты для создания томов, глав и загрузки страниц */}
+                  <Route 
+                    path="/manga/:id/volumes/create" 
+                    element={
+                      <ProtectedRoute>
+                        <VolumeCreatePage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/manga/:id/volumes/:volumeId/chapters/create" 
+                    element={
+                      <ProtectedRoute>
+                        <ChapterCreatePage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/manga/:id/volumes/:volumeId/chapters/:chapterId/pages/upload" 
+                    element={
+                      <ProtectedRoute>
+                        <PageUploadPage />
                       </ProtectedRoute>
                     } 
                   />

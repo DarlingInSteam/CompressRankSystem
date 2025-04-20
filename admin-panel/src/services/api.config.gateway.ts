@@ -16,7 +16,8 @@ const apiClient = axios.create({
   baseURL: 'http://localhost:8082',
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  withCredentials: true
 });
 
 // Перехватчик ответов для обработки ошибок
