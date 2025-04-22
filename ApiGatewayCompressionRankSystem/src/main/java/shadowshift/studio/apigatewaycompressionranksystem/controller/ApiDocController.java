@@ -76,7 +76,6 @@ public class ApiDocController {
                     ));
                     response.put("services", serviceEndpoints);
                     
-                    // Добавляем информацию о маршрутах
                     List<Map<String, String>> routes = new ArrayList<>();
                     routeLocator.getRoutes().subscribe(route -> 
                             routes.add(Map.of(
@@ -151,7 +150,6 @@ public class ApiDocController {
     private List<ApiEndpoint> getApiEndpoints() {
         List<ApiEndpoint> endpoints = new ArrayList<>();
 
-        // Сервис хранения изображений
         ApiEndpoint imageStorage = new ApiEndpoint("imageStorage", imageStorageServiceUrl, "/api/images");
         imageStorage.addEndpoint("GET", "/api/images", "Получение списка всех изображений");
         imageStorage.addEndpoint("GET", "/api/images/{id}", "Получение конкретного изображения по ID");
@@ -162,14 +160,12 @@ public class ApiDocController {
         imageStorage.addEndpoint("GET", "/api/images/{id}/statistics", "Получение статистики по конкретному изображению");
         endpoints.add(imageStorage);
 
-        // Сервис сжатия изображений
         ApiEndpoint compression = new ApiEndpoint("compression", compressionServiceUrl, "/api/compression");
         compression.addEndpoint("POST", "/api/compression/{id}", "Сжатие изображения");
         compression.addEndpoint("POST", "/api/compression/{id}/restore", "Восстановление оригинала изображения");
         compression.addEndpoint("GET", "/api/compression/{id}/original-size", "Получение размера оригинального изображения");
         endpoints.add(compression);
 
-        // API Gateway
         ApiEndpoint gateway = new ApiEndpoint("gateway", "http://localhost:8082", "/api");
         gateway.addEndpoint("GET", "/api/system/health", "Проверка здоровья всей системы");
         gateway.addEndpoint("GET", "/api/system/info", "Информация о системе и версиях");

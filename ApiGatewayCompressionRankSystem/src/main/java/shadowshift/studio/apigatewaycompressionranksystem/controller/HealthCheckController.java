@@ -39,7 +39,7 @@ public class HealthCheckController {
         this.webClient = WebClient.builder()
                 .codecs(configurer -> configurer
                         .defaultCodecs()
-                        .maxInMemorySize(16 * 1024 * 1024)) // 16MB буфер
+                        .maxInMemorySize(16 * 1024 * 1024))
                 .build();
     }
 
@@ -56,7 +56,6 @@ public class HealthCheckController {
         result.put("gateway", "UP");
         result.put("timestamp", System.currentTimeMillis());
 
-        // Проверка сервиса хранения изображений
         Mono<Object> imageStorageCheck = webClient.get()
                 .uri(imageStorageServiceUrl + "/actuator/health")
                 .retrieve()
@@ -69,7 +68,6 @@ public class HealthCheckController {
                     return Mono.empty();
                 });
 
-        // Проверка сервиса сжатия
         Mono<Object> compressionCheck = webClient.get()
                 .uri(compressionServiceUrl + "/actuator/health")
                 .retrieve()
@@ -86,7 +84,6 @@ public class HealthCheckController {
                         imageStorageCheck.defaultIfEmpty("unavailable"),
                         compressionCheck.defaultIfEmpty("unavailable"))
                 .then(Mono.defer(() -> {
-                    // Определение общего статуса системы
                     boolean anyServiceDown = result.entrySet().stream()
                             .filter(entry -> entry.getKey().endsWith("Service"))
                             .map(entry -> ((Map<?, ?>) entry.getValue()).get("status"))

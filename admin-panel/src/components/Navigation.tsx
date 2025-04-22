@@ -49,7 +49,8 @@ import {
   PhotoLibrary as GalleryIcon,
   Insights as StatsIcon,
   AdminPanelSettings as AdminIcon,
-  ManageAccounts as UserManagementIcon
+  ManageAccounts as UserManagementIcon,
+  MenuBook as MenuBookIcon
 } from '@mui/icons-material';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ColorModeContext } from '../App';
@@ -104,6 +105,14 @@ const Navigation: React.FC = () => {
       submenu: [
         { text: 'Загрузить', icon: <UploadIcon />, path: '/upload' },
         { text: 'Категории', icon: <CategoryIcon />, path: '/categories' }
+      ]
+    },
+    {
+      text: 'Манга',
+      icon: <MenuBookIcon />,
+      submenu: [
+        { text: 'Галерея манги', icon: <GalleryIcon />, path: '/manga' },
+        { text: 'Загрузка манги', icon: <UploadIcon />, path: '/manga/create' }
       ]
     },
     {

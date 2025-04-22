@@ -21,6 +21,9 @@ import shadowshift.studio.imagestorage.model.Image;
 import shadowshift.studio.imagestorage.model.UserInfo;
 import shadowshift.studio.imagestorage.service.ImageStorageService;
 import shadowshift.studio.imagestorage.client.AuthServiceClient;
+import shadowshift.studio.imagestorage.entity.manga.VolumeEntity;
+import shadowshift.studio.imagestorage.repository.manga.VolumeRepository;
+import shadowshift.studio.imagestorage.repository.manga.MangaRepository;
 
 import java.io.IOException;
 import java.util.*;
@@ -37,14 +40,19 @@ public class ImageController {
     private final ImageStorageService imageStorageService;
     private final StatisticsEventSender statisticsEventSender;
     private final AuthServiceClient authServiceClient;
+    private final VolumeRepository volumeRepository;
+    private final MangaRepository mangaRepository;
     private static final Logger logger = LoggerFactory.getLogger(ImageController.class);
 
     @Autowired
     public ImageController(ImageStorageService imageStorageService, StatisticsEventSender statisticsEventSender, 
-                          AuthServiceClient authServiceClient) {
+                          AuthServiceClient authServiceClient, VolumeRepository volumeRepository,
+                          MangaRepository mangaRepository) {
         this.imageStorageService = imageStorageService;
         this.statisticsEventSender = statisticsEventSender;
         this.authServiceClient = authServiceClient;
+        this.volumeRepository = volumeRepository;
+        this.mangaRepository = mangaRepository;
     }
 
     /**
@@ -166,9 +174,87 @@ public class ImageController {
                 headers.setContentDispositionFormData("attachment", metadata.getOriginalFilename());
             }
 
+            // Add Cache-Control header to enable browser caching
+            headers.setCacheControl("public, max-age=86400"); // Cache for 24 hours
+
             return ResponseEntity.ok().headers(headers).body(imageData);
         } catch (IOException e) {
             logger.error("Error retrieving image: {}", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @Operation(summary = "Get manga volume cover image", description = "Returns the cover image for a manga volume")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Cover image found"),
+            @ApiResponse(responseCode = "404", description = "Cover image not found or volume has no cover")
+    })
+    @GetMapping("/cover/volume/{volumeId}")
+    public ResponseEntity<byte[]> getVolumeCoverImage(@PathVariable String volumeId) {
+        try {
+            // Get the volume entity to find the cover image ID
+            VolumeEntity volume = volumeRepository.findById(volumeId).orElse(null);
+            
+            if (volume == null || volume.getCoverImageId() == null) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            // Get the image using the existing method
+            String imageId = volume.getCoverImageId();
+            byte[] imageData = imageStorageService.getImage(imageId);
+            
+            if (imageData == null) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            Image metadata = imageStorageService.getImageMetadata(imageId);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType(metadata.getContentType()));
+            headers.setContentLength(imageData.length);
+            
+            // Add Cache-Control header to enable browser caching
+            headers.setCacheControl("public, max-age=86400"); // Cache for 24 hours
+            
+            return new ResponseEntity<>(imageData, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @Operation(summary = "Get manga cover image", description = "Returns the cover image for a manga")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Cover image found"),
+            @ApiResponse(responseCode = "404", description = "Cover image not found or manga has no cover")
+    })
+    @GetMapping("/cover/manga/{mangaId}")
+    public ResponseEntity<byte[]> getMangaCoverImage(@PathVariable String mangaId) {
+        try {
+            // Get the manga entity to find the cover image ID
+            shadowshift.studio.imagestorage.entity.manga.MangaEntity manga = 
+                mangaRepository.findById(mangaId).orElse(null);
+            
+            if (manga == null || manga.getPreviewImageId() == null) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            // Get the image using the existing method
+            String imageId = manga.getPreviewImageId();
+            byte[] imageData = imageStorageService.getImage(imageId);
+            
+            if (imageData == null) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            Image metadata = imageStorageService.getImageMetadata(imageId);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType(metadata.getContentType()));
+            headers.setContentLength(imageData.length);
+            
+            // Add Cache-Control header to enable browser caching
+            headers.setCacheControl("public, max-age=86400"); // Cache for 24 hours
+            
+            return new ResponseEntity<>(imageData, headers, HttpStatus.OK);
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

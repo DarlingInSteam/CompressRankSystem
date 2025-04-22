@@ -82,6 +82,35 @@ spring:
                 name: imageStorageCircuitBreaker
                 fallbackUri: forward:/fallback/image-storage
                 
+        # Маршруты для манги (часть ImageStorageService)
+        # Маршрут отключен, т.к. используется отдельный контроллер MangaProxyController
+        # для обхода проблем с десериализацией запросов
+        #- id: manga-api
+        #  uri: ${IMAGE_STORAGE_SERVICE_URL:http://localhost:8081}
+        #  predicates:
+        #    - Path=/api/manga/**
+        #  filters:
+        #    - name: MangaRequestTransformer
+        #    - name: RequestRateLimiter
+        #      args:
+        #        key-resolver: "#{@ipKeyResolver}"
+        #        redis-rate-limiter.replenishRate: 50
+        #        redis-rate-limiter.burstCapacity: 100
+        #    - name: Retry
+        #      args:
+        #        retries: 3
+        #        statuses: BAD_GATEWAY,GATEWAY_TIMEOUT,SERVICE_UNAVAILABLE
+        #        methods: GET,POST,PUT,DELETE
+        #        backoff:
+        #          firstBackoff: 50ms
+        #          maxBackoff: 500ms
+        #          factor: 2
+        #          basedOnPreviousValue: false
+        #    - name: CircuitBreaker
+        #      args:
+        #        name: mangaCircuitBreaker
+        #        fallbackUri: forward:/fallback/image-storage
+                
         # Маршруты для сервиса сжатия (CompressionService)
         - id: compression-api
           uri: ${COMPRESSION_SERVICE_URL:http://localhost:8080}
@@ -212,4 +241,6 @@ resilience4j:
       statisticsCircuitBreaker:
         baseConfig: default
       authCircuitBreaker:
+        baseConfig: default
+      mangaCircuitBreaker:
         baseConfig: default
