@@ -16,6 +16,8 @@ import AdminPage from './pages/admin/AdminPage';
 import MangaGalleryPage from './pages/manga/MangaGalleryPage';
 import MangaDetailPage from './pages/manga/MangaDetailPage';
 import MangaCreatePage from './pages/manga/MangaCreatePage';
+import MangaEditPage from './pages/manga/MangaEditPage';
+import MangaCoverSelectPage from './pages/manga/MangaCoverSelectPage';
 import VolumeCreatePage from './pages/manga/VolumeCreatePage';
 import ChapterCreatePage from './pages/manga/ChapterCreatePage';
 import PageUploadPage from './pages/manga/PageUploadPage';
@@ -210,6 +212,22 @@ const App: React.FC = () => {
                     element={
                       <ProtectedRoute>
                         <MangaDetailPage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/manga/:id/edit" 
+                    element={
+                      <ProtectedRoute>
+                        <MangaEditPage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/manga/:id/cover/select" 
+                    element={
+                      <ProtectedRoute>
+                        <MangaCoverSelectPage />
                       </ProtectedRoute>
                     } 
                   />

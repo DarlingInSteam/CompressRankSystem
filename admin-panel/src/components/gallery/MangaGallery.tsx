@@ -30,6 +30,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { Manga, MangaStatus } from '../../types/manga.types';
+import { getMangaCoverUrl, getLocalPlaceholderUrl } from '../../utils/imageUtils';
 
 // Функция для отображения статуса манги
 const getMangaStatusInfo = (status: string) => {
@@ -442,7 +443,7 @@ const MangaGallery: React.FC<MangaGalleryProps> = ({
                   <CardMedia
                     component="img"
                     height="260"
-                    image={manga.coverImageUrl || `https://via.placeholder.com/400x600?text=${encodeURIComponent(manga.title)}`}
+                    image={manga.previewImageId ? getMangaCoverUrl(manga.id) : getLocalPlaceholderUrl(manga.title)}
                     alt={manga.title}
                     sx={{
                       objectFit: 'cover',

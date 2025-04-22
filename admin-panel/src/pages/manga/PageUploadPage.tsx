@@ -339,6 +339,11 @@ const PageUploadPage: React.FC = () => {
 
   // Navigate to manga detail
   const handleGoBackToManga = () => {
+    // Set refresh flag to ensure manga details update with new pages
+    if (mangaId) {
+      localStorage.setItem('manga_detail_refresh_needed', 'true');
+      localStorage.setItem('manga_detail_id', mangaId);
+    }
     navigate(`/manga/${mangaId}`);
   };
   

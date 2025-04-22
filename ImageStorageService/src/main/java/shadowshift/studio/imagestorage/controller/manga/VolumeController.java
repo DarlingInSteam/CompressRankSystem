@@ -38,14 +38,22 @@ public class VolumeController {
             @ApiResponse(responseCode = "404", description = "Manga not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping(value = "/{mangaId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = {"/{mangaId}", ""}, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Volume> createVolume(
             @Parameter(description = "Manga ID", required = true)
-            @PathVariable String mangaId,
+            @PathVariable(required = false) String mangaId,
             @RequestBody Volume volume) {
         
-        logger.info("Creating new volume for manga {}: {}", mangaId, volume.getTitle());
-        Volume createdVolume = volumeService.createVolume(mangaId, volume);
+        // If mangaId is null, try to get it from the volume object
+        String effectiveMangaId = mangaId != null ? mangaId : volume.getMangaId();
+        
+        if (effectiveMangaId == null) {
+            logger.error("Cannot create volume: No manga ID provided");
+            return ResponseEntity.badRequest().build();
+        }
+        
+        logger.info("Creating new volume for manga {}: {}", effectiveMangaId, volume.getTitle());
+        Volume createdVolume = volumeService.createVolume(effectiveMangaId, volume);
         
         if (createdVolume == null) {
             return ResponseEntity.notFound().build();

@@ -44,6 +44,7 @@ const ChapterCreatePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
   const [nextStep, setNextStep] = useState<boolean>(false);
+  const [createdChapterId, setCreatedChapterId] = useState<string | null>(null);
 
   // Fetch manga and volume details
   useEffect(() => {
@@ -117,6 +118,32 @@ const ChapterCreatePage: React.FC = () => {
       
       const createdChapter = await mangaService.createChapter(volumeId, chapter);
       
+      // Сохраняем полученный от сервера объект главы, включая ID
+      setChapter(createdChapter);
+      setCreatedChapterId(createdChapter.id);
+      
+      // Обновляем состояние родительского тома, чтобы включить новую главу
+      if (volumeId) {
+        try {
+          // Обновляем том для обновления статистики
+          await mangaService.getVolume(volumeId, true);
+          
+          // Если есть ID манги, обновляем и его статистику
+          if (mangaId) {
+            await mangaService.getManga(mangaId, true);
+            
+            // Set a flag in localStorage to force refresh when returning to manga detail page
+            localStorage.setItem('manga_detail_refresh_needed', 'true');
+            localStorage.setItem('manga_detail_id', mangaId);
+            
+            // Log that we're setting the refresh flag
+            console.log('Setting refresh flag for manga detail page:', mangaId);
+          }
+        } catch (err) {
+          console.warn("Failed to refresh volume/manga data after chapter creation", err);
+        }
+      }
+      
       setSuccess(true);
       setNextStep(true);
       
@@ -130,8 +157,8 @@ const ChapterCreatePage: React.FC = () => {
 
   // Go to page upload
   const handleGoToPageUpload = () => {
-    if (success && chapter.id) {
-      navigate(`/manga/${mangaId}/volumes/${volumeId}/chapters/${chapter.id}/pages/upload`);
+    if (success && createdChapterId) {
+      navigate(`/manga/${mangaId}/volumes/${volumeId}/chapters/${createdChapterId}/pages/upload`);
     }
   };
 

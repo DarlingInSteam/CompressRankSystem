@@ -49,15 +49,18 @@ import {
   HourglassEmpty as HourglassIcon,
   Warning as WarningIcon
 } from '@mui/icons-material';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { Manga, Volume, Chapter, MangaStatus } from '../../types/manga.types';
+import { ImageDTO, ImageStatistics, SortType, DateFilterType, SizeFilterType } from '../../types/api.types';
 import mangaService from '../../services/manga.service';
+import { getMangaCoverUrl, getVolumeCoverUrl, getLocalPlaceholderUrl } from '../../utils/imageUtils';
 
 const MangaDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const theme = useTheme();
-
+  const [images, setImages] = useState<Record<string, ImageDTO>>({});
   const [manga, setManga] = useState<Manga | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,17 +68,61 @@ const MangaDetailPage: React.FC = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
   const [deleteItemType, setDeleteItemType] = useState<'manga' | 'volume' | 'chapter'>('manga');
+  const [refreshKey, setRefreshKey] = useState<number>(0);
 
   useEffect(() => {
     fetchMangaDetails();
-  }, [id]);
+  }, [id, refreshKey]);
+
+  // Track location changes to refresh data when returning to manga page
+  useEffect(() => {
+    // Check if we're on the manga detail page and not on a subpage
+    if (location.pathname === `/manga/${id}`) {
+      console.log('Back on manga detail page, checking for refresh flags');
+      
+      // Check if there's a refresh flag in localStorage
+      const refreshNeeded = localStorage.getItem('manga_detail_refresh_needed') === 'true';
+      const mangaIdToRefresh = localStorage.getItem('manga_detail_id');
+      
+      if (refreshNeeded && mangaIdToRefresh === id) {
+        console.log('Refresh flag detected, forcing data refresh');
+        // Clear the flag to prevent unnecessary refreshes
+        localStorage.removeItem('manga_detail_refresh_needed');
+        localStorage.removeItem('manga_detail_id');
+        
+        // Force refresh by incrementing the refresh key
+        setRefreshKey(prev => prev + 1);
+      }
+    }
+  }, [location.pathname, id]);
+
+  // Add effect to refresh data when window gets focus
+  useEffect(() => {
+    const handleFocus = () => {
+      if (id && location.pathname === `/manga/${id}`) {
+        console.log('Window focused, refreshing manga details');
+        // Use refreshKey to force useEffect trigger
+        setRefreshKey(prev => prev + 1);
+      }
+    };
+
+    // Add window focus event listener
+    window.addEventListener('focus', handleFocus);
+    
+    // Clean up event listener on component unmount
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [id, location.pathname]);
 
   const fetchMangaDetails = async () => {
     if (!id) return;
     
     try {
       setLoading(true);
-      const mangaData = await mangaService.getManga(id, true); // true to include volumes
+      console.log('Fetching manga details with includeVolumes=true');
+      // Запрашиваем данные манги с включением томов и отключаем кэширование
+      const mangaData = await mangaService.getManga(id, true);
       setManga(mangaData);
       setError(null);
     } catch (err) {
@@ -365,7 +412,7 @@ const MangaDetailPage: React.FC = () => {
             >
               <CardMedia
                 component="img"
-                image={manga.coverImageUrl || `https://via.placeholder.com/400x600?text=${encodeURIComponent(manga.title)}`}
+                image={manga.previewImageId ? getMangaCoverUrl(manga.id) : getLocalPlaceholderUrl(manga.title)}
                 alt={manga.title}
                 sx={{ 
                   height: 350, 
@@ -408,7 +455,7 @@ const MangaDetailPage: React.FC = () => {
                   startIcon={<UploadIcon />} 
                   fullWidth
                   variant="contained"
-                  onClick={() => navigate(`/manga/${id}/upload-cover`)}
+                  onClick={() => navigate(`/manga/${id}/cover/select`)}
                   sx={{
                     borderRadius: '10px',
                     py: 1

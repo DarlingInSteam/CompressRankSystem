@@ -32,14 +32,12 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
     public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
         ServerHttpResponse response = exchange.getResponse();
         
-        // Устанавливаем соответствующий статус ответа в зависимости от типа исключения
         HttpStatus status;
         String errorMessage;
         String errorCode;
         
         if (ex instanceof ResponseStatusException) {
             ResponseStatusException responseStatusException = (ResponseStatusException) ex;
-            // Исправляем: преобразуем HttpStatusCode в HttpStatus
             status = HttpStatus.valueOf(responseStatusException.getStatusCode().value());
             errorMessage = responseStatusException.getMessage();
             errorCode = "API_ERROR";
@@ -53,18 +51,14 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
             errorCode = "INTERNAL_ERROR";
         }
         
-        // Получаем и обрабатываем путь запроса для лога
         final String requestPath = exchange.getRequest().getPath().value();
         
-        // Логируем информацию об ошибке
         logger.error("Gateway Exception: status={}, path={}, error={}", 
                 status, requestPath, ex.getMessage(), ex);
         
-        // Устанавливаем статус ответа
         response.setStatusCode(status);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
         
-        // Создаем JSON-ответ с информацией об ошибке
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("status", "error");
         errorResponse.put("message", errorMessage);
@@ -72,7 +66,6 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
         errorResponse.put("timestamp", System.currentTimeMillis());
         errorResponse.put("path", requestPath);
         
-        // Преобразуем ответ в JSON и отправляем
         String jsonResponse;
         try {
             StringBuilder builder = new StringBuilder();

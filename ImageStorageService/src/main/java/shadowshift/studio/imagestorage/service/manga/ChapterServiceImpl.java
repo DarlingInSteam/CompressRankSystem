@@ -55,6 +55,12 @@ public class ChapterServiceImpl implements ChapterService {
         }
         
         ChapterEntity savedEntity = chapterRepository.save(entity);
+        
+        // Explicitly add the chapter to the volume's chapter list to ensure consistency
+        volumeEntity.addChapter(savedEntity);
+        volumeRepository.save(volumeEntity);
+        
+        logger.info("Created chapter with ID: {} for volume: {}", savedEntity.getId(), volumeId);
         return chapterMapper.toModel(savedEntity);
     }
 

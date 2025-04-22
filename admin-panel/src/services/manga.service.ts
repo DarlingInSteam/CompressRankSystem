@@ -47,7 +47,7 @@ class MangaService {
     return response.data;
   }
 
-  async getManga(id: string, includeVolumes = false): Promise<Manga> {
+  async getManga(id: string, includeVolumes = true): Promise<Manga> {
     const response = await apiClient.get(`/api/manga/${id}`, { 
       params: { includeVolumes } 
     });
@@ -76,12 +76,25 @@ class MangaService {
   }
 
   async setMangaPreviewImage(mangaId: string, imageId: string): Promise<Manga> {
-    const response = await apiClient.put(`/api/manga/${mangaId}/preview-image/${imageId}`);
-    return response.data;
+    try {
+      console.log(`Setting preview image ${imageId} for manga ${mangaId}`);
+      // Use direct request construction to ensure proper URL format
+      const url = `/api/manga/${mangaId}/preview-image/${imageId}`;
+      console.log(`Sending request to: ${url}`);
+      
+      const response = await apiClient.put(url);
+      console.log('Preview image set successfully:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to set manga preview image:', error);
+      // Log more specific error details
+      
+      throw error;
+    }
   }
 
   // Volume endpoints
-  async getVolume(id: string, includeChapters = false): Promise<Volume> {
+  async getVolume(id: string, includeChapters = true): Promise<Volume> {
     const response = await apiClient.get(`/api/manga/volumes/${id}`, { 
       params: { includeChapters } 
     });

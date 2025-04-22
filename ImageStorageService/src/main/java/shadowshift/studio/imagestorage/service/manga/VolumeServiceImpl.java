@@ -104,7 +104,7 @@ public class VolumeServiceImpl implements VolumeService {
         logger.info("Getting volumes for manga: {}", mangaId);
         List<VolumeEntity> entities = volumeRepository.findByMangaIdOrderByVolumeNumberAsc(mangaId);
         return entities.stream()
-                .map(volumeMapper::toModel)
+                .map(entity -> volumeMapper.toModel(entity, true))  // Изменение: включаем главы в результат (true)
                 .collect(Collectors.toList());
     }
 
